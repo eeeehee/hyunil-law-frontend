@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <base href="/hyunil-law-frontend/">
+  <base href="hyunil-law-frontend/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인 - 법무그룹 현일</title>
@@ -123,7 +123,7 @@
 
     <script type="module">
         // API 클라이언트 불러오기
-        import { auth } from "/js/api.js";
+        import { auth } from "/hyunil-law-frontend/js/api.js";
 
         const loginForm = document.getElementById('loginForm');
         const loginBtn = document.querySelector('button');
@@ -145,7 +145,7 @@
                 console.log('로그인 성공:', response);
                 
                 // 성공 시 대시보드로 이동
-                location.href = "/index.html"; 
+                location.href="index.html"; 
 
             } catch (error) {
                 console.error('로그인 오류:', error);
