@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <base href="/hyunil-law-frontend/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>?�산/?�생 관�?- 법무그룹 ?�일</title>
+    <title>?�산/?�생 관�?- 법무그룹 ?�일</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        /* [관리자 공통 ?��??? */
+        /* [관리자 공통 ?��??? */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
         body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
         a { text-decoration: none; color: inherit; }
         ul, li { list-style: none; }
 
-        /* ?�이?�바 */
+        /* ?�이?�바 */
         .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
         .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; }
         .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
@@ -27,18 +28,18 @@
         .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
         .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
 
-        /* 메인 컨텐�?*/
+        /* 메인 컨텐�?*/
         .main-content { flex: 1; margin-left: 260px; padding: 40px; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; display: flex; align-items: center; gap: 10px; }
         
-        /* ?�계 카드 */
+        /* ?�계 카드 */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
         .stat-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; display: flex; flex-direction: column; justify-content: center; }
         .stat-label { font-size: 12px; color: #888; font-weight: 600; margin-bottom: 5px; }
         .stat-value { font-size: 24px; font-weight: 800; color: #1a1a1a; }
 
-        /* ?�터 �??�이�?*/
+        /* ?�터 �??�이�?*/
         .filter-box { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
         .search-input { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; flex: 1; outline: none; }
         .filter-select { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; outline: none; }
@@ -49,16 +50,16 @@
         .pasan-table th { background-color: #f9f9f9; color: #555; font-weight: 700; position: sticky; top: 0; }
         .pasan-table tr:hover { background-color: #f0f7ff; cursor: pointer; }
 
-        /* 뱃�? ?��???*/
+        /* 뱃�? ?��???*/
         .type-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; margin-right: 5px; }
         .type-indiv { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; } /* 개인 */
         .type-corp { background: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; } /* 법인 */
         
         .status-pill { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-block; }
-        .st-apply { background: #fffbe6; color: #fa8c16; border: 1px solid #ffe58f; } /* ?�청?�료 */
+        .st-apply { background: #fffbe6; color: #fa8c16; border: 1px solid #ffe58f; } /* ?�청?�료 */
         .st-start { background: #e6fffb; color: #13c2c2; border: 1px solid #87e8de; } /* 개시결정 */
-        .st-ok { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; } /* ?��?/면책 */
-        .st-reject { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; } /* 기각/?��? */
+        .st-ok { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; } /* ?��?/면책 */
+        .st-reject { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; } /* 기각/?��? */
 
         .btn-add { background-color: #2c5bf2; color: #fff; border: none; padding: 0 20px; height: 40px; border-radius: 6px; font-weight: 700; cursor: pointer; }
         .btn-add:hover { background-color: #1b42c4; }
@@ -85,31 +86,31 @@
     <ul class="sidebar-menu">
         <li>
             <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
-                <div><span class="menu-icon">?��</span> 기업?�문?�터</div>
+                <div><span class="menu-icon">?��</span> 기업?�문?�터</div>
                 <span class="menu-arrow">??/span>
             </div>
             <ul id="groupCorp" class="submenu">
-                <li><a href="/pages/admin/admin.html">?�� ?�문 관�?/a></li>
-                <li><a href="/pages/admin/admin_requests.html">?�� ?�청 관리함</a></li>
-                <li><a href="/pages/admin/admin_report.html">?�� 리포??발송</a></li>
-                <li><a href="/pages/admin/admin_members.html">?�� ?�원/기업 관�?/a></li>
-                <li><a href="/pages/admin/admin_payments.html">?�� 매출/결제 관�?/a></li>
+                <li><a href="pages/admin/admin.html">?�� ?�문 관�?/a></li>
+                <li><a href="pages/admin/admin_requests.html">?�� ?�청 관리함</a></li>
+                <li><a href="pages/admin/admin_report.html">?�� 리포??발송</a></li>
+                <li><a href="pages/admin/admin_members.html">?�� ?�원/기업 관�?/a></li>
+                <li><a href="pages/admin/admin_payments.html">?�� 매출/결제 관�?/a></li>
             </ul>
         </li>
         <li>
             <div class="menu-category open active" onclick="toggleAdminMenu('groupConsult', this)">
-                <div><span class="menu-icon">?��</span> ?�건 관�?/div>
+                <div><span class="menu-icon">?��</span> ?�건 관�?/div>
                 <span class="menu-arrow">??/span>
             </div>
             <ul id="groupConsult" class="submenu" style="display:block;">
-                <li><a href="/pages/admin/admin_litigation.html">?�� ?�자?�송 관�?(�???</a></li>
-                <li><a href="/pages/admin/admin_pasan.html" class="active" style="color:#d32f2f; font-weight:700;">?�� ?�산/?�생 ?�터</a></li>
+                <li><a href="pages/admin/admin_litigation.html">?�� ?�자?�송 관�?(�???</a></li>
+                <li><a href="pages/admin/admin_pasan.html" class="active" style="color:#d32f2f; font-weight:700;">?�� ?�산/?�생 ?�터</a></li>
             </ul>
         </li>
         <li class="menu-divider"></li>
-        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
+        <li><a href="pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
         <li class="menu-divider"></li>
-        <li><a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a></li>
+        <li><a href="index.html" class="menu-link">?�� 메인 ?�페?��?</a></li>
     </ul>
 </nav>
 
@@ -124,45 +125,45 @@
 
 <main class="main-content">
     <div class="page-header">
-        <h2 class="page-title">?�� ?�산/?�생 ?�건 관�?/h2>
-        <button class="btn-add" onclick="openModal('new')">+ ?�규 ?�건 ?�록</button>
+        <h2 class="page-title">?�� ?�산/?�생 ?�건 관�?/h2>
+        <button class="btn-add" onclick="openModal('new')">+ ?�규 ?�건 ?�록</button>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">�?관�??�건</div>
-            <div class="stat-value" id="st_total">- �?/div>
+            <div class="stat-label">�?관�??�건</div>
+            <div class="stat-value" id="st_total">- �?/div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">개시결정 (진행�?</div>
-            <div class="stat-value" style="color:#13c2c2;" id="st_start">- �?/div>
+            <div class="stat-label">개시결정 (진행�?</div>
+            <div class="stat-value" style="color:#13c2c2;" id="st_start">- �?/div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">?��?/면책 (?�공)</div>
-            <div class="stat-value" style="color:#52c41a;" id="st_ok">- �?/div>
+            <div class="stat-label">?��?/면책 (?�공)</div>
+            <div class="stat-value" style="color:#52c41a;" id="st_ok">- �?/div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">?�번 ???�규?�수</div>
-            <div class="stat-value" style="color:#fa8c16;" id="st_new">- �?/div>
+            <div class="stat-label">?�번 ???�규?�수</div>
+            <div class="stat-value" style="color:#fa8c16;" id="st_new">- �?/div>
         </div>
     </div>
 
     <div class="filter-box">
         <select id="filterType" class="filter-select" onchange="filterTable()">
-            <option value="all">?�체 구분</option>
-            <option value="개인?�생">개인?�생</option>
-            <option value="개인?�산">개인?�산</option>
-            <option value="법인?�생">법인?�생</option>
-            <option value="법인?�산">법인?�산</option>
+            <option value="all">?�체 구분</option>
+            <option value="개인?�생">개인?�생</option>
+            <option value="개인?�산">개인?�산</option>
+            <option value="법인?�생">법인?�생</option>
+            <option value="법인?�산">법인?�산</option>
         </select>
         <select id="filterStatus" class="filter-select" onchange="filterTable()">
-            <option value="all">?�체 ?�태</option>
-            <option value="?�청">?�청?�료</option>
+            <option value="all">?�체 ?�태</option>
+            <option value="?�청">?�청?�료</option>
             <option value="개시">개시결정</option>
-            <option value="?��?">?��?결정</option>
+            <option value="?��?">?��?결정</option>
             <option value="면책">면책</option>
         </select>
-        <input type="text" id="searchInput" class="search-input" placeholder="채무?�명, ?�건번호 검??.." onkeyup="filterTable()">
+        <input type="text" id="searchInput" class="search-input" placeholder="채무?�명, ?�건번호 검??.." onkeyup="filterTable()">
         <button class="btn-add" style="background:#333; padding:0 15px;" onclick="filterTable()">검??/button>
     </div>
 
@@ -170,18 +171,18 @@
         <table class="pasan-table">
             <thead>
                 <tr>
-                    <th style="width:12%">구분 (?�건)</th>
-                    <th style="width:15%">?�건번호</th>
-                    <th>채무??(?�청??</th>
-                    <th>관?�법??/th>
-                    <th>진행?�태</th>
-                    <th>�?채무??/th>
-                    <th>?�당??/th>
-                    <th style="width:10%">?�수??/th>
+                    <th style="width:12%">구분 (?�건)</th>
+                    <th style="width:15%">?�건번호</th>
+                    <th>채무??(?�청??</th>
+                    <th>관?�법??/th>
+                    <th>진행?�태</th>
+                    <th>�?채무??/th>
+                    <th>?�당??/th>
+                    <th style="width:10%">?�수??/th>
                 </tr>
             </thead>
             <tbody id="pasanListBody">
-                <tr><td colspan="8" style="text-align:center; padding:40px;">?�이??로딩 �?..</td></tr>
+                <tr><td colspan="8" style="text-align:center; padding:40px;">?�이??로딩 �?..</td></tr>
             </tbody>
         </table>
     </div>
@@ -190,68 +191,68 @@
 <div id="pasanModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <span id="modalTitle">?�산/?�생 ?�건 ?�록</span>
+            <span id="modalTitle">?�산/?�생 ?�건 ?�록</span>
             <span class="close-btn" onclick="closeModal()">??/span>
         </div>
         <input type="hidden" id="editDocId">
         
         <div class="info-grid">
             <div class="form-group">
-                <label class="form-label">?�건번호 *</label>
+                <label class="form-label">?�건번호 *</label>
                 <input type="text" id="p_caseNum" class="input-box" placeholder="?? 2025개회12345" onkeyup="detectCaseType()">
-                <div id="autoDetectMsg" class="auto-detect-msg">???�건 ?�별?? <span id="detectedType"></span></div>
+                <div id="autoDetectMsg" class="auto-detect-msg">???�건 ?�별?? <span id="detectedType"></span></div>
             </div>
             <div class="form-group">
-                <label class="form-label">?�건 구분 (?�동?�택)</label>
+                <label class="form-label">?�건 구분 (?�동?�택)</label>
                 <select id="p_type" class="input-box">
-                    <option value="">?�택?�세??/option>
-                    <option value="개인?�생">개인?�생 (개회)</option>
-                    <option value="개인?�산">개인?�산 (개파/면책)</option>
-                    <option value="법인?�생">법인?�생 (?�합/?�개)</option>
-                    <option value="법인?�산">법인?�산 (?�단/?�선)</option>
-                    <option value="기�?">기�?</option>
+                    <option value="">?�택?�세??/option>
+                    <option value="개인?�생">개인?�생 (개회)</option>
+                    <option value="개인?�산">개인?�산 (개파/면책)</option>
+                    <option value="법인?�생">법인?�생 (?�합/?�개)</option>
+                    <option value="법인?�산">법인?�산 (?�단/?�선)</option>
+                    <option value="기�?">기�?</option>
                 </select>
             </div>
         </div>
 
         <div class="info-grid">
             <div class="form-group">
-                <label class="form-label">채무?�명 *</label>
-                <input type="text" id="p_client" class="input-box" placeholder="?�름 ?�는 법인�?>
+                <label class="form-label">채무?�명 *</label>
+                <input type="text" id="p_client" class="input-box" placeholder="?�름 ?�는 법인�?>
             </div>
             <div class="form-group">
-                <label class="form-label">관?�법??/label>
-                <input type="text" id="p_court" class="input-box" placeholder="?? ?�울?�생법원">
+                <label class="form-label">관?�법??/label>
+                <input type="text" id="p_court" class="input-box" placeholder="?? ?�울?�생법원">
             </div>
         </div>
 
         <div class="info-grid">
             <div class="form-group">
-                <label class="form-label">?�재 ?�태</label>
+                <label class="form-label">?�재 ?�태</label>
                 <select id="p_status" class="input-box">
-                    <option value="?�수준�?>?�수준�?/option>
-                    <option value="?�청?�료">?�청?�료</option>
+                    <option value="?�수준�?>?�수준�?/option>
+                    <option value="?�청?�료">?�청?�료</option>
                     <option value="보정권고">보정권고/명령</option>
-                    <option value="금�?명령">금�?/중�?명령</option>
+                    <option value="금�?명령">금�?/중�?명령</option>
                     <option value="개시결정">개시결정</option>
-                    <option value="채권?�집??>채권?�집??/option>
-                    <option value="?��?결정">?��?결정</option>
+                    <option value="채권?�집??>채권?�집??/option>
+                    <option value="?��?결정">?��?결정</option>
                     <option value="면책">면책 (종결)</option>
-                    <option value="기각/?��?">기각/?��?</option>
+                    <option value="기각/?��?">기각/?��?</option>
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">�?채무??(?�금+?�자)</label>
-                <input type="text" id="p_debt" class="input-box" placeholder="?�자�? oninput="formatNumber(this)">
+                <label class="form-label">�?채무??(?�금+?�자)</label>
+                <input type="text" id="p_debt" class="input-box" placeholder="?�자�? oninput="formatNumber(this)">
             </div>
         </div>
 
         <div class="form-group">
-            <label class="form-label">?�당??(직원)</label>
-            <input type="text" id="p_staff" class="input-box" placeholder="?? 김주희, ?�나??>
+            <label class="form-label">?�당??(직원)</label>
+            <input type="text" id="p_staff" class="input-box" placeholder="?? 김주희, ?�나??>
         </div>
 
-        <button class="btn-save" onclick="savePasan()">?�?�하�?/button>
+        <button class="btn-save" onclick="savePasan()">?�?�하�?/button>
     </div>
 </div>
 
@@ -287,16 +288,16 @@
                 const userData = await users.getMe();
                 
                 if (!checkRole(['master', 'admin', 'general_manager', 'lawyer'])) {
-                    alert('관리자 권한???�요?�니??');
+                    alert('관리자 권한???�요?�니??');
                     location.href = '/pages/user/dashboard.html';
                     return;
                 }
 
                 renderAdminSidebar(pageKey, userData);
-                console.log('?�이지 로드:', pageKey, userData);
+                console.log('?�이지 로드:', pageKey, userData);
 
             } catch (error) {
-                console.error('?�이지 로드 ?�러:', error);
+                console.error('?�이지 로드 ?�러:', error);
             }
         })();
 
