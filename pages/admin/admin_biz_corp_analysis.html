@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>기업?�용·부?�산 ?�합 ?��?분석 ?�스??/title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [?�마: Modern Dark Dashboard] */
+        :root { 
+            --bg-dark: #0f1015; 
+            --bg-panel: #1b1c25; 
+            --primary: #5046e5; 
+            --accent: #f59e0b; 
+            --border: #2d3748; 
+            --text: #e2e8f0; 
+            --text-sub: #94a3b8;
+            --risk: #ef4444; 
+            --safe: #10b981; 
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text); min-height: 100vh; }
+
+        .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); transition: 0.3s; }
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .header h1 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+        .header h1 span { color: var(--primary); }
+
+        /* JSON Zone */
+        .json-zone { background: #14151b; border: 1px solid var(--border); padding: 25px; border-radius: 16px; margin-bottom: 30px; }
+        .prompt-box { background: #1e1e2e; padding: 15px; border-radius: 8px; border: 1px dashed #555; margin-bottom: 15px; color: #a5b4fc; font-size: 12px; line-height: 1.6; cursor: pointer; }
+        .json-textarea { width: 100%; height: 120px; background: #0b0c10; border: 1px solid #333; color: #4ade80; padding: 15px; font-family: monospace; font-size: 13px; border-radius: 8px; resize: vertical; outline: none; }
+
+        /* Grid & Panel */
+        .grid-container { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; margin-bottom: 30px; }
+        .col-12 { grid-column: span 12; } .col-8 { grid-column: span 8; } .col-6 { grid-column: span 6; } .col-4 { grid-column: span 4; }
+        .panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 25px; height: 100%; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #2d3748; padding-bottom: 10px; }
+        .panel-title { font-weight: 700; font-size: 16px; color: #fff; }
+
+        /* Inputs */
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 6px; font-weight: 500; }
+        .input-field { width: 100%; background: #252630; border: 1px solid #3f3f46; color: #fff; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+        .input-highlight { border-color: var(--accent); background: rgba(245, 158, 11, 0.05); }
+        textarea.input-field { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+        /* Tables */
+        table.dash-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; }
+        table.dash-table th { color: #94a3b8; padding: 10px; text-align: center; border-bottom: 1px solid #333; background: #252630; }
+        table.dash-table td { padding: 8px; border-bottom: 1px solid #2d3748; }
+        table.dash-table input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-size: 13px; outline: none; }
+        
+        /* Buttons */
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; color: white; transition: 0.2s; font-size: 13px; }
+        .btn-primary { background: linear-gradient(135deg, #5046e5, #4338ca); }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-save { background: #d97706; color: white; }
+        .btn-word { background: #2b579a; color: white; } /* MS Word Blue */
+        .btn-add { background: #333; border: 1px solid #555; color: #ccc; padding: 4px 8px; font-size: 11px; margin-left: 10px; cursor: pointer; }
+
+        /* Stress Test */
+        .stress-result-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--safe); padding: 15px; border-radius: 8px; text-align: center; font-size: 13px; color: var(--safe); margin-top: 15px; }
+
+/* Header */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .header h1 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.5px; } .header h1 span { color: var(--primary); }
+        
+        /* Grid & Inputs */
+        .grid-container { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; margin-bottom: 30px; }
+        .col-12 { grid-column: span 12; } .col-8 { grid-column: span 8; } .col-6 { grid-column: span 6; } .col-4 { grid-column: span 4; }
+        .panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 25px; height: 100%; }
+        .panel-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #2d3748; padding-bottom: 10px; align-items: center; }
+        .panel-title { font-weight: 700; font-size: 16px; color: #fff; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 6px; }
+        .input-field { width: 100%; background: #252630; border: 1px solid #3f3f46; color: #fff; padding: 10px; border-radius: 8px; }
+        .input-highlight { border-color: var(--accent); background: rgba(245, 158, 11, 0.05); }
+        
+        /* Tables */
+        table.dash-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; }
+        table.dash-table th { color: #94a3b8; padding: 10px; text-align: center; border-bottom: 1px solid #333; background: #252630; }
+        table.dash-table td { padding: 8px; border-bottom: 1px solid #2d3748; }
+        table.dash-table input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; color: white; margin-left: 5px; }
+        .btn-primary { background: var(--primary); } .btn-success { background: var(--safe); } .btn-print { background: #fff; color: #1a237e; }
+        .btn-add { background: #333; color: #ccc; padding: 4px 8px; font-size: 11px; margin-left: 10px; }
+        .btn-clear { background: #333; color: #ef4444; border: 1px solid #ef4444; padding: 2px 6px; font-size: 10px; border-radius: 4px; margin-left: 5px; cursor: pointer; }
+
+        /* [NEW] Conflict Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); z-index: 9999; display: none;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #1b1c25; width: 600px; max-height: 80vh; overflow-y: auto;
+            border-radius: 12px; border: 1px solid var(--border); padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-header { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--accent); border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .conflict-item { margin-bottom: 15px; background: #252630; padding: 15px; border-radius: 8px; border-left: 4px solid var(--risk); }
+        .conflict-label { font-size: 12px; color: #999; margin-bottom: 5px; }
+        .val-box { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; font-size: 13px; }
+        .val-current { color: #aaa; text-decoration: line-through; margin-right: 10px; }
+        .val-new { color: var(--safe); font-weight: bold; }
+        .btn-resolve { padding: 4px 10px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; margin-left: 5px; }
+        .btn-keep { background: #444; color: #fff; }
+        .btn-overwrite { background: var(--safe); color: #fff; }
+        
+        .json-zone { background: #14151b; border: 1px solid var(--border); padding: 25px; border-radius: 16px; margin-bottom: 30px; }
+        .json-textarea { width: 100%; height: 100px; background: #0b0c10; border: 1px solid #333; color: #4ade80; padding: 15px; font-family: monospace; border-radius: 8px; }
+
+        @media print { body { display: none; } }
+    </style>
+</head>
+<body>
+
+<div id="conflictModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">?�️ ?�이??충돌 감�? (Conflict Detected)</div>
+            <p style="font-size:13px; color:#ccc; margin-bottom:20px;">
+                기존 ?�력???�보?� ?�로???�보가 ?�릅?�다.<br>?�떤 값을 ?�용?��? ?�택?�주?�요.
+            </p>
+            <div id="conflictList"></div>
+            <div style="text-align:right; margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+                <button class="btn btn-add" onclick="closeModal()">?�기 (?�동 ?�정)</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+        
+        (async () => {
+            if (!requireAuth()) return;
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                
+                if (!checkRole(['master', 'admin', 'general_manager'])) {
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+                console.log('Business corp analysis page loaded');
+            } catch (error) {
+                console.error('?�이지 로드 ?�러:', error);
+                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
+            }
+        })();
+        
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('로그?�웃 ?�러:', error);
+            }
+        };
+    </script>
+
+    
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>기업?�용·부?�산 <span>?�합 ?��?분석</span></h1>
+                <p>AI 분석 ?�이???�용 �?리포???�성 (Real Service)</p>
+            </div>
+            <div>
+                <button class="btn btn-save" onclick="saveToLocal()">?�� ?�시 ?�??/button>
+                <button class="btn btn-word" onclick="exportToWord()">?�� ?�드�??�??/button>
+                <button class="btn btn-primary" onclick="window.print()">?���?PDF 출력</button>
+            </div>
+        </div>
+
+        <div class="json-zone">
+            <div class="prompt-box" onclick="copyPrompt()">
+                <div style="font-weight:bold; color:white; margin-bottom:5px;">?�� AI ?�롬?�트 (?�릭?�여 복사)</div>
+                [Role] 기업?�용분석 ?�문가<br>
+                [Task] ?�공??기업 문서(개요, ?�무, 부?�산 ??�?분석?�여 ?�래 JSON ?�맷?�로 ?�이?��? 추출?�라.<br>
+                * ?�수 ?�함: 법인?�록번호, ?�립?? 주주?�황, 3개년 ?�무?�표, 부?�산 권리(채권) ?�역<br><br>
+                { "request": {...}, "overview": {...}, "finance": [...], "assets": {...} }
+            </div>
+            <textarea id="jsonInput" class="json-textarea" placeholder="AI가 ?�성??JSON ?�이?��? ?�기??붙여?�고 [?�이???�용] 버튼???�르?�요."></textarea>
+            <div style="text-align:right; margin-top:10px;">
+                <button class="btn btn-success" onclick="applyJson()">???�이???�용 �??�동 계산</button>
+            </div>
+        </div>
+
+
+        <div class="grid-container">
+            
+            <div class="col-12 panel" style="margin-bottom:20px; border-left:4px solid var(--accent);">
+                <div style="font-weight:bold; color:var(--text); margin-bottom:15px;">?�� 조회 ?�청 ?�보 (Request Info)</div>
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px;">
+                    <div class="input-group"><label class="input-label" style="color:var(--primary);">조회?�청??/label><input type="text" id="req_client" class="input-field input-highlight"></div>
+                    <div class="input-group"><label class="input-label" style="color:var(--primary);">조회?�?�자</label><input type="text" id="req_target" class="input-field input-highlight"></div>
+                    <div class="input-group"><label class="input-label" style="color:var(--primary);">문서번호</label><input type="text" id="req_docNo" class="input-field input-highlight"></div>
+                    <div class="input-group"><label class="input-label">조회?�자</label><input type="text" id="req_date" class="input-field"></div>
+                </div>
+            </div>
+
+            <div class="panel col-8">
+                <div class="panel-header"><span class="panel-title">I. 기업 개요 (Identity)</span></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="input-group"><label class="input-label">기업�?/label><input type="text" id="inp_name" class="input-field"></div>
+                    <div class="input-group"><label class="input-label">?�?�자</label><input type="text" id="inp_ceo" class="input-field"></div>
+                    <div class="input-group"><label class="input-label">?�업?�등록번??/label><input type="text" id="inp_bizNo" class="input-field"></div>
+                    <div class="input-group"><label class="input-label" style="color:var(--accent);">법인?�록번호</label><input type="text" id="inp_corpNo" class="input-field input-highlight"></div>
+                    
+                    <div class="input-group"><label class="input-label" style="color:var(--primary);">?�립??(?�력)</label><input type="text" id="inp_estDate" class="input-field"></div>
+                    <div class="input-group"><label class="input-label" style="color:var(--primary);">기업?�태</label><input type="text" id="inp_type" class="input-field"></div>
+                    
+                    <div class="input-group" style="grid-column: span 2;"><label class="input-label">본점 주소</label><input type="text" id="inp_addr" class="input-field"></div>
+                    <div class="input-group" style="grid-column: span 2;"><label class="input-label" style="color:var(--primary);">주요?�업</label><input type="text" id="inp_bizItem" class="input-field"></div>
+
+                    <div class="input-group"><label class="input-label">?�시 종업?�수</label><input type="text" id="inp_emp" class="input-field"></div>
+                    <div class="input-group"><label class="input-label">주채권�???/label><input type="text" id="inp_bank" class="input-field"></div>
+                </div>
+            </div>
+
+            <div class="panel col-4">
+                <div class="panel-header"><span class="panel-title">?�� ?�?�이???�로??/span></div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div class="input-group"><label class="input-label">?�명</label><input type="text" id="mgmt_ceo_name" class="input-field"></div>
+                    <div class="input-group"><label class="input-label">?�년?�일</label><input type="text" id="mgmt_ceo_dob" class="input-field"></div>
+                    <div class="input-group"><label class="input-label">?�택 주소</label><input type="text" id="mgmt_ceo_addr" class="input-field"></div>
+                    <div class="input-group"><label class="input-label">주요 경력?�항</label><textarea id="mgmt_ceo_career" class="input-field"></textarea></div>
+                </div>
+            </div>
+
+            <div class="panel col-12">
+                <div class="panel-header"><span class="panel-title">?�� 지배구�?�?관계사 ?�황</span></div>
+                <div class="grid-container" style="margin-bottom:0;">
+                    <div class="col-6">
+                        <label class="input-label" style="display:flex; justify-content:space-between;">
+                            1. 주주 ?�황 <button class="btn btn-add" onclick="addRow('tbl_shareholders')">+ ??추�?</button>
+                        </label>
+                        <table class="dash-table" id="tbl_shareholders">
+                            <thead><tr><th>주주�?/th><th>구분</th><th>?�유주식</th><th>지분율(%)</th><th>관�?/th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="col-6">
+                        <label class="input-label" style="display:flex; justify-content:space-between;">
+                            2. 관계회???�황 <button class="btn btn-add" onclick="addRow('tbl_affiliates')">+ ??추�?</button>
+                        </label>
+                        <table class="dash-table" id="tbl_affiliates">
+                            <thead><tr><th>기업�?/th><th>관�?/th><th>지분율</th><th>?�산</th><th>매출</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="col-12">
+                        <label class="input-label" style="color:var(--accent);">?�� 지배구�?분석 ?�견</label>
+                        <textarea id="inp_gov_opinion" class="input-field" style="min-height:50px;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel col-12">
+                <div class="panel-header"><span class="panel-title">II. ?�무 �??�용 (Financial Status)</span></div>
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <div class="input-group" style="flex:1;"><label class="input-label">?�용?�급</label><input type="text" id="inp_credit" class="input-field" style="color:#fbc02d; font-weight:bold;"></div>
+                    <div class="input-group" style="flex:1;"><label class="input-label">?�금?�름?�급</label><input type="text" id="inp_cash" class="input-field" style="color:#10b981; font-weight:bold;"></div>
+                    <div class="input-group" style="flex:1;"><label class="input-label" style="color:var(--risk);">Risk Watch</label><input type="text" id="inp_risk" class="input-field" style="color:var(--risk); font-weight:bold;"></div>
+                </div>
+                <label class="input-label" style="color:var(--accent);">?�� ?�무?�표 ?�약 (?�위: 백만??</label>
+                <table class="dash-table" id="tbl_finance_edit">
+                    <thead><tr><th>구분</th><th>Y-3</th><th>Y-2</th><th>Y-1 (최근)</th><th>증감</th><th>비고</th></tr></thead>
+                    <tbody>
+                        <tr><td>매출??/td><td><input onkeyup="calcGrowth(this)"></td><td><input onkeyup="calcGrowth(this)"></td><td><input class="text-right" style="color:var(--risk);" onkeyup="calcGrowth(this)"></td><td><input readonly class="text-center"></td><td><input class="text-left"></td></tr>
+                        <tr><td>?�업?�익</td><td><input onkeyup="calcGrowth(this)"></td><td><input onkeyup="calcGrowth(this)"></td><td><input class="text-right" onkeyup="calcGrowth(this)"></td><td><input readonly class="text-center"></td><td><input class="text-left"></td></tr>
+                        <tr><td>?�기?�이??/td><td><input onkeyup="calcGrowth(this)"></td><td><input onkeyup="calcGrowth(this)"></td><td><input class="text-right" onkeyup="calcGrowth(this)"></td><td><input readonly class="text-center"></td><td><input class="text-left"></td></tr>
+                        <tr><td>?�산총계</td><td><input></td><td><input></td><td><input id="inp_asset_last" class="text-right" onkeyup="updateAllRatios()"></td><td><input readonly class="text-center"></td><td><input class="text-left"></td></tr>
+                        <tr><td>부채비??%)</td><td><input></td><td><input></td><td><input class="text-right" style="color:var(--safe);"></td><td><input readonly class="text-center" value="-"></td><td><input class="text-left"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel col-12">
+                <div class="panel-header"><span class="panel-title">?�� ?�금 ?�동??�?채무 분석</span></div>
+                <div class="grid-container" style="margin-bottom:0;">
+                    <div class="col-6">
+                        <label class="input-label" style="color:var(--safe);">?�� 보유 ?�동??/label>
+                        <div style="background:#252630; padding:15px; border-radius:8px; margin-bottom:15px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                <span style="color:#aaa; font-size:12px;">?�금???�산</span><input type="text" id="liq_cash" class="input-field text-right" style="width:140px;" onkeyup="calcLiquidity()">
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                <span style="color:#aaa; font-size:12px;">?�기 ?�금</span><input type="text" id="liq_deposit" class="input-field text-right" style="width:140px;" onkeyup="calcLiquidity()">
+                            </div>
+                            <div style="display:flex; justify-content:space-between; border-top:1px dashed #444; padding-top:10px;">
+                                <span style="color:#fff; font-weight:bold; font-size:12px;">가???�금 ?�계</span><span id="liq_total_asset" class="text-safe" style="font-weight:bold; font-size:14px;">-</span>
+                            </div>
+                        </div>
+                        <label class="input-label" style="color:var(--risk);">?�� ?�기 지�??�무</label>
+                        <div style="background:#252630; padding:15px; border-radius:8px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                <span style="color:#aaa; font-size:12px;">?�기차입�?/span><input type="text" id="liq_borrow" class="input-field text-right" style="width:140px;" onkeyup="calcLiquidity()">
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                <span style="color:#aaa; font-size:12px;">매입채무</span><input type="text" id="liq_payable" class="input-field text-right" style="width:140px;" onkeyup="calcLiquidity()">
+                            </div>
+                            <div style="display:flex; justify-content:space-between; border-top:1px dashed #444; padding-top:10px;">
+                                <span style="color:#fff; font-weight:bold; font-size:12px;">?�요 ?�금 ?�계</span><span id="liq_total_liab" class="text-risk" style="font-weight:bold; font-size:14px;">-</span>
+                            </div>
+                        </div>
+                        <div id="liq_result_box" class="stress-result-box" style="display:none;"></div>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="input-label">�?금융부�?개요</label>
+                        <div style="background:#252630; padding:15px; border-radius:8px; margin-bottom:15px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <span style="color:#aaa; font-size:12px;">�??�액 (??</span>
+                                <input type="text" id="debt_total" class="input-field text-right" style="width:150px; font-weight:bold; color:var(--primary);" onkeyup="formatInput(this); updateAllRatios();">
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <span style="color:#aaa; font-size:12px;">금융거래(조회) 기�? ??/span>
+                                <input type="text" id="debt_count" class="input-field text-right" style="width:80px;">
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <span style="color:#aaa; font-size:12px;">�?채무?�태</span>
+                                <input type="text" id="debt_type" class="input-field text-right" style="width:120px;">
+                            </div>
+                            <div style="display:flex; justify-content:space-between; border-top:1px dashed #444; padding-top:10px;">
+                                <span style="color:#fff; font-weight:bold; font-size:12px;">?�산 ?��?비율</span><span id="debt_asset_ratio" class="text-safe" style="font-weight:bold; font-size:14px;">-</span>
+                            </div>
+                        </div>
+                        <label class="input-label">주요 채권기�? ?�세 (금액 ?�력 ??비중 ?�동계산)</label>
+                        <table class="dash-table">
+                            <thead><tr><th>기�?�?/th><th>?�격</th><th>채무????</th><th>비중(%)</th></tr></thead>
+                            <tbody id="creditor_list"></tbody>
+                        </table>
+                        <button class="btn btn-add" style="width:100%; margin-top:5px;" onclick="addCreditorRow()">+ 기�? 추�?</button>
+                    </div>
+                </div>
+            </div>
+
+<div class="panel col-12">
+    <div class="panel-header">
+        <span class="panel-title">?�� 금융 �??�용거래 ?�력 ?�세 (Credit History)</span>
+    </div>
+    
+    <div class="grid-container" style="margin-bottom:0;">
+        <div class="col-6">
+            <label class="input-label" style="color:var(--text); font-weight:bold; margin-bottom:10px;">
+                1. ?�용?�보 변???�역 ?��?
+            </label>
+            <table class="dash-table" id="tbl_credit_check">
+                <thead>
+                    <tr>
+                        <th width="20%">구분</th>
+                        <th>?��? ?�용</th>
+                        <th width="15%">조회결과(�?</th>
+                        <th width="15%">?�태</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center" style="font-weight:bold;">?�기?�체</td>
+                        <td>금융�??��?�?카드?��??�체 (?�용?�보??</td>
+                        <td><input type="number" class="text-center" value="0" min="0" onchange="updateStatus(this)"></td>
+                        <td><input type="text" class="text-center text-safe" value="?�상" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight:bold;">공공?�보</td>
+                        <td>�?��/지방세 체납, 고용/?�재보험�?체납</td>
+                        <td><input type="number" class="text-center" value="0" min="0" onchange="updateStatus(this)"></td>
+                        <td><input type="text" class="text-center text-safe" value="?�상" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight:bold;">?�거?�연�?/td>
+                        <td>KED ?�록 기업 �??��?미�?�??�역</td>
+                        <td><input type="number" class="text-center" value="0" min="0" onchange="updateStatus(this)"></td>
+                        <td><input type="text" class="text-center text-safe" value="?�상" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight:bold;">?�수채권</td>
+                        <td>금융기�? 부?�채�??�실처리) ?�재 ?��?</td>
+                        <td><input type="number" class="text-center" value="0" min="0" onchange="updateStatus(this)"></td>
+                        <td><input type="text" class="text-center text-safe" value="?�상" readonly></td>
+                    </tr>
+                                  </tbody>
+            </table>
+        </div>
+
+        <div class="col-6">
+            <label class="input-label" style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:var(--risk);">2. [가???�나리오] ?�체 ?�력 보유 ???�세 ?�력</span>
+                <button class="btn btn-add" onclick="addRow('tbl_credit_detail')">+ ??추�?</button>
+            </label>
+            <table class="dash-table" id="tbl_credit_detail">
+                <thead>
+                    <tr>
+                        <th>?�체 기�?</th>
+                        <th>발생?�자</th>
+                        <th>?�체 금액</th>
+                        <th>?�태</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="4" class="text-center" style="color:#666; padding:15px;">?�당?�항 ?�음 (?�상 기업)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <label class="input-label" style="color:var(--accent); margin-top:15px;">?�� Credit Insight (?�문가 ?�견)</label>
+            <textarea id="inp_credit_insight" class="input-field" style="min-height:80px; font-size:12px; line-height:1.5;">?�사??창업 ?�래 11?�간 ????건의 금융 ?�체???�금 체납 ?�력??발견?��? ?�았?�니?? ?�는 경영진의 ?�금 관�??�력??매우 보수?�이�??�정?�임???�사?�니?? ?�면?�인 매출 감소?� ?�리, 기업??'지�??�력(Solvency)'?� 건재?�니??</textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateStatus(el) {
+        const count = parseInt(el.value);
+        const row = el.closest('tr');
+        const statusInput = row.cells[3].querySelector('input');
+
+        if (count > 0) {
+            statusInput.value = "발생";
+            statusInput.style.color = "#ef4444"; // Red
+            statusInput.style.fontWeight = "bold";
+        } else {
+            statusInput.value = "?�상";
+            statusInput.style.color = "#10b981"; // Green
+            statusInput.style.fontWeight = "bold";
+            if(row.rowIndex === 5) statusInput.value = "Clean"; // ?�송?�보??Clean
+        }
+    }
+
+    // Function to add rows for detail table
+    function addRow(tableId) {
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        // If "No Data" message exists, clear it
+        if(tbody.querySelector('td') && tbody.querySelector('td').colSpan > 1) {
+            tbody.innerHTML = '';
+        }
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" placeholder="?? OO카드"></td>
+            <td><input type="text" placeholder="YYYY.MM.DD"></td>
+            <td><input type="text" class="text-right" placeholder="금액" onkeyup="formatInput(this)"></td>
+            <td><input type="text" class="text-center" placeholder="진행�??�제"></td>
+        `;
+        tbody.appendChild(tr);
+    }
+</script>
+            <div class="panel col-12">
+                <div class="panel-header"><span class="panel-title">IV. 기술 �??�업 ??�� (Business Intelligence)</span></div>
+                <div class="grid-container" style="margin-bottom:0;">
+                    <div class="col-6">
+                        <label class="input-label">기술 ?�황</label>
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <div class="input-group" style="flex:1;"><label class="input-label">기업부?�연구소</label><input type="text" id="biz_rnd" class="input-field"></div>
+                            <div class="input-group" style="flex:1;"><label class="input-label">지?�재?�권(?�허)</label><input type="text" id="biz_patent" class="input-field"></div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label class="input-label">?�업 ???�상</label>
+                        <div style="display:flex; gap:10px;">
+                            <div class="input-group" style="flex:1;"><label class="input-label">?�계?�위</label><input type="text" id="biz_rank" class="input-field"></div>
+                            <div class="input-group" style="flex:1;"><label class="input-label">비교기업</label><input type="text" id="biz_comp" class="input-field"></div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="input-label" style="display:flex; justify-content:space-between;">
+                            주요 공사 ?�주 ?�적 (Track Record) <button class="btn btn-add" onclick="addRow('tbl_project')">+ ??추�?</button>
+                        </label>
+                        <table class="dash-table" id="tbl_project">
+                            <thead><tr><th>?�로?�트/?�장�?/th><th>발주�?/th><th>계약금액</th><th>기간/?�태</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+<div class="panel col-12">
+    <div class="panel-header">
+        <span class="panel-title">?�️ 거래�?�?공급�?분석 (Supply Chain)</span>
+    </div>
+
+    <div class="grid-container" style="margin-bottom:0;">
+        
+        <div class="col-6">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <label class="input-label" style="margin:0; color:var(--primary);">1. 주요 매출�?(?�금)</label>
+                <button class="btn btn-add" onclick="addRow('tbl_sales_partners')">+ 추�?</button>
+            </div>
+            <table class="dash-table" id="tbl_sales_partners">
+                <thead>
+                    <tr>
+                        <th>거래처명</th>
+                        <th>?�간 추정??/th>
+                        <th>비중(%)</th>
+                        <th>?�격 (관�?민간)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+
+            <div style="background:rgba(251, 192, 45, 0.1); border:1px solid var(--accent); padding:15px; border-radius:8px; margin-top:15px;">
+                <div style="font-size:12px; font-weight:bold; color:var(--accent); margin-bottom:10px; display:flex; justify-content:space-between;">
+                    <span>??최근 매출 ?�거???�황</span>
+                    <input type="text" id="sales_last_quarter" placeholder="?? 2025. 3Q" style="width:80px; background:transparent; border:none; color:var(--accent); font-weight:bold; text-align:right;">
+                </div>
+                <table class="dash-table" id="tbl_sales_recent" style="margin-bottom:0;">
+                    <thead><tr><th>거래처명</th><th>거래금액 (??</th><th>비고</th></tr></thead>
+                    <tbody>
+                        </tbody>
+                </table>
+                <button class="btn btn-add" style="width:100%; margin-top:5px; border-color:var(--accent); color:var(--accent);" onclick="addRecentRow('tbl_sales_recent')">+ 최근 거래 추�?</button>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <label class="input-label" style="margin:0; color:var(--primary);">2. 주요 매입�?(지�?</label>
+                <button class="btn btn-add" onclick="addRow('tbl_buy_partners')">+ 추�?</button>
+            </div>
+            <table class="dash-table" id="tbl_buy_partners">
+                <thead>
+                    <tr>
+                        <th>거래처명</th>
+                        <th>?�간 추정??/th>
+                        <th>비중(%)</th>
+                        <th>주요 ?�목</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+
+            <div style="background:rgba(226, 232, 240, 0.1); border:1px solid #4a5568; padding:15px; border-radius:8px; margin-top:15px;">
+                <div style="font-size:12px; font-weight:bold; color:#94a3b8; margin-bottom:10px; display:flex; justify-content:space-between;">
+                    <span>??최근 매입 ?�거???�황</span>
+                    <input type="text" id="buy_last_quarter" placeholder="?? 2025. 3Q" style="width:80px; background:transparent; border:none; color:#94a3b8; font-weight:bold; text-align:right;">
+                </div>
+                <table class="dash-table" id="tbl_buy_recent" style="margin-bottom:0;">
+                    <thead><tr><th>거래처명</th><th>거래금액 (??</th><th>비고</th></tr></thead>
+                    <tbody>
+                        </tbody>
+                </table>
+                <button class="btn btn-add" style="width:100%; margin-top:5px; border-color:#4a5568; color:#94a3b8;" onclick="addRecentRow('tbl_buy_recent')">+ 최근 거래 추�?</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="panel col-12" style="border-left: 4px solid var(--risk);">
+    <div class="panel-header">
+        <span class="panel-title" style="color:var(--risk);">?�️ VII. ?�송 �??�정처분 리스??(Legal & Admin Risk)</span>
+        <label style="font-size:11px; color:#aaa;"><input type="checkbox" checked onchange="togglePrint('rpt_sec_legal', this.checked)"> ?�션 출력</label>
+    </div>
+
+    <div class="grid-container" style="margin-bottom:0;">
+        
+        <div class="col-12" style="margin-bottom:20px;">
+            <label class="input-label" style="display:flex; justify-content:space-between; color:var(--risk);">
+                <span>1. ?�정처분 ?�역 (?�허가 취소/?��?/과태�???</span>
+                <button class="btn btn-add" onclick="addRow('tbl_admin_actions')">+ 처분 추�?</button>
+            </label>
+            <div style="font-size:11px; color:#aaa; margin-bottom:5px;">* 관�?공사 ?�찰 ?�한(PQ 감점) �??�업 ?��? ?�험 분석</div>
+            <table class="dash-table" id="tbl_admin_actions">
+                <thead>
+                    <tr>
+                        <th width="12%">처분?�자</th>
+                        <th width="15%">처분기�?</th>
+                        <th>?�반 ?�용</th>
+                        <th width="10%">처분 결과</th>
+                        <th width="10%">?�향??/th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="col-12">
+            <label class="input-label" style="display:flex; justify-content:space-between; color:#a5b4fc;">
+                <span>2. ?�송 진행 ?�역 (민사/?�사/가?�류 ??</span>
+                <button class="btn btn-add" onclick="addRow('tbl_litigation')">+ ?�송 추�?</button>
+            </label>
+            <div style="font-size:11px; color:#aaa; margin-bottom:5px;">* ?�고로서 진행 중인 ?�송 �?주요 채권 분쟁 ?�역</div>
+            <table class="dash-table" id="tbl_litigation">
+                <thead>
+                    <tr>
+                        <th width="12%">?�건번호</th>
+                        <th width="15%">관?�법??/th>
+                        <th>?�건�?(?�고)</th>
+                        <th width="15%">?��?(�?��금액)</th>
+                        <th width="10%">진행?�태</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="col-12" style="margin-top:15px;">
+            <label class="input-label">?�� 법적 리스??검???�견</label>
+            <textarea id="inp_legal_opinion" class="input-field" style="min-height:60px;" placeholder="?? ?�정처분?�로 ?�한 공공?�찰 ?�한 리스?��? ?�음. ?�송가?��? ?�본�??��?미�???"></textarea>
+        </div>
+
+    </div>
+</div>
+
+
+           <div class="panel col-12 estate-panel">
+    <div class="panel-header" style="border-left-color:var(--accent);">
+        <span class="panel-title" style="color:var(--accent);">?�� V. 부?�산 �?권리 ?��? 분석 (3-Step Analysis)</span>
+        <label style="font-size:11px; color:#aaa;"><input type="checkbox" checked onchange="togglePrint('rpt_sec_asset', this.checked)"> ?�션 출력</label>
+    </div>
+    
+    <div style="margin-bottom:25px;">
+        <label class="input-label" style="display:flex; justify-content:space-between; color:var(--safe);">
+            <span>1. 법인 직접 ?�유 부?�산 (Direct Ownership)</span>
+            <button class="btn btn-add" onclick="addRow('tbl_owned_estate')">+ ??추�?</button>
+        </label>
+        <div style="font-size:11px; color:#aaa; margin-bottom:5px;">* ?�기부?�본??법인 명의�??�인???�물 ?�산</div>
+        <table class="dash-table" id="tbl_owned_estate">
+            <thead>
+                <tr>
+                    <th width="15%">구분</th>
+                    <th>?�재지</th>
+                    <th width="15%">?�태(?��?/?�차)</th>
+                    <th width="20%">추정가??(??</th>
+                    <th width="15%">비고</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div style="margin-bottom:25px;">
+        <label class="input-label" style="display:flex; justify-content:space-between; color:var(--accent);">
+            <span>2. 법인 보유 권리 (채권/Hidden Assets)</span>
+            <button class="btn btn-add" onclick="addRow('tbl_rights_edit')">+ ??추�?</button>
+        </label>
+        <div style="font-size:11px; color:#aaa; margin-bottom:5px;">* ????부?�산???�정??근�??�권, ?�세�? 가?�류 ??(?�수 ?�략 ?�심)</div>
+        <table class="dash-table" id="tbl_rights_edit">
+            <thead>
+                <tr>
+                    <th width="15%">권리종류</th>
+                    <th>?�??부?�산 (?�???�유)</th>
+                    <th width="20%">권리금액 (채권??</th>
+                    <th width="15%">?�정??/th>
+                    <th width="15%">가치평가</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div>
+        <label class="input-label" style="display:flex; justify-content:space-between; color:#a5b4fc;">
+            <span>3. 관계인/관계사 부?�산 (Indirect Assets)</span>
+            <button class="btn btn-add" onclick="addRow('tbl_related_estate')">+ ??추�?</button>
+        </label>
+        <div style="font-size:11px; color:#aaa; margin-bottom:5px;">* ?�?�이?? 주주, 관계회?��? ?�유?�거??권리�?가�??�산 (보증???�보 ???�효)</div>
+        <table class="dash-table" id="tbl_related_estate">
+            <thead>
+                <tr>
+                    <th width="15%">?�유??관�?/th>
+                    <th>?�재지</th>
+                    <th width="15%">구분(?��?/건물)</th>
+                    <th width="20%">추정가??(??</th>
+                    <th width="15%">비고</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+            
+            <div class="panel col-12">
+                <div class="panel-header"><span class="panel-title">VI. 종합 분석 ?�견 (Final Opinion)</span></div>
+                <textarea id="inp_final_opinion" class="input-field" style="min-height:120px;" placeholder="?�용???��?, ?�산 가�??��?, Action Plan ??종합 ?�견???�성?�세??"></textarea>
+            </div>
+
+        </div>
+    </div>
+
+    
+</body>
+</html>

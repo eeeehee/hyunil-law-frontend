@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>법무그룹 현일 기업자문센터</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* --- [공통] 기본 설정 --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { width: 100%; overflow-x: hidden; color: #333; background-color: #fff; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, textarea, button { font-family: inherit; }
+
+        /* --- [1] 헤더 --- */
+        header { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 20px 24px; height: 80px; }
+        .logo img { height: 40px; cursor: pointer; }
+        .nav-links a { margin-left: 30px; font-weight: 500; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .nav-links a:hover { color: #2c5bf2; }
+
+        /* --- [2] 메인 히어로 섹션 --- */
+        .hero { display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 60px auto 100px; padding: 0 24px; gap: 40px; }
+        .text-content { flex: 1; }
+        .text-content h1 { font-size: 48px; font-weight: 700; line-height: 1.3; color: #1a1a1a; margin-bottom: 24px; word-break: keep-all; }
+        .text-content p { font-size: 18px; line-height: 1.6; color: #555; margin-bottom: 40px; word-break: keep-all; }
+        .btn-group { display: flex; gap: 12px; }
+        .btn { padding: 14px 28px; font-size: 16px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-block;}
+        
+        .btn-primary { background-color: #1a1a1a; color: #fff; border: 1px solid #1a1a1a; }
+        .btn-primary:hover { background-color: #333; }
+        .btn-secondary { background-color: #fff; color: #1a1a1a; border: 1px solid #ddd; }
+        .btn-secondary:hover { background-color: #f9f9f9; border-color: #bbb; }
+        
+        .image-content { flex: 1; text-align: right; }
+        .image-content img { max-width: 100%; height: auto; }
+
+        /* --- [3] 파트너 로고 슬라이더 --- */
+        .partners-section { background-color: #fff; padding: 60px 0; overflow: hidden; border-top: 1px solid #eee; }
+        .logo-slider { display: flex; width: 100%; overflow: hidden; position: relative; }
+        .logo-track { display: flex; width: max-content; align-items: center; animation: scroll 40s linear infinite; }
+        .logo-item { height: 120px; margin: 0 60px; object-fit: contain; opacity: 0.6; filter: grayscale(100%); transition: all 0.3s; cursor: pointer; }
+        .logo-item:hover { opacity: 1; filter: grayscale(0%); transform: scale(1.1); }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* --- [4] 서비스 섹션 --- */
+        .services-section { background-color: #f8f9fb; padding: 120px 24px; overflow: hidden; }
+        .services-container { max-width: 1280px; margin: 0 auto; }
+        .section-title { font-size: 36px; font-weight: 700; color: #1a1a1a; margin-bottom: 60px; text-align: left; line-height: 1.3; opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        .section-title.visible { opacity: 1; transform: translateY(0); }
+        .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; width: 100%; }
+        .service-card { background-color: #242736; color: #fff; padding: 40px 32px; border-radius: 16px; display: flex; flex-direction: column; justify-content: space-between; height: 480px; position: relative; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); opacity: 0; transform: translateY(80px); transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        .service-card:nth-child(1) { transition-delay: 0.2s; }
+        .service-card:nth-child(2) { transition-delay: 0.4s; margin-top: 100px; } 
+        .service-card:nth-child(3) { transition-delay: 0.6s; }
+        .service-card:nth-child(4) { transition-delay: 0.8s; margin-top: 100px; }
+        .service-card.visible { opacity: 1; transform: translateY(0); }
+        .service-card h3 { font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #fff; }
+        .service-card p { font-size: 17px; line-height: 1.7; color: #e0e0e0; letter-spacing: -0.01em; }
+        .card-icon { align-self: flex-end; margin-top: 30px; width: 90px; height: auto; opacity: 0.9; }
+
+        /* --- [5] 특화 파트너 섹션 --- */
+        .features-section { background-color: #ffffff; padding: 120px 24px; overflow: hidden; }
+        .features-container { max-width: 1440px; margin: 0 auto; }
+        .features-title { font-size: 38px; font-weight: 700; color: #1a1a1a; margin-bottom: 60px; opacity: 0; transform: translateY(30px); transition: all 0.8s; }
+        .features-title.visible { opacity: 1; transform: translateY(0); }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .feature-card { background-color: #fff; border: 1px solid #eee; border-radius: 16px; padding: 40px; display: flex; flex-direction: column; align-items: flex-start; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); transition: all 0.8s; opacity: 0; transform: translateY(50px); }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08); border-color: #ddd; }
+        .feature-card.visible { opacity: 1; transform: translateY(0); }
+        .feature-card:nth-child(1) { transition-delay: 0.1s; } .feature-card:nth-child(2) { transition-delay: 0.2s; } .feature-card:nth-child(3) { transition-delay: 0.3s; }
+        .feature-card:nth-child(4) { transition-delay: 0.4s; } .feature-card:nth-child(5) { transition-delay: 0.5s; } .feature-card:nth-child(6) { transition-delay: 0.6s; }
+        .feature-icon { width: 60px; height: 60px; margin-bottom: 24px; object-fit: contain; }
+        .feature-card h3 { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
+        .feature-card p { font-size: 17px; color: #555; line-height: 1.6; }
+
+        /* --- [6] FAQ & CTA 섹션 (하단 폼 삭제됨) --- */
+        .faq-section { background-color: #f9f9f9; padding: 100px 20px; display: flex; justify-content: center; border-bottom: 1px solid #eee; }
+        .faq-container { display: flex; gap: 50px; max-width: 1300px; width: 100%; align-items: stretch; }
+        .faq-list { flex: 1; display: flex; flex-direction: column; }
+        .faq-title { font-size: 36px; font-weight: 700; margin-bottom: 30px; color: #1a1a1a; }
+        
+        details { border-bottom: 1px solid #d1d1d1; padding: 15px 0; cursor: pointer; transition: all 0.3s; }
+        details[open] summary { color: #000; }
+        summary { font-size: 17px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; align-items: center; color: #333; padding: 5px 0; }
+        summary::after { content: '∨'; font-size: 13px; color: #999; transform: rotate(0deg); transition: 0.2s; font-weight: 400; }
+        details[open] summary::after { transform: rotate(180deg); }
+        .answer { margin-top: 10px; font-size: 16px; color: #555; line-height: 1.6; padding: 20px; background-color: #f2f4f6; border-radius: 8px; }
+
+        .faq-hidden { display: none; }
+        .btn-more-faq { display: block; width: 100%; text-align: center; padding: 15px 0; margin-top: 20px; border: 1px solid #ddd; background: #fff; border-radius: 8px; font-weight: 600; cursor: pointer; color: #555; transition: 0.2s; }
+        .btn-more-faq:hover { background: #f0f0f0; color: #333; border-color: #bbb; }
+
+        .cta-card { width: 440px; height: auto; background-color: #000; color: #fff; padding: 50px 40px; border-radius: 16px; position: relative; overflow: hidden; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; }
+        .cta-top-group { position: relative; z-index: 10; }
+        .cta-text h3 { font-size: 20px; font-weight: 400; line-height: 1.6; margin-bottom: 20px; color: #ccc; }
+        .cta-phone { font-size: 38px; font-weight: 700; display: block; color: #fff; letter-spacing: -0.5px; }
+        .cta-bottom-group { position: relative; z-index: 10; margin-top: 40px; }
+        .cta-btn { display: inline-block; background-color: #fff; color: #000; padding: 14px 28px; border-radius: 6px; font-weight: 700; font-size: 16px; transition: 0.2s; cursor: pointer; text-decoration: none;}
+        .cta-btn:hover { background-color: #eee; }
+        .gradient-circle { position: absolute; bottom: -40px; right: -40px; width: 300px; height: 300px; background-image: url('/assets/img/want_.png'); background-size: contain; background-repeat: no-repeat; z-index: 1; opacity: 1; }
+
+        /* --- [7] 푸터 --- */
+        footer { background-color: #2c2c2c; color: #ccc; padding: 60px 20px; font-size: 14px; text-align: center; border-top: 1px solid #444; }
+        .footer-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .social-icons { display: flex; gap: 15px; margin-bottom: 10px; }
+        .social-icons a { display: inline-block; width: 36px; height: 36px; background-color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: 0.2s; }
+        .social-icons a:hover { transform: translateY(-3px); }
+        .social-icons img { width: 20px; height: 20px; object-fit: contain; } 
+        .footer-info h2 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 15px; }
+        .info-row { margin-bottom: 8px; line-height: 1.6; }
+        .info-row span { margin: 0 8px; color: #555; }
+        .footer-links a { margin: 0 10px; color: #ccc; }
+        .footer-links a.bold { font-weight: 700; color: #fff; }
+        .copyright { color: #777; font-size: 12px; margin-top: 10px; }
+
+        /* 팝업(모달) 스타일 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 9999; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; background-color: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .modal-title { font-size: 20px; font-weight: 700; color: #1a1a1a; }
+        .close-btn { font-size: 28px; cursor: pointer; color: #999; line-height: 1; }
+        .modal-form .form-group { margin-bottom: 20px; }
+        .modal-form .input-box { width: 100%; height: 46px; border: 1px solid #ddd; border-radius: 4px; padding: 0 15px; font-size: 15px; }
+        .privacy-box { width: 100%; height: 150px; overflow-y: auto; border: 1px solid #eee; background-color: #f9f9f9; padding: 15px; font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 10px; border-radius: 4px; }
+        .modal-submit-btn { width: 100%; height: 50px; background-color: #fff; border: 1px solid #333; color: #333; font-weight: 700; font-size: 16px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .modal-submit-btn:hover { background-color: #333; color: #fff; }
+        .check-label { display: flex; align-items: center; gap: 8px; font-size: 15px; color: #555; cursor: pointer; }
+        .check-label input { width: 18px; height: 18px; accent-color: #333; cursor: pointer; }
+        .form-label { display: block; font-size: 15px; font-weight: 700; color: #333; margin-bottom: 10px; }
+        .required { color: #ff4d4f; margin-left: 2px; }
+        .phone-inputs { display: flex; align-items: center; gap: 10px; }
+        .phone-box { width: 100%; height: 48px; border: 1px solid #ddd; border-radius: 4px; padding: 0 15px; font-size: 16px; outline: none; text-align: center; }
+        .phone-dash { color: #999; }
+
+        @media (max-width: 1024px) {
+            .services-grid, .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .faq-container { flex-direction: column; align-items: center; }
+            .cta-card { width: 100%; height: auto; min-height: 300px; }
+            .modal-content { width: 90%; padding: 25px; }
+        }
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; text-align: center; margin-top: 40px; }
+            .nav-links { display: none; }
+            .services-grid, .features-grid { grid-template-columns: 1fr; }
+            .service-card:nth-child(even) { margin-top: 0; }
+            .service-card { transition-delay: 0s !important; }
+            .logo-item { height: 80px; }
+            .info-row { font-size: 13px; display: flex; flex-direction: column; gap: 5px; }
+            .info-row span { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo"><a href="/"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a></div>
+        <nav class="nav-links">
+            <a href="/pages/public/service_intro.html">서비스 소개</a>
+            <a href="/pages/public/pricing.html">요금제</a>
+            <a href="/pages/public/login.html" id="navLoginBtn">로그인</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="text-content">
+            <h1>법은 사후가 아닌<br>사전이 중요합니다.</h1>
+            <p>현일 기업자문센터는 기업의 리스크를 미리 진단하고,<br>계약·노무·채권 등 전 과정을 사전에 대비할 수 있도록 돕습니다.</p>
+            <div class="btn-group">
+                <a href="javascript:void(0)" class="btn btn-primary" onclick="openMainModal()">도입 문의하기</a>
+                <a href="/pages/public/login.html" class="btn btn-secondary" id="heroStartBtn">시작하기</a>
+            </div>
+        </div>
+        <div class="image-content">
+            <img src="/assets/img/main_image.png" alt="비즈니스 일러스트">
+        </div>
+    </section>
+
+    <section class="partners-section">
+        <div class="logo-slider">
+            <div class="logo-track">
+                <img src="/assets/img/kisa.png" class="logo-item">
+                <img src="/assets/img/kist.png" class="logo-item">
+                <img src="/assets/img/leeung.png" class="logo-item">
+                <img src="/assets/img/nefs.png" class="logo-item">
+                <img src="/assets/img/AIA.png" class="logo-item">
+                <img src="/assets/img/nexans.png" class="logo-item">
+                <img src="/assets/img/open.png" class="logo-item">
+                <img src="/assets/img/rebyss.png" class="logo-item">
+                <img src="/assets/img/seoul_cor.png" class="logo-item">
+                <img src="/assets/img/seoulherb.png" class="logo-item">
+                <img src="/assets/img/kisa.png" class="logo-item">
+                <img src="/assets/img/kist.png" class="logo-item">
+                <img src="/assets/img/leeung.png" class="logo-item">
+                <img src="/assets/img/nefs.png" class="logo-item">
+                <img src="/assets/img/nexans.png" class="logo-item">
+                <img src="/assets/img/open.png" class="logo-item">
+                <img src="/assets/img/rebyss.png" class="logo-item">
+                <img src="/assets/img/seoul_cor.png" class="logo-item">
+                <img src="/assets/img/seoulherb.png" class="logo-item">
+            </div>
+        </div>
+    </section>
+
+    <section class="services-section">
+        <div class="services-container">
+            <h2 class="section-title">기업을 위한<br>맞춤형 법률 자문 분야</h2>
+            <div class="services-grid">
+                <div class="service-card"><div><h3>노무</h3><p>근로계약서, 인사규정, 퇴직·징계·해고 등<br>노무 이슈를 사전에 점검하여<br>조직 리스크를 줄입니다.</p></div><img src="/assets/img/_01 1.png" alt="노무" class="card-icon"></div>
+                <div class="service-card"><div><h3>계약</h3><p>거래처·협력사와의 계약서,<br>투자, MOU 등 주요 계약의<br>위험 요소를 사전에 검토해<br>분쟁을 예방합니다.</p></div><img src="/assets/img/_02 1.png" alt="계약" class="card-icon"></div>
+                <div class="service-card"><div><h3>채권</h3><p>미수금, 거래대금 등<br>채권 분쟁에 신속하게 대응하고 회수<br>절차를 효율적으로 안내합니다.</p></div><img src="/assets/img/_03 1.png" alt="채권" class="card-icon"></div>
+                <div class="service-card"><div><h3>지식재산(IP)</h3><p>상표, 저작권, 디자인 등<br>기업의 지식재산권 등록<br>및 보호를 통해 브랜드 가치를 지킵니다.</p></div><img src="/assets/img/_04 1.png" alt="IP" class="card-icon"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="features-container">
+            <h2 class="features-title">기업 자문에 특화된 법률 파트너, 현일</h2>
+            <div class="features-grid">
+                <div class="feature-card"><img src="/assets/img/icon_1 1.png" class="feature-icon"><h3>대기업 출신</h3><p>10년 이상 경력의 대기업 출신 변호사 자문</p></div>
+                <div class="feature-card"><img src="/assets/img/icon_2 1.png" class="feature-icon"><h3>변호사 겸 변리사</h3><p>복합 법률 · IP 이슈를 한 번에 해결</p></div>
+                <div class="feature-card"><img src="/assets/img/icon_3 1.png" class="feature-icon"><h3>빠른 자문</h3><p>7일 내 자문 회신 보장, 시급한 이슈에도 즉시 대응</p></div>
+                <div class="feature-card"><img src="/assets/img/icon_4 1.png" class="feature-icon"><h3>다국어 지원</h3><p>영어 자문 기본 제공, 중국어·일본어는 별도 요금</p></div>
+                <div class="feature-card"><img src="/assets/img/icon_5 1.png" class="feature-icon"><h3>맞춤 요금제</h3><p>단건 결제부터 정기 구독까지, 합리적인 맞춤 플랜</p></div>
+                <div class="feature-card"><img src="/assets/img/icon_6 1.png" class="feature-icon"><h3>자문 문서 관리</h3><p>자문 기록부터 계약서까지, 문서 한곳에서 관리</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq-section">
+        <div class="faq-container">
+            <div class="faq-list">
+                <h2 class="faq-title">자주 묻는 질문</h2>
+                <details><summary>Q. 서비스는 어떻게 이용하나요?</summary><div class="answer">회원가입 후 기업 상황에 맞는 요금제를 선택하시면 즉시 이용 가능합니다.<br>어떤 요금제가 적합할지 고민되신다면, <b>[문의하기]</b>를 통해 맞춤형 요금제를 추천받으실 수 있습니다.</div></details>
+                <details><summary>Q. 자문 신청은 어떤 절차로 진행되나요?</summary><div class="answer">1. [회원가입] 후 승인 완료 시 로그인<br>2. [자문 신청하기] 메뉴에서 문의 내용 작성<br>3. 변호사 검토 후 [1차 답변] 제공 및 필요시 추가 질문</div></details>
+                <details><summary>Q. 외국어 자문도 가능한가요?</summary><div class="answer">네, 영어 자문을 기본 지원하며 중국어 및 일본어 자문은 별도 요금으로 제공됩니다.</div></details>
+                <details><summary>Q. 자문 회신은 얼마나 걸리나요?</summary><div class="answer">모든 자문은 영업일 기준 7일 이내 회신을 원칙으로 합니다.</div></details>
+                <a href="/pages/public/faq.html" class="btn-more-faq">자주 묻는 질문 전체보기 ></a>
+            </div>
+            <div class="cta-card">
+                <div class="cta-top-group">
+                    <div class="cta-text">
+                        <h3>우리 회사에 맞을지 고민된다면<br>상담부터 시작해보세요.</h3>
+                        <a href="tel:1533-6092" class="cta-phone">tel. 1533-6092</a>
+                    </div>
+                </div>
+                <div class="cta-bottom-group"><a href="javascript:void(0)" class="cta-btn" onclick="openMainModal()">도입 문의하기</a></div>
+                <div class="gradient-circle"></div> 
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="social-icons">
+                <a href="https://blog.naver.com/entrustlaw" target="_blank"><img src="/assets/img/naver-blog.png" alt="네이버 블로그"></a>
+                <a href="http://pf.kakao.com/_MxbdNn" target="_blank"><img src="/assets/img/icon_kakao.png" alt="카카오"></a>
+                <a href="https://www.instagram.com/hyunillaw_official?igsh=ZTN6MHM1NmU5NjR4" target="_blank"><img src="/assets/img/icon_insta.png" alt="인스타"></a>
+            </div>
+            <div class="footer-info">
+                <h2>법무그룹 현일 기업자문센터</h2>
+                <div class="info-row">대표변호사 : 신현정 <span>|</span> 주소 : 서울특별시 강남구 테헤란로 521 29층 suite 39-c <span>|</span> 대표번호 : 1533-6092</div>
+                <div class="info-row">사업자등록번호 : 211-51-06741 <span>|</span> 통신판매업신고번호 : 2025-서울강남-04334</div>
+            </div>
+            <div class="footer-links">
+                <a href="/pages/public/terms.html">이용약관</a> <span>|</span> <a href="/pages/public/privacy.html" class="bold">개인정보처리방침</a>
+            </div>
+            <p class="copyright">Copyright ⓒ 2025 법무그룹 현일 기업자문센터 All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="paymentModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">도입 상담 문의</div>
+                <div class="close-btn" onclick="closeModal()">✕</div>
+            </div>
+            <form class="modal-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label class="form-label">기업명 <span class="required">•</span></label>
+                    <input type="text" class="input-box" id="main_inq_company">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">연락처 <span class="required">•</span></label>
+                    <div class="phone-inputs">
+                        <input type="text" class="phone-box" id="main_inq_phone_1" maxlength="3">
+                        <span class="phone-dash">-</span>
+                        <input type="text" class="phone-box" id="main_inq_phone_2" maxlength="4">
+                        <span class="phone-dash">-</span>
+                        <input type="text" class="phone-box" id="main_inq_phone_3" maxlength="4">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">개인정보 수집 및 이용 동의 <span class="required">•</span></label>
+                    <div class="privacy-box">
+                        <strong>[개인정보 수집·이용 동의서]</strong><br><br>
+                        <strong>법무그룹 현일</strong> (이하 ‘회사’)는 「개인정보 보호법」 등 관련 법령에 따라, 도입 상담 및 안내를 위하여 신청자의 개인정보를 아래와 같이 수집·이용하고자 합니다.<br><br>
+                        1. <strong>수집·이용 목적:</strong> 기업자문 서비스 도입 상담, 견적 안내, 서비스 관련 정보 제공<br>
+                        2. <strong>수집 항목:</strong> 기업명, 휴대전화번호<br>
+                        3. <strong>보유 기간:</strong> 상담 완료 후 1년 간 보관 (이후 즉시 파기)<br><br>
+                        귀하는 개인정보 수집·이용에 동의하지 않을 권리가 있으나, 동의 거부 시 상담 및 안내 서비스 이용이 제한될 수 있습니다.
+                    </div>
+                    <label class="check-label" style="margin-top: 5px;">
+                        <input type="checkbox" id="main_inq_agree"> 개인정보 수집 및 이용에 동의합니다.
+                    </label>
+                </div>
+                <button type="button" class="modal-submit-btn" onclick="submitMainInquiry()">작성</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/channel-service.js"></script>
+
+    <script type="module">
+        import { auth, consultationInquiries } from "/js/api.js";
+
+        // 애니메이션 및 모달 관련
+        document.addEventListener("DOMContentLoaded", function() {
+            const targets = document.querySelectorAll('.section-title, .service-card, .features-title, .feature-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            targets.forEach(target => observer.observe(target));
+        });
+
+        window.openMainModal = function() { document.getElementById('paymentModal').style.display = 'block'; }
+        window.closeModal = function() { document.getElementById('paymentModal').style.display = 'none'; }
+        window.onclick = function(event) {
+            const modal = document.getElementById('paymentModal');
+            if (event.target == modal) modal.style.display = "none";
+        }
+
+        // 로그인 상태 체크
+        if (auth.isLoggedIn()) {
+            const user = auth.getCurrentUser();
+            const navBtn = document.getElementById('navLoginBtn');
+            const heroBtn = document.getElementById('heroStartBtn');
+            
+            if (user) {
+                if(navBtn) { navBtn.innerText = "대시보드"; navBtn.href = "/pages/user/dashboard.html"; navBtn.style.color = "#2c5bf2"; navBtn.style.fontWeight = "800"; }
+                if(heroBtn) { heroBtn.innerText = "대시보드 바로가기"; heroBtn.href = "/pages/user/dashboard.html"; }
+                
+                // 관리자면 admin.html로 (master는 최상위 권한)
+                const isAdmin = user.role === 'master' || user.role === 'admin' || user.role === 'general_manager' || user.role === 'lawyer';
+                if (isAdmin) {
+                    if(navBtn) navBtn.href = "/pages/admin/admin.html";
+                    if(heroBtn) heroBtn.href = "/pages/admin/admin.html";
+                }
+            }
+        } else {
+            const navBtn = document.getElementById('navLoginBtn');
+            const heroBtn = document.getElementById('heroStartBtn');
+            if(navBtn) { navBtn.innerText = "로그인"; navBtn.href = "/pages/public/login.html"; navBtn.style.color = ""; }
+            if(heroBtn) { heroBtn.innerText = "시작하기"; heroBtn.href = "/pages/public/login.html"; }
+        }
+
+        // 모달 도입 문의 제출
+        window.submitMainInquiry = async function() {
+            const company = document.getElementById('main_inq_company').value;
+            const p1 = document.getElementById('main_inq_phone_1').value;
+            const p2 = document.getElementById('main_inq_phone_2').value;
+            const p3 = document.getElementById('main_inq_phone_3').value;
+            const agree = document.getElementById('main_inq_agree').checked;
+
+            if (!company || !p1 || !p2 || !p3) { alert("기업명과 연락처를 입력해주세요."); return; }
+            if (!agree) { alert("개인정보 수집 이용에 동의해주세요."); return; }
+
+            const phone = `${p1}-${p2}-${p3}`;
+            const btn = document.querySelector('.modal-submit-btn');
+            btn.innerText = "전송 중...";
+            btn.disabled = true;
+
+            try {
+                // 상담 문의 API로 제출
+                await consultationInquiries.create({
+                    category: 'introduction',
+                    clientName: company,
+                    phone: phone,
+                    email: '',
+                    content: "메인 페이지 도입 문의 신청입니다."
+                });
+                
+                alert("문의가 접수되었습니다.\n담당자가 확인 후 연락드리겠습니다.");
+                closeModal();
+                location.reload();
+                
+            } catch(e) {
+                console.error(e); alert("전송 중 오류가 발생했습니다.");
+                btn.innerText = "작성"; btn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>

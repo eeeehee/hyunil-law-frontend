@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 자문 내역 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [기본 스타일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size: 15px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+
+        /* ▼▼▼ [사이드바 스타일 필수 포함] ▼▼▼ */
+        /* client_ui.js가 HTML을 가져오더라도, 스타일은 여기에 있어야 합니다 */
+        .sidebar { width: 260px; background-color: #fff; border-right: 1px solid #eee; padding: 40px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
+        .sidebar-logo { margin-bottom: 30px; padding-left: 10px; }
+        .sidebar-logo img { height: 32px; }
+        
+        .user-profile-area { background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #eee; }
+        .user-name { font-size: 16px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+        .user-email { font-size: 12px; color: #888; margin-bottom: 10px; word-break: break-all; }
+        .user-role { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+        .badge-owner { background: #1a1a2e; color: #fff; }
+        .badge-manager { background: #e6f7ff; color: #096dd9; }
+        .badge-staff { background: #f0f0f0; color: #555; }
+
+        .menu-list li { margin-bottom: 8px; }
+        .menu-link { display: block; padding: 14px 15px; border-radius: 8px; color: #555; font-weight: 500; transition: 0.2s; font-size: 15px; }
+        .menu-link:hover { background-color: #f0f0f0; color: #1a1a1a; }
+        .menu-link.active { background-color: #1a1a1a; color: #fff; font-weight: 700; }
+        .logout-btn { margin-top: auto; padding: 15px 20px; color: #999; font-size: 14px; cursor: pointer; }
+        /* ▲▲▲ [사이드바 스타일 끝] ▲▲▲ */
+
+        .main-content { flex: 1; margin-left: 260px; padding: 50px; max-width: 1600px; } 
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+
+        /* 사용량 박스 */
+        .usage-container { display: flex; gap: 15px; align-items: center; background: #fff; padding: 10px 20px; border-radius: 8px; border: 1px solid #eee; margin-right: 20px; }
+        .usage-box { display: flex; align-items: center; gap: 5px; font-size: 14px; }
+        .u-label { font-weight: 700; color: #555; }
+        .u-val { font-weight: 800; color: #2c5bf2; font-size: 16px; }
+        .u-max { color: #999; font-size: 12px; }
+
+        /* 버튼 */
+        .header-actions { display: flex; gap: 10px; }
+        .btn-write { background-color: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 14px; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-write:hover { background-color: #333; transform: translateY(-2px); }
+        .btn-phone { background-color: #fff; border: 1px solid #2c5bf2; color: #2c5bf2; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 14px; transition: 0.2s; }
+        .btn-phone:hover { background-color: #e3f2fd; }
+
+        /* 검색바 */
+        .search-bar { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .date-input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        .btn-search { padding: 8px 20px; background: #2c5bf2; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+        .btn-reset { padding: 8px 15px; background: #f5f5f5; color: #555; border: 1px solid #ddd; border-radius: 6px; font-weight: 600; cursor: pointer; }
+
+        /* 테이블 */
+        .board-table-container { background: #fff; border-radius: 12px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .board-table { width: 100%; border-collapse: collapse; }
+        .board-table th, .board-table td { padding: 18px 20px; text-align: left; border-bottom: 1px solid #f5f5f5; font-size: 15px; }
+        .board-table th { background-color: #fafafa; font-weight: 700; color: #555; border-bottom: 1px solid #eee; }
+        .board-table tr:hover { background-color: #f9f9f9; }
+        
+        .td-title { font-weight: 600; color: #333; cursor: pointer; }
+        .td-title:hover { text-decoration: underline; color: #2c5bf2; }
+
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; min-width: 60px; text-align: center; }
+        .status-waiting { background-color: #f0f0f0; color: #666; }
+        .status-progress { background-color: #e3f2fd; color: #1976d2; }
+        .status-done { background-color: #e8f5e9; color: #2e7d32; }
+
+        /* 페이지네이션 스타일 */
+        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding: 20px; }
+        .pagination-btn { padding: 8px 15px; border: 1px solid #ddd; background: #fff; color: #555; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
+        .pagination-btn:hover:not(:disabled) { background: #f5f5f5; border-color: #2c5bf2; color: #2c5bf2; }
+        .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .pagination-btn.active { background: #2c5bf2; color: #fff; border-color: #2c5bf2; }
+        .pagination-info { font-size: 14px; color: #666; font-weight: 600; }
+
+        @media (max-width: 900px) {
+            .main-content { margin-left: 0; padding: 20px; }
+            .header-actions { width: 100%; justify-content: space-between; margin-top: 10px; }
+            .search-bar { flex-direction: column; align-items: stretch; }
+            .sidebar { display: none; } /* 모바일에서 사이드바 숨김 처리 */
+        }
+    </style>
+</head>
+<body>
+
+    
+    <!-- Sidebar Skeleton (깜빡임 방지) -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <a href="/"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a>
+        </div>
+        <div class="user-profile-area">
+            <div class="user-name">로딩중...</div>
+            <div class="user-email">...</div>
+            <div class="user-role badge-staff">...</div>
+        </div>
+        <ul class="menu-list">
+            <li><a href="/pages/user/dashboard.html" class="menu-link">대시보드</a></li>
+            <li><a href="/pages/user/board_list.html" class="menu-link">나의 자문 내역</a></li>
+            <li><a href="/pages/user/payment.html" class="menu-link">결제/구독 관리</a></li>
+            <li><a href="/pages/user/member_info.html" class="menu-link">회원 정보 수정</a></li>
+            <li><a href="/pages/public/user_guide.html" class="menu-link">📘 이용 가이드 (FAQ)</a></li>
+        </ul>
+        <div class="logout-btn" id="logoutBtn">로그아웃</div>
+    </nav>
+
+<main class="main-content">
+        <div class="page-header">
+            <h2 class="page-title" id="pageTitleText">나의 자문 내역</h2>
+            
+            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div class="usage-container" id="usageContainer" style="display:none;">
+                    <div class="usage-box">
+                        <span class="u-label">📝 서면</span> 
+                        <span id="qaVal" class="u-val">0</span>
+                        <span id="qaMax" class="u-max">/ 0</span>
+                    </div>
+                    <div class="usage-box">
+                        <span class="u-label">📞 전화</span> 
+                        <span id="phVal" class="u-val">0</span>
+                        <span id="phMax" class="u-max">/ 0</span>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <a href="/pages/public/phone_consult.html" class="btn-phone">📞 전화상담 예약</a>
+                    <a href="/pages/user/board_write.html" class="btn-write">✏️ 자문 신청하기</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <select id="searchCategory" class="date-input" style="width:130px;">
+                <option value="">전체 분야</option>
+                <option value="contract">계약 검토</option>
+                <option value="labor">노무/인사</option>
+                <option value="debt">채권/미수금</option>
+                <option value="ip">지식재산권</option>
+                <option value="etc">기타 자문</option>
+            </select>
+
+            <div id="deptSearchWrapper" style="display:none; position:relative;">
+                <input list="deptList" id="searchDeptInput" class="date-input" style="width:160px;" placeholder="부서명 입력 또는 선택">
+                <datalist id="deptList"></datalist>
+            </div>
+
+            <span style="font-weight:600; font-size:14px; color:#555; margin-left:10px;">📅 기간:</span>
+            <input type="date" id="startDate" class="date-input">
+            <span style="color:#888;">~</span>
+            <input type="date" id="endDate" class="date-input">
+            
+            <button class="btn-search" onclick="window.triggerSearch()">검색</button>
+            <button class="btn-reset" onclick="window.resetSearch()">초기화</button>
+        </div>
+
+        <div class="board-table-container">
+            <table class="board-table">
+                <thead>
+                    <tr id="tableHeader">
+                        <th style="width: 12%;">상태</th>
+                        <th style="width: 15%;">분야</th>
+                        <th>제목</th>
+                        <th style="width: 15%;">담당자</th>
+                        <th style="width: 15%;">작성일</th>
+                    </tr>
+                </thead>
+                <tbody id="postListBody">
+                    <tr><td colspan="5" style="text-align:center; padding:50px; color:#999;">데이터를 불러오는 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div id="paginationContainer" class="pagination-container" style="display:none;">
+            <button class="pagination-btn" onclick="window.goToPage(1)" id="btnFirst">처음</button>
+            <button class="pagination-btn" onclick="window.goToPrevPage()" id="btnPrev">이전</button>
+            <span class="pagination-info" id="pageInfo">1 / 1</span>
+            <button class="pagination-btn" onclick="window.goToNextPage()" id="btnNext">다음</button>
+            <button class="pagination-btn" onclick="window.goToLastPage()" id="btnLast">마지막</button>
+        </div>
+    </main>
+
+    <script src="/js/channel-service.js"></script>
+
+    <script type="module">
+        import { auth, users, requireAuth, posts } from "/js/api.js";
+        import { renderClientSidebar } from "/js/client_ui.js";
+
+        const PLAN_SPECS = {
+            'none': { qa: 0, phone: 0, label: '미가입' },
+            'Basic': { qa: 1, phone: 0, label: '🌱 Basic' },
+            'Standard': { qa: 3, phone: 1, label: '⭐ Standard' },
+            'Pro': { qa: 5, phone: 2, label: '💎 Pro' },
+            'Premium': { qa: 8, phone: 5, label: '👑 Premium' },
+            'Enterprise': { qa: 999, phone: 999, label: '🏢 Enterprise' }
+        };
+
+        let gUserData = null;
+        let gAllPosts = []; // 전체 게시글 저장
+        let gCurrentPage = 1;
+        const ITEMS_PER_PAGE = 10;
+
+        (async () => {
+            if (!requireAuth()) return;
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                gUserData = userData;
+                renderClientSidebar('board_list', userData);
+
+                // 사용량 표시 (모든 사용자)
+                const usageContainer = document.getElementById('usageContainer');
+                if (usageContainer) {
+                    usageContainer.style.display = 'flex';
+
+                    const spec = PLAN_SPECS[userData.plan] || PLAN_SPECS['none'];
+                    const qaLimit = userData.plan === 'Enterprise' ? (userData.customQaLimit || 0) : spec.qa;
+                    const phoneLimit = userData.plan === 'Enterprise' ? (userData.customPhoneLimit || 0) : spec.phone;
+
+                    const qaUsed = userData.qaUsedCount || 0;
+                    const phoneUsed = userData.phoneUsedCount || 0;
+                    const qaRemaining = Math.max(0, qaLimit - qaUsed);
+                    const phoneRemaining = Math.max(0, phoneLimit - phoneUsed);
+
+                    document.getElementById('qaVal').textContent = qaRemaining;
+                    document.getElementById('qaMax').textContent = `/ ${qaLimit}`;
+                    document.getElementById('phVal').textContent = phoneRemaining;
+                    document.getElementById('phMax').textContent = `/ ${phoneLimit}`;
+                }
+
+                // owner일 경우 타이틀 변경 및 부서 검색 표시
+                if (userData.role === 'owner') {
+                    document.getElementById('pageTitleText').innerText = '우리 회사 자문 내역 (전체)';
+                    document.getElementById('deptSearchWrapper').style.display = 'block';
+
+                    // 테이블 헤더에 부서 컬럼 추가
+                    const tableHeader = document.getElementById('tableHeader');
+                    if (tableHeader) {
+                        const deptTh = document.createElement('th');
+                        deptTh.style.width = '12%';
+                        deptTh.textContent = '부서';
+                        tableHeader.insertBefore(deptTh, tableHeader.children[3]); // 담당자 앞에 삽입
+                    }
+                }
+
+                // 자문 목록 가져오기
+                const urlParams = new URLSearchParams(window.location.search);
+                const statusFilter = urlParams.get('status') || '';
+
+                const response = await posts.getAll({
+                    status: statusFilter,
+                    limit: 100
+                });
+
+                // 결제수단/요금제 변경 관련 게시글 제외
+                let postsData = (response.posts || []).filter(post => {
+                    return post.category !== 'payment_method' && post.category !== 'plan_change' && post.category !== 'extra_usage_quote';
+                });
+
+                // ✅ 부서 권한 필터: 일반 직원은 본인 부서 자문만 열람 가능
+                // - owner는 전체 열람 가능
+                // - 그 외(예: manager/staff/user 등)는 본인 department와 일치하는 건만 노출
+                if (userData.role !== 'owner') {
+                    const myDept = (userData.department || '').trim();
+                    // 부서가 '전사'면 전체 열람
+                    if (myDept && myDept !== '전사') {
+                        postsData = postsData.filter(p => ((p.userDepartment || '').trim() === myDept));
+                    }
+                }
+
+                gAllPosts = postsData;
+                gCurrentPage = 1;
+                renderPosts(postsData);
+
+                // owner일 경우 부서 목록 로드
+                if (userData.role === 'owner') {
+                    loadDepartments(postsData);
+                }
+
+            } catch (error) {
+                console.error('데이터 로드 에러:', error);
+                const tbody = document.getElementById('postListBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+                }
+            }
+        })();
+
+        // 게시글 렌더링 함수 (페이지네이션 적용)
+        function renderPosts(posts) {
+            const tbody = document.getElementById('postListBody');
+            if (!tbody) return;
+
+            const isOwner = gUserData && gUserData.role === 'owner';
+            const colspan = isOwner ? 6 : 5;
+
+            if (!posts || posts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding:40px; color:#999;">자문 내역이 없습니다.</td></tr>`;
+                document.getElementById('paginationContainer').style.display = 'none';
+                return;
+            }
+
+            // 페이지네이션 계산
+            const totalPages = Math.ceil(posts.length / ITEMS_PER_PAGE);
+            const startIndex = (gCurrentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const currentPagePosts = posts.slice(startIndex, endIndex);
+
+            // 10개 이상일 때만 페이지네이션 표시
+            const paginationContainer = document.getElementById('paginationContainer');
+            if (posts.length > 10) {
+                paginationContainer.style.display = 'flex';
+                updatePaginationUI(totalPages);
+            } else {
+                paginationContainer.style.display = 'none';
+            }
+
+            tbody.innerHTML = currentPagePosts.map(post => {
+                // 추가 질문 여부 확인
+                const hasFollowup = post.content && post.content.includes('[FOLLOWUP_SEPARATOR]');
+                const hasAnswer = post.answer && post.answer.trim();
+
+                // 상태 매핑 (데이터베이스 값 -> 표시)
+                let statusClass = 'status-done';
+                let statusText = '답변 완료';
+
+                // 추가 질문이 있고 아직 답변이 analyzing 상태면 "추가질문"으로 표시
+                if (hasFollowup && (post.status === 'analyzing' || post.status === 'processing')) {
+                    statusClass = 'status-progress';
+                    statusText = '추가질문';
+                } else if (post.status === 'pending' || post.status === 'waiting') {
+                    statusClass = 'status-waiting';
+                    statusText = '답변 대기중';
+                } else if (post.status === 'analyzing' || post.status === 'processing' || post.status === 'InProgress') {
+                    statusClass = 'status-progress';
+                    statusText = '검토중';
+                } else if (post.status === 'done' || post.status === 'completed' || post.status === 'Completed') {
+                    statusClass = 'status-done';
+                    statusText = '답변 완료';
+                }
+
+                // 담당자는 작성자의 담당자 이름 (고정)
+                const displayManager = post.userManagerName || '-';
+                const displayDept = post.userDepartment || '-';
+
+                // owner일 때는 부서 컬럼 추가
+                const deptCell = isOwner ? `<td>${displayDept}</td>` : '';
+
+                return `
+                    <tr onclick="location.href='/pages/user/board_view.html?id=${post.docId}'" style="cursor:pointer;">
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${post.category || '-'}</td>
+                        <td class="title-cell">${post.title || '(제목 없음)'}</td>
+                        ${deptCell}
+                        <td>${displayManager}</td>
+                        <td>${post.createdAt ? new Date(post.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 부서 목록 로드 (owner 전용)
+        function loadDepartments(posts) {
+            const deptSet = new Set();
+            posts.forEach(post => {
+                if (post.userDepartment && post.userDepartment.trim()) {
+                    deptSet.add(post.userDepartment.trim());
+                }
+            });
+
+            const datalist = document.getElementById('deptList');
+            if (datalist) {
+                datalist.innerHTML = Array.from(deptSet).sort().map(dept =>
+                    `<option value="${dept}">`
+                ).join('');
+            }
+        }
+
+        // 검색 기능
+        window.triggerSearch = async function() {
+            const category = document.getElementById('searchCategory').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const deptInput = document.getElementById('searchDeptInput');
+            const department = deptInput ? deptInput.value.trim() : '';
+
+            try {
+                const params = { limit: 100 };
+                if (category) params.category = category;
+                if (department) params.department = department;
+
+                const response = await posts.getAll(params);
+                let postsData = (response.posts || []).filter(post => {
+                    return post.category !== 'payment_method' && post.category !== 'plan_change' && post.category !== 'extra_usage_quote';
+                });
+
+                // ✅ 부서 권한 필터: 일반 직원은 본인 부서 자문만 열람 가능
+                if (gUserData && gUserData.role !== 'owner') {
+                    const myDept = (gUserData.department || '').trim();
+                    // 부서가 '전사'면 전체 열람
+                    if (myDept && myDept !== '전사') {
+                        postsData = postsData.filter(p => ((p.userDepartment || '').trim() === myDept));
+                    }
+                }
+
+
+                // 날짜 필터링 (프론트엔드)
+                if (startDate || endDate) {
+                    postsData = postsData.filter(post => {
+                        if (!post.createdAt) return false;
+                        const postDate = new Date(post.createdAt).toISOString().split('T')[0];
+                        if (startDate && postDate < startDate) return false;
+                        if (endDate && postDate > endDate) return false;
+                        return true;
+                    });
+                }
+
+                gAllPosts = postsData;
+                gCurrentPage = 1;
+                renderPosts(postsData);
+            } catch (error) {
+                console.error('검색 오류:', error);
+                alert('검색 중 오류가 발생했습니다.');
+            }
+        };
+
+        // 페이지네이션 UI 업데이트
+        function updatePaginationUI(totalPages) {
+            const pageInfo = document.getElementById('pageInfo');
+            const btnFirst = document.getElementById('btnFirst');
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            const btnLast = document.getElementById('btnLast');
+
+            pageInfo.textContent = `${gCurrentPage} / ${totalPages}`;
+
+            btnFirst.disabled = gCurrentPage === 1;
+            btnPrev.disabled = gCurrentPage === 1;
+            btnNext.disabled = gCurrentPage === totalPages;
+            btnLast.disabled = gCurrentPage === totalPages;
+        }
+
+        // 페이지 이동 함수들
+        window.goToPage = function(page) {
+            const totalPages = Math.ceil(gAllPosts.length / ITEMS_PER_PAGE);
+            if (page < 1 || page > totalPages) return;
+            gCurrentPage = page;
+            renderPosts(gAllPosts);
+        };
+
+        window.goToNextPage = function() {
+            const totalPages = Math.ceil(gAllPosts.length / ITEMS_PER_PAGE);
+            if (gCurrentPage < totalPages) {
+                gCurrentPage++;
+                renderPosts(gAllPosts);
+            }
+        };
+
+        window.goToPrevPage = function() {
+            if (gCurrentPage > 1) {
+                gCurrentPage--;
+                renderPosts(gAllPosts);
+            }
+        };
+
+        window.goToLastPage = function() {
+            const totalPages = Math.ceil(gAllPosts.length / ITEMS_PER_PAGE);
+            gCurrentPage = totalPages;
+            renderPosts(gAllPosts);
+        };
+
+        // 검색 초기화
+        window.resetSearch = function() {
+            document.getElementById('searchCategory').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            const deptInput = document.getElementById('searchDeptInput');
+            if (deptInput) deptInput.value = '';
+            window.location.reload();
+        };
+
+        // 로그아웃
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('로그아웃 에러:', error);
+            }
+        };
+    </script>
+</body>
+</html>

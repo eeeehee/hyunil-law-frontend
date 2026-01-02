@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>?„ì?Œì†¡ ê´€ë¦?- ë²•ë¬´ê·¸ë£¹ ?„ì¼</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [ê´€ë¦¬ì ê³µí†µ ?¤í??? */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+
+        /* ?¬ì´?œë°” ?¤í???(ê¸°ì¡´ê³??™ì¼) */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 50px; padding-left: 10px; color: #fff; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 15px; transition: 0.2s; margin-bottom: 5px; }
+        .menu-link:hover, .menu-link.active { background-color: #2c2c45; color: #fff; font-weight: 600; }
+
+        /* ë©”ì¸ ?ì—­ */
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+
+        /* ê²€???„í„° */
+        .filter-box { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        .search-input { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; flex: 1; outline: none; }
+        .btn-search { background: #2c5bf2; color: #fff; border: none; padding: 0 20px; height: 40px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+
+        /* ?Œì´ë¸??¤í???*/
+        .table-container { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .lit-table { width: 100%; border-collapse: collapse; min-width: 1200px; } /* ê°€ë¡??¤í¬ë¡??€??*/
+        .lit-table th, .lit-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+        .lit-table th { background-color: #f9f9f9; color: #555; font-weight: 700; position: sticky; top: 0; z-index: 10; }
+        .lit-table tr:hover { background-color: #f0f7ff; }
+
+        /* ?íƒœ ë±ƒì? */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .bg-sent { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; } /* ?„ì†¡??*/
+        .bg-wait { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; } /* ?€ê¸?FALSE */
+        .bg-done { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; } /* ?„ê²° */
+
+        .staff-tag { font-size: 11px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; margin-right: 4px; color: #555; }
+        
+        /* ëª¨ë‹¬ (?ì„¸ë³´ê¸°) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; background: #fff; padding: 30px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .info-grid { display: grid; grid-template-columns: 100px 1fr; gap: 15px 10px; font-size: 14px; }
+        .info-label { font-weight: 700; color: #666; }
+        .email-list { background: #f9f9f9; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 13px; color: #555; }
+        .btn-close { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; background: none; border: none; }
+
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li><a href="/pages/admin/admin.html" class="menu-link">?“ ?ë¬¸ ê´€ë¦?/a></li>
+        <li><a href="/pages/admin/admin_requests.html" class="menu-link">?“© ?”ì²­ ê´€ë¦¬í•¨</a></li>
+        <li><a href="/pages/admin/admin_litigation.html" class="menu-link active">?” ?„ì?Œì†¡ ê´€ë¦?/a></li>
+        <li><a href="/pages/admin/admin_members.html" class="menu-link">?‘¥ ?Œì›/ê¸°ì—… ê´€ë¦?/a></li>
+        <li><a href="/pages/admin/admin_report.html" class="menu-link">?“Š ë¦¬í¬??ë°œì†¡</a></li>
+        <li><a href="/pages/admin/admin_payments.html" class="menu-link">?’³ ë§¤ì¶œ/ê²°ì œ ê´€ë¦?/a></li>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?™ï¸ ?˜ê²½ ?¤ì •</a></li>
+        <li style="margin-top: 20px; border-top: 1px solid #2c2c45; padding-top: 20px;">
+            <a href="/index.html" class="menu-link">?  ë©”ì¸ ?ˆí˜?´ì?</a>
+        </li>
+    </ul>
+</nav>
+
+<main class="main-content">
+    <div class="page-header">
+        <h2 class="page-title">?„ì?Œì†¡ ?°ì´???•ì¸</h2>
+        <button class="btn-search" style="background:#333;" onclick="alert('?ˆë„???œë²„ ?¬ë¡¤???íƒœ: ?•ìƒ (ê°€??')">?–¥ï¸??¬ë¡¤???íƒœ ?•ì¸</button>
+    </div>
+
+    <div class="filter-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="?¬ê±´ë²ˆí˜¸, ?¹ì‚¬?ëª…, ?´ë‹¹?ë¡œ ê²€??.." onkeyup="filterTable()">
+        <button class="btn-search">ê²€??/button>
+    </div>
+
+    <div class="table-container">
+        <table class="lit-table">
+            <thead>
+                <tr>
+                    <th>?íƒœ (DB?„ì†¡)</th>
+                    <th>ë²•ì› / ?¬ê±´ë²ˆí˜¸</th>
+                    <th>?¬ê±´ëª?/th>
+                    <th>?¹ì‚¬??(?˜ë¢°??</th>
+                    <th>?´ë‹¹??(ì£?ë¶€)</th>
+                    <th>?°ë½ì²?/th>
+                    <th>ê´€ë¦?/th>
+                </tr>
+            </thead>
+            <tbody id="litigationListBody">
+                <tr><td colspan="7" style="text-align:center; padding:30px;">?°ì´?°ë? ë¶ˆëŸ¬?¤ëŠ” ì¤?..</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div id="detailModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="btn-close" onclick="closeModal()">??/button>
+        <div class="modal-header">?¬ê±´ ?ì„¸ ?•ë³´</div>
+        <div class="info-grid" id="modalDetailContent">
+            </div>
+        <div style="margin-top:20px; text-align:right;">
+            <button class="btn-search" onclick="alert('?Œë¦¼??ë°œì†¡ ê¸°ëŠ¥?€ ?°ë™ ?ˆì •?…ë‹ˆ??')">?”” ?Œë¦¼??ë°œì†¡</button>
+        </div>
+    </div>
+</div>
+
+    <script type="module">
+        import { auth, users, requireAuth, checkRole } from '/js/api.js';
+        import { renderAdminSidebar } from '/js/admin_ui.js';
+
+        const PAGE_MAP = {
+            'admin_litigation.html': 'litigation',
+            'admin_collection.html': 'collection',
+            'admin_pasan.html': 'pasan',
+            'admin_report.html': 'report',
+            'admin_payments.html': 'payments',
+            'admin_clients.html': 'clients'
+        };
+        
+        const currentPage = Object.keys(PAGE_MAP).find(p => location.pathname.includes(p));
+        const pageKey = PAGE_MAP[currentPage] || 'dashboard';
+
+        (async () => {
+            if (!requireAuth()) {
+                location.href = '/pages/public/login.html';
+                return;
+            }
+
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = '/pages/public/login.html';
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                
+                if (!checkRole(['master', 'admin', 'general_manager', 'lawyer'])) {
+                    alert('ê´€ë¦¬ì ê¶Œí•œ???„ìš”?©ë‹ˆ??');
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+
+                renderAdminSidebar(pageKey, userData);
+                console.log('?˜ì´ì§€ ë¡œë“œ:', pageKey, userData);
+
+            } catch (error) {
+                console.error('?˜ì´ì§€ ë¡œë“œ ?ëŸ¬:', error);
+            }
+        })();
+
+        window.handleLogout = async () => {
+            await auth.logout();
+            location.href = '/';
+        };
+    </script>
+</body>
+</html>

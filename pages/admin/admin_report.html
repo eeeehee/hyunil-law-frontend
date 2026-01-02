@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리포트 발송 관리 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [기본 스타일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, select, textarea { font-family: inherit; }
+
+        /* 사이드바 */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; letter-spacing: 1px; }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        /* 메인 컨텐츠 */
+        .main-content { flex: 1; margin-left: 260px; margin-right: 350px; padding: 40px; }
+        .page-header { margin-bottom: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+
+        /* 검색창 */
+        .search-box { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 10px; }
+        .search-input { flex: 1; height: 42px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; font-size: 14px; outline: none; }
+
+        /* 테이블 */
+        .section-box { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th, .admin-table td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .admin-table th { background-color: #f9f9f9; color: #555; font-weight: 600; }
+        .admin-table tr:hover { background-color: #fafafa; }
+        .btn-gen-rep { background-color: #2c5bf2; color: #fff; border: none; padding: 6px 14px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 12px; }
+
+        /* 우측 히스토리 패널 */
+        .right-panel {
+            width: 350px; background-color: #fff; border-left: 1px solid #eee;
+            position: fixed; right: 0; top: 0; height: 100vh; padding: 30px 20px;
+            z-index: 90; overflow-y: auto; box-shadow: -4px 0 20px rgba(0,0,0,0.02);
+        }
+        .rp-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- 사이드바 -->
+    <nav class="sidebar">
+        <div class="sidebar-brand">ADMINISTRATOR</div>
+        <ul class="sidebar-menu">
+            <li>
+                <div class="menu-category open active" onclick="toggleAdminMenu('groupCorp', this)">
+                    <div><span class="menu-icon">🏢</span> 기업자문센터</div>
+                    <span class="menu-arrow">▼</span>
+                </div>
+                <ul id="groupCorp" class="submenu" style="display:block;">
+                    <li><a href="admin.html">📝 자문 관리 (전체)</a></li>
+                    <li><a href="admin_requests.html">📩 요청 관리함</a></li>
+                    <li><a href="admin_report.html" class="active">📊 리포트 발송</a></li>
+                    <li><a href="admin_corpbilling.html">💸 자문료 청구/발송</a></li>
+                    <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
+                    <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
+                    <div><span class="menu-icon">⚖️</span> 전자소송/사건</div>
+                    <span class="menu-arrow">▼</span>
+                </div>
+                <ul id="groupLitigation" class="submenu">
+                    <li><a href="admin_litigation.html">🔎 전자소송 데이터 확인</a></li>
+                    <li><a href="admin_clients.html">📇 당사자(고객) 관리</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <div class="menu-category" onclick="toggleAdminMenu('groupSpecial', this)">
+                    <div><span class="menu-icon">📞</span> 파산/추심 센터</div>
+                    <span class="menu-arrow">▼</span>
+                </div>
+                <ul id="groupSpecial" class="submenu">
+                    <li><a href="admin_collection_consult.html">💰 채권 추심 상담</a></li>
+                    <li><a href="admin_collection.html">💰 채권 추심 사건</a></li>
+                    <li><a href="admin_pasan_consult.html">📉 파산/회생 상담</a></li>
+                    <li><a href="admin_pasan.html">📉 파산/회생 사건</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-divider"></li>
+
+            <li><a href="admin_settings.html" class="menu-link">⚙️ 환경 설정</a></li>
+            <li class="menu-divider"></li>
+            <li><a href="/" class="menu-link">🏢 기업자문 홈페이지</a></li>
+            <li><a href="../user/dashboard.html" class="menu-link" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
+        </ul>
+    </nav>
+
+    <script>
+        function toggleAdminMenu(id, header) {
+            const submenu = document.getElementById(id);
+            if(!submenu) return;
+            if (submenu.style.display === "block") {
+                submenu.style.display = "none";
+                header.classList.remove("open");
+                header.classList.remove("active");
+            } else {
+                submenu.style.display = "block";
+                header.classList.add("open");
+                header.classList.add("active");
+            }
+        }
+    </script>
+
+<main class="main-content">
+    <h2 class="page-title">📊 리포트 발송 관리 (기업별)</h2>
+    <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="기업명, 대표자명 검색.." onkeyup="filterCompanies()">
+    </div>
+    <div class="section-box">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>기업명 (사업자번호)</th>
+                    <th>대표자</th>
+                    <th>직원 수</th>
+                    <th>리포트 생성</th>
+                </tr>
+            </thead>
+            <tbody id="companyListBody">
+                <tr><td colspan="4" style="text-align:center; padding:30px;">로딩 중...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<aside class="right-panel">
+    <div class="rp-title">📜 최근 발송 이력 (History)</div>
+    <div id="historyList">
+        <div style="text-align:center; color:#999; padding:20px;">이력을 불러오는 중...</div>
+    </div>
+</aside>
+
+    <script type="module">
+        import { auth, users, admin, reports } from '/js/api.js';
+
+        // 권한 확인 및 초기화
+        (async () => {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                location.href = '../public/login.html';
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                console.log('🔍 [리포트 발송] 사용자 정보:', userData);
+
+                const adminRoles = ['master', 'admin', 'general_manager', 'lawyer'];
+                if (!adminRoles.includes(userData.role)) {
+                    alert('관리자 권한이 없습니다. 현재 권한: ' + userData.role);
+                    location.href = '../user/dashboard.html';
+                    return;
+                }
+
+                await loadCompanies();
+                await loadReportHistory();
+
+            } catch (error) {
+                console.error('권한 확인 에러:', error);
+                alert('로그인 정보를 확인할 수 없습니다.');
+                location.href = '../public/login.html';
+            }
+        })();
+
+        // 회사 목록 로드
+        async function loadCompanies() {
+            try {
+                const result = await admin.getCompanies();
+                const companies = result.companies || [];
+
+                const tbody = document.getElementById('companyListBody');
+
+                if (companies.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#999;">등록된 기업이 없습니다.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = companies.map(company => `
+                    <tr>
+                        <td>
+                            <strong>${company.companyName || '알 수 없음'}</strong><br>
+                            <span style="font-size:12px; color:#888;">${company.bizNum || '-'}</span>
+                        </td>
+                        <td>${company.managerName || '-'}</td>
+                        <td>${company.employeeCount || 0}명</td>
+                        <td>
+                            <button class="btn-gen-rep" onclick="openReportModal('${company.uid}', '${company.companyName}')">
+                                리포트 생성
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                console.error('회사 목록 로드 실패:', error);
+                let errorMsg = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#ff4d4f;">';
+                errorMsg += '<h3 style="margin-bottom:10px;">⚠️ 데이터 로드 실패</h3>';
+
+                if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+                    errorMsg += '<p>❌ 백엔드 서버에 연결할 수 없습니다.</p>';
+                    errorMsg += '<p style="font-size:12px; color:#666; margin-top:10px;">서버가 실행 중인지 확인하세요: http://localhost:3000</p>';
+                } else {
+                    errorMsg += '<p>' + error.message + '</p>';
+                }
+
+                errorMsg += '</td></tr>';
+                document.getElementById('companyListBody').innerHTML = errorMsg;
+            }
+        }
+
+        // 리포트 발송 이력 로드
+        async function loadReportHistory() {
+            try {
+                const result = await reports.getAll({ limit: 10 });
+                const reportsList = result.reports || [];
+
+                const historyContainer = document.getElementById('historyList');
+
+                if (reportsList.length === 0) {
+                    historyContainer.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">발송 이력이 없습니다.</div>';
+                    return;
+                }
+
+                historyContainer.innerHTML = reportsList.map(report => {
+                    const date = report.createdAt ? new Date(report.createdAt).toLocaleDateString('ko-KR') : '-';
+                    return `
+                        <div style="padding:15px; border-bottom:1px solid #f0f0f0;">
+                            <div style="font-weight:700; color:#333; margin-bottom:4px; font-size:14px;">
+                                ${report.companyName || '알 수 없음'}
+                            </div>
+                            <div style="font-size:12px; color:#888;">
+                                ${date} | ${report.reportType || '월간 리포트'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('이력 로드 실패:', error);
+                document.getElementById('historyList').innerHTML =
+                    '<div style="text-align:center; color:#999; padding:20px;">이력 로드 실패</div>';
+            }
+        }
+
+        // 검색 필터
+        window.filterCompanies = function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#companyListBody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        // 리포트 모달 열기 (추후 구현)
+        window.openReportModal = function(uid, companyName) {
+            alert(`${companyName}의 리포트 생성 기능은 추후 구현 예정입니다.`);
+        }
+    </script>
+</body>
+</html>

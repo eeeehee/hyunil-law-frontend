@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비용 �?�� ?�터 - 법무그룹 ?�일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size: 14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, select, textarea { font-family: inherit; }
+
+        /* ?�이?�바 */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        /* 메인 컨텐�?*/
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; max-width: 1400px; } /* max-width ?�림 */
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        .page-title span { font-size: 14px; color: #d32f2f; background: #ffebee; padding: 4px 10px; border-radius: 20px; border: 1px solid #ffcdd2; }
+
+        /* ?�이?�웃 (Grid) */
+        .billing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+        
+        /* ?�션 박스 */
+        .section-box { background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .box-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        
+        /* 검???�역 */
+        .search-wrap { display: flex; gap: 10px; position: relative; }
+        .search-input { flex: 1; height: 46px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; font-size: 15px; }
+        .search-results { position: absolute; top: 50px; left: 0; width: 100%; background: #fff; border: 1px solid #ddd; border-radius: 6px; max-height: 200px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .search-item { padding: 12px 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .search-item:hover { background-color: #f0f7ff; }
+        .s-name { font-weight: 700; color: #333; }
+        .s-info { font-size: 12px; color: #888; }
+
+        /* ?�택???�보 카드 */
+        .recipient-card { background-color: #fff1f0; border: 1px solid #ffa39e; padding: 20px; border-radius: 8px; display: none; margin-bottom: 30px; position: relative; }
+        .rc-row { display: flex; gap: 30px; margin-bottom: 8px; font-size: 14px; align-items: center; }
+        .rc-label { font-weight: 700; color: #cf1322; width: 80px; flex-shrink: 0; }
+        .btn-reset { position: absolute; top: 20px; right: 20px; background: #fff; border: 1px solid #ff4d4f; color: #ff4d4f; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600; }
+        
+        .email-edit-input { width: 100%; border: 1px solid #ffccc7; background: #fff; padding: 5px 10px; border-radius: 4px; font-size: 13px; color: #333; }
+        .email-edit-input:focus { outline: none; border-color: #ff4d4f; }
+
+        /* ?�성 ??*/
+        .form-label { display: block; font-weight: 700; margin-bottom: 8px; color: #333; font-size: 14px; margin-top: 15px; }
+        .form-select { width: 100%; height: 46px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; font-size: 15px; margin-bottom: 5px; outline: none; }
+        .form-textarea { width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 6px; padding: 15px; font-size: 15px; resize: none; margin-bottom: 5px; outline: none; }
+        
+        .btn-send { width: 100%; height: 50px; background-color: #d32f2f; color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; margin-top: 20px; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3); }
+        .btn-send:hover { background-color: #b71c1c; }
+        .btn-send:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        /* ?�스?�리 ?�이�?*/
+        .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .history-table th { background: #f9f9f9; padding: 12px; border-bottom: 1px solid #eee; text-align: left; color: #555; position: sticky; top: 0; }
+        .history-table td { padding: 12px; border-bottom: 1px solid #eee; color: #333; vertical-align: top; }
+        .badge-type { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-block; margin-bottom: 4px; }
+        .type-FEE { background: #e3f2fd; color: #1565c0; } 
+        .type-EXPENSE { background: #fff3e0; color: #ef6c00; } 
+        .type-REMINDER { background: #ffebee; color: #c62828; } 
+        .type-RECEIPT { background: #e8f5e9; color: #2e7d32; } 
+
+        .btn-resend { background: #fff; border: 1px solid #2c5bf2; color: #2c5bf2; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 700; transition: 0.2s; margin-top: 5px; }
+        .btn-resend:hover { background-color: #e6f7ff; }
+
+        /* 로딩 ?�버?�이 */
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; color: #fff; font-size: 20px; font-weight: 700; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+        
+        @media (max-width: 1200px) { .billing-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">?��</span> 기업?�문?�터</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupCorp" class="submenu">
+                <li><a href="/pages/admin/admin.html">?�� ?�문 관�?/a></li>
+                <li><a href="/pages/admin/admin_requests.html">?�� ?�청 관리함</a></li>
+                <li><a href="/pages/admin/admin_report.html">?�� 리포??발송</a></li>
+                <li><a href="/pages/admin/admin_members.html">?�� ?�원/기업 관�?/a></li>
+                <li><a href="/pages/admin/admin_payments.html">?�� 매출/결제 관�?/a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="menu-category open active" onclick="toggleAdminMenu('groupLitigation', this)">
+                <div><span class="menu-icon">?�️</span> ?�자?�송/?�건</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupLitigation" class="submenu" style="display:block;">
+                <li><a href="/pages/admin/admin_litigation.html">?�� ?�자?�송 관�?/a></li>
+                <li><a href="/pages/admin/admin_clients.html">?�� ?�사??고객) 관�?/a></li>
+                <li><a href="/pages/admin/admin_submit.html">?�� 문서 ?�출/발송</a></li>
+                <li><a href="/pages/admin/admin_billing.html" class="active" style="color:#d32f2f; font-weight:700;">?�� 비용/�?�� 관�?/a></li>
+            </ul>
+        </li>
+        <li class="menu-divider"></li>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
+        <li class="menu-divider"></li>
+        <li><a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return; 
+        if (submenu.style.display === "block") { submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active"); } 
+        else { submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active"); }
+    }
+</script>
+
+<main class="main-content">
+    <h2 class="page-title">?�� 비용 �?�?��??발송 ?�터 <span>PDF ?�동?�성</span></h2>
+
+    <div class="billing-grid">
+        <div class="left-panel">
+            <div class="section-box">
+                <div class="box-title" style="color:#d32f2f; border-color:#d32f2f;">1. �?�� ?�???�건) ?�택</div>
+                <div class="search-wrap">
+                    <input type="text" id="searchInput" class="search-input" placeholder="?�건번호, 고객�? ?�당?�로 검??.." onkeyup="searchCase()">
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </div>
+
+            <div id="recipientCard" class="recipient-card">
+                <button class="btn-reset" onclick="resetSelection()">?�시 ?�택</button>
+                <div class="rc-row"><span class="rc-label">�?��?�건</span><span id="sel_case" style="font-weight:bold;"></span></div>
+                <div class="rc-row"><span class="rc-label">고객�?/span><span id="sel_name"></span></div>
+                <div class="rc-row"><span class="rc-label">?�락�?/span><span id="sel_phone"></span></div>
+                <div class="rc-row" style="align-items:flex-start;">
+                    <span class="rc-label" style="margin-top:6px;">?�메??/span>
+                    <div style="flex:1;">
+                        <input type="text" id="sel_email_input" class="email-edit-input" placeholder="?�메???�력 (?�표�?구분?�여 ?�러 �??�력 가??">
+                        <div style="font-size:11px; color:#666; margin-top:4px;">??�?��???�메?�을 변경하�??�동?�로 ?�?�되???�음 발송 ?�에???��??�니??</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="billingForm" class="section-box" style="display:none;">
+                <div class="box-title">2. �?��???�성</div>
+                
+                <label class="form-label">발신 ?�터 (발신번호)</label>
+                <select id="billSenderPhone" class="form-select">
+                    <option value="15336935">?�� 기업?�문?�터 (1533-6935)</option>
+                    <option value="15336092">?�️ ?�송/?�생?�터 (1533-6092)</option>
+                    <option value="15336935">?�� ?�일?�무?�터 (1533-6935)</option>
+                </select>
+
+                <label class="form-label">�?�� ?�형</label>
+                <select id="billType" class="form-select">
+                    <option value="FEE">?�� ?�임�?�?�� (최초)</option>
+                    <option value="EXPENSE">?�� ?�비 �?�� (최초)</option>
+                    <option value="REMINDER">?�� ?�촉 (?�발??</option>
+                    <option value="RECEIPT">???�수�?발송</option>
+                </select>
+
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label class="form-label">�?�� 금액 (??</label>
+                        <input type="text" id="billCost" class="search-input" placeholder="?�자�??�력" onkeyup="formatCurrency(this)">
+                    </div>
+                    <div style="flex:1;">
+                        <label class="form-label">?��? 기한 / ?�인 ?�자</label>
+                        <input type="date" id="billDate" class="search-input">
+                    </div>
+                </div>
+
+                <label class="form-label" style="margin-top:15px;">비고 (?�세 ?�역)</label>
+                <textarea id="billNote" class="form-textarea" placeholder="?? ?��??�, ?�달�? 부가???�함 ??></textarea>
+
+                <button class="btn-send" onclick="sendBilling()">?�� �?��???�성 �?발송?�기</button>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div id="historySection" class="section-box" style="height: 100%; min-height: 500px; display:none;">
+                <div class="box-title">3. 발송 ?�력 (History)</div>
+                <div style="height: 600px; overflow-y: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th style="width:25%">발송?�시</th>
+                                <th>?�용</th>
+                                <th style="width:20%">관�?/th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr><td colspan="3" style="text-align:center; padding:50px; color:#999;">?�건???�택?�면 ?�력???�시?�니??</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div>??PDF ?�성 �?발송 �?..</div>
+    <div style="font-size:14px; margin-top:10px; font-weight:400;">(??3~5�??�도 ?�요?�니??</div>
+</div>
+
+<script type="module">
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+        
+        (async () => {
+            if (!requireAuth()) return;
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                
+                if (!checkRole(['master', 'admin', 'general_manager'])) {
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+                console.log('Billing page loaded');
+            } catch (error) {
+                console.error('?�이지 로드 ?�러:', error);
+                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
+            }
+        })();
+        
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('로그?�웃 ?�러:', error);
+            }
+        };
+    </script>
+
+</body>
+</html>

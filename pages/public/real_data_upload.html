@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>스마트 데이터 업로더 (자동 분석)</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background: #f0f2f5; padding: 40px; display: flex; justify-content: center; }
+        .container { width: 900px; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #1a1a2e; border-bottom: 2px solid #333; padding-bottom: 15px; }
+        
+        .guide-box { background: #e6f7ff; border: 1px solid #91d5ff; padding: 20px; border-radius: 6px; color: #0050b3; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        .guide-title { font-weight: 800; font-size: 15px; margin-bottom: 5px; display: block; }
+        
+        textarea { width: 100%; height: 250px; padding: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; font-family: "Pretendard", monospace; line-height: 1.6; resize: vertical; }
+        textarea:focus { border-color: #2c5bf2; outline: none; background-color: #f9fbfd; }
+        /* placeholder 색상 지정 */
+        textarea::placeholder { color: #aaa; font-weight: 400; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 15px; }
+        button { flex: 1; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; border: none; transition: 0.2s; }
+        
+        .btn-preview { background: #555; color: white; }
+        .btn-preview:hover { background: #333; }
+        
+        .btn-upload { background: #2c5bf2; color: white; display: none; }
+        .btn-upload:hover { background: #1b42c4; }
+
+        /* 미리보기 테이블 */
+        .preview-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        .preview-table th { background: #f1f3f5; padding: 10px; border: 1px solid #ddd; text-align: left; }
+        .preview-table td { padding: 10px; border: 1px solid #ddd; vertical-align: top; }
+        
+        .tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: white; display: inline-block; margin-right: 4px; }
+        .tag-pasan { background-color: #722ed1; }
+        .tag-coll { background-color: #cf1322; }
+        .tag-gen { background-color: #1a1a2e; }
+
+        .log-area { margin-top: 20px; background: #222; color: #0f0; padding: 15px; border-radius: 6px; height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🧠 스마트 데이터 업로더 (줄글 자동 분석)</h2>
+    
+    <div class="guide-box">
+        <span class="guide-title">📢 사용 가이드</span>
+        카카오톡, 문자, 이메일 내용을 <strong>그대로 복사해서</strong> 아래 칸에 붙여넣으세요.<br>
+        형식이 달라도 인공지능이 핵심 정보(사건번호, 이름, 연락처)를 자동으로 찾아냅니다.<br><br>
+        <strong>✅ 필수 포함 정보:</strong> 사건번호 (예: 2025개회...)<br>
+        <strong>☑️ 선택 포함 정보:</strong> 고객명, 연락처, 법원명
+    </div>
+
+    <textarea id="pasteArea" placeholder="[예시 1] 깔끔한 데이터
+홍길동 010-1234-5678 2025개회12345 서울회생법원
+
+[예시 2] 카톡 내용 복사
+문의드립니다. 채무자 이몽룡씨 사건이구요.
+사건번호는 2025타채9999 입니다. (수원지법)
+연락처는 010-9876-5432 로 주세요.
+
+[예시 3] 엑셀에서 긁어온 것
+서울중앙 2024가단5050 김철수"></textarea>
+
+    <div class="btn-group">
+        <button class="btn-preview" onclick="analyzeText()">1단계: 텍스트 분석 미리보기</button>
+        <button class="btn-upload" id="uploadBtn" onclick="startUpload()">2단계: DB 업로드 시작</button>
+    </div>
+
+    <div id="logArea" class="log-area"></div>
+    <div id="previewResult"></div>
+</div>
+
+<script type="module">
+        import { auth, requireAuth } from '/js/api.js';
+        
+        if (!requireAuth()) {
+            // 로그인 필요한 페이지
+        }
+        
+        window.uploadData = async function() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput?.files[0]) {
+                alert('파일을 선택해주세요.');
+                return;
+            }
+            
+            alert('파일 업로드 기능은 서버에서 구현이 필요합니다.');
+        };
+    </script>
+
+</body>
+</html>

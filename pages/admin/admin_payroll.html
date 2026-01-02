@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>급여/비용 �??�차 관�?- 법무그룹 ?�일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [기본 ?��??? */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, select { font-family: inherit; }
+
+        /* ?�이?�바 */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; letter-spacing: 1px; }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        /* 메인 컨텐�?*/
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; display: flex; align-items: center; gap: 10px; }
+        .page-badge { background: #ff4d4f; color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 20px; }
+
+        /* ??*/
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; border-radius: 8px; background: #fff; border: 1px solid #ddd; cursor: pointer; font-weight: 700; color: #555; transition: 0.2s; }
+        .tab-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+        .tab-btn:hover:not(.active) { background: #f0f0f0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ?�션 박스 */
+        .section-box { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        .box-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .box-title { font-size: 16px; font-weight: 700; }
+
+        /* ?�이�?*/
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th, .admin-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .admin-table th { background-color: #f9f9f9; color: #555; font-weight: 600; }
+        .admin-table tr:hover { background-color: #fafafa; }
+
+        /* ???�소 */
+        .input-row { display: flex; gap: 10px; padding: 20px; background: #f9f9f9; align-items: flex-end; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 150px; }
+        .form-label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 12px; color:#555; }
+        .input-box { width: 100%; height: 38px; border: 1px solid #ddd; border-radius: 6px; padding: 0 10px; }
+        .btn-save { height: 38px; padding: 0 20px; background: #1a1a2e; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+        .btn-setting { height: 32px; padding: 0 15px; background: #fff; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; color: #555; }
+        .btn-setting:hover { background: #f0f0f0; }
+        
+        .btn-bonus { background: #722ed1; color: #fff; border: none; border-radius: 6px; padding: 0 15px; height: 38px; font-weight: 700; cursor: pointer; }
+        .btn-bonus:hover { background: #531dab; }
+
+        /* 계산 결과 카드 */
+        .calc-result { padding: 20px; background: #f0f5ff; border-top: 1px solid #d6e4ff; display: flex; gap: 20px; font-size: 13px; }
+        .cr-item { flex: 1; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+        .cr-label { color: #888; font-weight: 600; margin-bottom: 5px; font-size: 11px; }
+        .cr-val { font-size: 16px; font-weight: 800; color: #333; }
+        .text-blue { color: #2c5bf2; }
+        .text-red { color: #ff4d4f; }
+        .text-green { color: #52c41a; }
+        .text-orange { color: #fa8c16; }
+
+        /* 카테고리 뱃�? */
+        .cat-badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .cat-salary { background: #e6f7ff; color: #096dd9; }
+        .cat-welfare { background: #f6ffed; color: #389e0d; }
+        .cat-rent { background: #fff7e6; color: #d46b08; }
+        .cat-etc { background: #f5f5f5; color: #666; }
+
+        /* 모달 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background-color: #fff; padding: 25px; border-radius: 12px; }
+        .close-btn { float: right; font-size: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">?��</span> 기업?�문?�터</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupCorp" class="submenu">
+                <li><a href="/pages/admin/admin.html">?�� ?�문 관�?/a></li>
+                <li><a href="/pages/admin/admin_requests.html">?�� ?�청 관리함</a></li>
+                <li><a href="/pages/admin/admin_report.html">?�� 리포??발송</a></li>
+                <li><a href="/pages/admin/admin_corpbilling.html">?�� ?�문�?�?��/발송</a></li>
+                <li><a href="/pages/admin/admin_members.html">?�� ?�원/기업 관�?/a></li>
+                <li><a href="/pages/admin/admin_payments.html">?�� 매출/CMS 관�?/a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
+                <div><span class="menu-icon">?�️</span> ?�자?�송/?�건</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupLitigation" class="submenu">
+                <li><a href="/pages/admin/admin_litigation.html">?�� ?�자?�송 관�?/a></li>
+                <li><a href="/pages/admin/admin_billing.html">?�� 비용/�?�� 관�?/a></li>
+            </ul>
+        </li>
+        
+        <div style="margin: 20px 0; border-top: 1px solid #2c2c45;"></div>
+        
+        <li class="menu-category open active" style="background:#2c2c45;">
+            <div style="color:#fff;"><span class="menu-icon">?��</span> 경영/?�무 ?�합</div>
+        </li>
+        <ul class="submenu" style="display:block;">
+            <li><a href="/pages/admin/admin_finance.html" style="color:#aaa;">?�� ?�합 매출/지�?리포??/a></li>
+            <li><a href="/pages/admin/admin_payroll.html" class="active" style="color:#fff; font-weight:700;">?�� 급여 �?비용 관�?/a></li>
+        </ul>
+        
+        <div style="margin: 20px 0; border-top: 1px solid #2c2c45;"></div>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
+        <li><a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return; 
+        if (submenu.style.display === "block") { submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active"); } 
+        else { submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active"); }
+    }
+</script>
+
+<main class="main-content">
+    <div class="page-header">
+        <h2 class="page-title">급여 �?비용 관�?<span class="page-badge">Expenditure</span></h2>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('salary')">?�� 급여 ?�??(Payroll)</button>
+        <button class="tab-btn" onclick="switchTab('welfare')">??복리?�생/?�영�?/button>
+        <button class="tab-btn" onclick="switchTab('leave')">?���??�차 �??��? 관�?/button>
+    </div>
+
+    <div id="tabSalary" class="tab-content active">
+        <div class="section-box">
+            <div class="box-header">
+                <span class="box-title">??급여 ?�역 ?�록 (?�동계산)</span>
+                <button class="btn-setting" onclick="openRateModal()">?�️ 4?�보험/?�율 ?�정</button>
+            </div>
+            
+            <div class="input-row">
+                <div class="form-group" style="flex:0 0 120px;">
+                    <label class="form-label">귀???�월</label>
+                    <input type="month" id="salMonth" class="input-box">
+                </div>
+                <div class="form-group" style="flex:0 0 150px;">
+                    <label class="form-label">직원 ?�택</label>
+                    <select id="salStaff" class="input-box"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">기본�?(?�전)</label>
+                    <input type="text" id="salBasic" class="input-box" placeholder="?��??�함" oninput="formatCurrency(this); calcTax();">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">?�여/?�센?�브</label>
+                    <input type="text" id="salBonus" class="input-box" placeholder="?�과�? oninput="formatCurrency(this); calcTax();">
+                </div>
+                <div class="form-group" style="flex:0 0 100px;">
+                    <label class="form-label">부?��?족수</label>
+                    <input type="number" id="salDependents" class="input-box" value="1" min="1" onchange="calcTax()">
+                </div>
+                <div class="form-group">
+                    <button class="btn-save" onclick="saveSalary()">급여 ?�???�??/button>
+                </div>
+            </div>
+
+            <div class="calc-result" id="calcPreview">
+                <div class="cr-item"><div class="cr-label">지�?총액 (?�전)</div><div class="cr-val text-blue" id="dispTotal">0??/div></div>
+                <div class="cr-item"><div class="cr-label">4?�보험 (근로?�분)</div><div class="cr-val text-red" id="dispInsurance">0??/div></div>
+                <div class="cr-item"><div class="cr-label">?�득??지방세 (추정)</div><div class="cr-val text-red" id="dispTax">0??/div></div>
+                <div class="cr-item" style="border:1px solid #52c41a; background:#f6ffed;"><div class="cr-label" style="color:#52c41a;">?????�령??(?�금??</div><div class="cr-val text-green" id="dispNet">0??/div></div>
+                <div class="cr-item" style="background:#fff7e6; border:1px solid #ffd591;"><div class="cr-label">?�� ?�사 ?�제 부?�금</div><div class="cr-val text-orange" id="dispCompanyCost">0??/div></div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="box-header"><span class="box-title">?�� 최근 급여 지�??�역</span></div>
+            <table class="admin-table">
+                <thead><tr><th>귀?�월</th><th>?�름</th><th>지급총???�전)</th><th>공제?�계</th><th>?�수?�액</th><th>?�사부?�금</th><th>관�?/th></tr></thead>
+                <tbody id="salaryListBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tabWelfare" class="tab-content">
+        <div class="section-box">
+            <div class="box-header"><span class="box-title">??지�??�역 ?�록 (법인카드/?�금)</span></div>
+            <div class="input-row">
+                <div class="form-group">
+                    <label class="form-label">?�용 ?�자</label>
+                    <input type="date" id="expDate" class="input-box">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">지�?구분</label>
+                    <select id="expCategory" class="input-box">
+                        <option value="welfare">??복리?�생 (?��?/간식)</option>
+                        <option value="travel">?�� ?�비교통�?/option>
+                        <option value="supplies">?�� ?�모?�비</option>
+                        <option value="rent">?�� ?�차�?관리비</option>
+                        <option value="tax">?�� 공과�??�금</option>
+                        <option value="etc">?�� 기�? ?�비</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:2;">
+                    <label class="form-label">?�용 (?�요)</label>
+                    <input type="text" id="expDesc" class="input-box" placeholder="?? ?�근 ?��?, ?�무?�품 구입">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">금액</label>
+                    <input type="text" id="expAmount" class="input-box" oninput="formatCurrency(this)">
+                </div>
+                <button class="btn-save" onclick="saveExpense()">?�록</button>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="box-header"><span class="box-title">?�� 지�??�역</span></div>
+            <table class="admin-table">
+                <thead><tr><th>?�자</th><th>구분</th><th>?�용</th><th>금액</th><th>관�?/th></tr></thead>
+                <tbody id="expenseListBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tabLeave" class="tab-content">
+        <div class="section-box">
+            <div class="box-header">
+                <span class="box-title">?���??�차 부??�??�황 관�?/span>
+                <span style="font-size:12px; color:#888;">* 직원???�택?�여 ?�차�?부?�하거나 차감?????�습?�다.</span>
+            </div>
+            
+            <div class="input-row" style="background:#fff; border-bottom:1px solid #eee;">
+                <div class="form-group">
+                    <label class="form-label">?�??직원 ?�택</label>
+                    <select id="leaveStaffSelect" class="input-box" onchange="loadUserLeaveInfo()"></select>
+                </div>
+                <div class="form-group" style="flex:2; display:flex; align-items:center; gap:20px;">
+                    <div>
+                        <div style="font-size:11px; color:#888;">?�재 �??�차</div>
+                        <div style="font-size:20px; font-weight:bold; color:#2c5bf2;" id="currentTotalLeave">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px; color:#888;">?�용 ?�차</div>
+                        <div style="font-size:20px; font-weight:bold; color:#ff4d4f;" id="currentUsedLeave">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px; color:#888;">?�여 ?�차</div>
+                        <div style="font-size:20px; font-weight:bold; color:#52c41a;" id="currentRemainLeave">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-row" style="background:#f9f9f9; margin-top:0;">
+                <div class="form-group">
+                    <label class="form-label">?�별 ?��? 부??/label>
+                    <button class="btn-bonus" onclick="grantSpecialLeave(5, '6개월 ?�면근�??�상')">?�� [6개월 ?�면근?? 5??부??/button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">?�동 조정 (?�수)</label>
+                    <input type="number" id="manualLeaveDays" class="input-box" placeholder="?? 1 ?�는 -1">
+                </div>
+                <div class="form-group" style="flex:2;">
+                    <label class="form-label">조정 ?�유</label>
+                    <input type="text" id="manualLeaveReason" class="input-box" placeholder="?? ?�름?��? 추�? 부?? ?�기???�정">
+                </div>
+                <div class="form-group">
+                    <button class="btn-save" style="background:#555;" onclick="manualUpdateLeave()">?�동 ?�용</button>
+                </div>
+            </div>
+            
+            <div style="padding:20px;">
+                <h4 style="margin-bottom:10px;">?�� ?�차 변???�력</h4>
+                <table class="admin-table">
+                    <thead><tr><th>?�시</th><th>?�용</th><th>변?�일??/th><th>?�업??/th></tr></thead>
+                    <tbody id="leaveHistoryBody"><tr><td colspan="4" style="text-align:center; color:#999;">직원???�택?�세??</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<div id="rateModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('rateModal')">??/span>
+        <h3 style="margin-bottom:20px;">?�️ 4?�보험 �??�율 ?�정</h3>
+        <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:1;"><label class="form-label">�???�금 (%)</label><input type="number" id="ratePension" class="input-box" step="0.01"></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">건강보험 (%)</label><input type="number" id="rateHealth" class="input-box" step="0.01"></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:1;"><label class="form-label">?�기?�양 (건보%)</label><input type="number" id="rateCare" class="input-box" step="0.01"></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">고용보험 (%)</label><input type="number" id="rateEmp" class="input-box" step="0.01"></div>
+        </div>
+        <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+        <div class="form-group">
+            <label class="form-label">?�득?�율 (?�식 %)</label>
+            <div style="display:flex; gap:5px; margin-bottom:5px;"><span style="font-size:12px; width:80px; padding-top:8px;">300�?미만:</span><input type="number" id="taxLow" class="input-box" step="0.1" style="flex:1;"></div>
+            <div style="display:flex; gap:5px; margin-bottom:5px;"><span style="font-size:12px; width:80px; padding-top:8px;">500�?미만:</span><input type="number" id="taxMid" class="input-box" step="0.1" style="flex:1;"></div>
+            <div style="display:flex; gap:5px;"><span style="font-size:12px; width:80px; padding-top:8px;">500�??�상:</span><input type="number" id="taxHigh" class="input-box" step="0.1" style="flex:1;"></div>
+        </div>
+        <button class="btn-save" style="width:100%; margin-top:10px;" onclick="saveRates()">?�정 ?�??/button>
+    </div>
+</div>
+
+<script type="module">
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+        
+        (async () => {
+            if (!requireAuth()) return;
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                
+                if (!checkRole(['master', 'admin', 'general_manager'])) {
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+                console.log('Payroll page loaded');
+            } catch (error) {
+                console.error('?�이지 로드 ?�러:', error);
+                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
+            }
+        })();
+        
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('로그?�웃 ?�러:', error);
+            }
+        };
+    </script>
+</body>
+</html>

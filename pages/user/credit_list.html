@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>거래처 신용 조회 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* (기본 스타일 유지) */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size: 14px; }
+        .main-content { flex: 1; margin-left: 260px; padding: 50px; }
+        
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+        
+        /* 요청 박스 */
+        .req-box { background: #fff; padding: 25px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 30px; display: flex; gap: 15px; align-items: flex-end; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .form-group { flex: 1; }
+        .label { display: block; font-size: 13px; font-weight: 700; color: #666; margin-bottom: 8px; }
+        .input-box { width: 100%; height: 42px; border: 1px solid #ddd; border-radius: 6px; padding: 0 12px; }
+        .btn-req { height: 42px; padding: 0 25px; background: #1a1a1a; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+        .btn-req:hover { background: #333; }
+
+        /* [NEW] CEO 승인 대기 박스 */
+        .approval-alert { background-color: #fff7e6; border: 1px solid #ffd591; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: none; align-items: center; justify-content: space-between; }
+        .approval-text { color: #d46b08; font-weight: 700; font-size: 14px; }
+        .btn-approve { background: #d46b08; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; font-weight: 700; cursor: pointer; margin-left: 10px; font-size: 12px; }
+
+        /* 테이블 */
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th { background: #f9f9f9; font-weight: 700; color: #555; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+        .st-pending { background: #f0f0f0; color: #666; } 
+        .st-agreed { background: #e6f7ff; color: #096dd9; } 
+        .st-done { background: #f6ffed; color: #389e0d; }
+        
+        /* 버튼류 */
+        .btn-action { text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; display: inline-block; cursor: pointer; border: 1px solid transparent; }
+        .btn-down { color: #2c5bf2; border-color: #2c5bf2; background: #fff; }
+        .btn-down:hover { background: #f0f5ff; }
+        .btn-share { color: #fa8c16; border-color: #fa8c16; background: #fff; margin-left: 5px; }
+        .btn-share:hover { background: #fff7e6; }
+        
+        /* 권한 신청 버튼 */
+        .btn-lock { color: #666; border: 1px solid #ddd; background: #f9f9f9; display: flex; align-items: center; gap: 4px; }
+        .btn-lock:hover { background: #eee; border-color: #ccc; }
+        .req-sent { color: #2e7d32; font-size: 12px; font-weight: 700; }
+
+        /* 모달 (공유) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-box { background: #fff; width: 400px; padding: 25px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; }
+        .emp-list { max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; padding: 10px; margin-bottom: 20px; }
+        .emp-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f5f5f5; }
+        .emp-item:last-child { border-bottom: none; }
+        .emp-item input { margin-right: 10px; }
+        .modal-btns { display: flex; gap: 10px; }
+        .modal-btns button { flex: 1; padding: 12px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; }
+        .btn-save { background: #1a1a1a; color: #fff; }
+        .btn-close { background: #f5f5f5; color: #333; }
+
+        @media (max-width: 900px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } .req-box { flex-direction: column; align-items: stretch; } }
+    </style>
+</head>
+<body>
+
+    
+    <!-- Sidebar Skeleton (깜빡임 방지) -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <a href="/"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a>
+        </div>
+        <div class="user-profile-area">
+            <div class="user-name">로딩중...</div>
+            <div class="user-email">...</div>
+            <div class="user-role badge-staff">...</div>
+        </div>
+        <ul class="menu-list">
+            <li><a href="/pages/user/dashboard.html" class="menu-link">대시보드</a></li>
+            <li><a href="/pages/user/board_list.html" class="menu-link">나의 자문 내역</a></li>
+            <li><a href="/pages/user/payment.html" class="menu-link">결제/구독 관리</a></li>
+            <li><a href="/pages/user/member_info.html" class="menu-link">회원 정보 수정</a></li>
+            <li><a href="/pages/public/user_guide.html" class="menu-link">📘 이용 가이드 (FAQ)</a></li>
+        </ul>
+        <div class="logout-btn" id="logoutBtn">로그아웃</div>
+    </nav>
+
+<main class="main-content">
+        <div class="page-header">
+            <h2 class="page-title">🔎 거래처 신용 조회</h2>
+        </div>
+
+        <div id="approvalAlert" class="approval-alert">
+            <span class="approval-text">🔔 열람 권한 신청이 <span id="reqCount">0</span>건 있습니다.</span>
+            <div id="reqBtnArea"></div>
+        </div>
+
+        <div class="req-box">
+            <div class="form-group"><label class="label">거래처(상대방) 기업명</label><input type="text" id="targetName" class="input-box" placeholder="예: (주)한국무역"></div>
+            <div class="form-group"><label class="label">사업자등록번호</label><input type="text" id="targetBizNum" class="input-box" placeholder="- 없이 입력"></div>
+            <div class="form-group"><label class="label">상대방 연락처</label><input type="text" id="targetPhone" class="input-box" placeholder="동의 문자 받을 번호"></div>
+            <button class="btn-req" onclick="requestCreditCheck()">조회 요청</button>
+        </div>
+
+        <h3>📋 우리 회사 조회 내역</h3>
+        <p style="font-size:12px; color:#888; margin-bottom:10px;">* 권한이 없는 문서는 기업명과 정보가 일부 가려져 보입니다. 필요 시 권한을 신청하세요.</p>
+        <table style="margin-top:15px;">
+            <thead>
+                <tr>
+                    <th width="15%">요청일</th>
+                    <th width="20%">거래처명</th>
+                    <th width="20%">사업자번호</th>
+                    <th width="15%">신청자</th>
+                    <th width="15%">상태</th>
+                    <th width="15%">보고서 / 관리</th>
+                </tr>
+            </thead>
+            <tbody id="listBody">
+                <tr><td colspan="6" style="text-align:center; padding:30px;">데이터를 불러오는 중...</td></tr>
+            </tbody>
+        </table>
+    </main>
+
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">📤 직원에게 보고서 공유</div>
+            <p style="font-size:13px; color:#666; margin-bottom:10px;">선택한 직원에게 열람 권한을 부여합니다.</p>
+            <div id="employeeList" class="emp-list"></div>
+            <div class="modal-btns">
+                <button class="btn-close" onclick="closeShareModal()">취소</button>
+                <button class="btn-save" onclick="saveShare()">공유하기</button>
+            </div>
+            <input type="hidden" id="shareDocId">
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, users, requireAuth, creditReports } from "/js/api.js";
+        import { renderClientSidebar } from "/js/client_ui.js";
+
+        (async () => {
+            if (!requireAuth()) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                renderClientSidebar('credit_list', userData);
+
+                const reports = await creditReports.getAll();
+                console.log('신용조회 내역:', reports);
+
+            } catch (error) {
+                console.error('신용조회 로드 에러:', error);
+            }
+        })();
+
+        window.handleLogout = async () => {
+            await auth.logout();
+            location.href = "/";
+        };
+    </script>
+</body>
+</html>

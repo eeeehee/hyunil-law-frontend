@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ë¬¸ì„œ ë°œì†¡ ?¼í„° - ë²•ë¬´ê·¸ë£¹ ?„ì¼</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size: 14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, select, textarea { font-family: inherit; }
+
+        /* ?¬ì´?œë°” */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; }
+        
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        /* ë©”ì¸ ì»¨í…ì¸?*/
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; max-width: 1000px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 30px; }
+
+        /* ?¹ì…˜ ë°•ìŠ¤ */
+        .section-box { background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .box-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        
+        /* ëª¨ë“œ ?¤ìœ„ì¹?*/
+        .mode-switch { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-mode { padding: 12px 24px; border: 1px solid #ddd; background: #fff; border-radius: 30px; cursor: pointer; font-weight: 700; color: #555; transition: 0.2s; font-size: 14px; }
+        .btn-mode.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-mode:hover { background: #f0f0f0; }
+
+        /* ê²€???ì—­ */
+        .search-wrap { display: flex; gap: 10px; position: relative; }
+        .search-input { flex: 1; height: 46px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; font-size: 15px; outline: none; }
+        .search-input:focus { border-color: #1a1a2e; }
+        .search-results { position: absolute; top: 50px; left: 0; width: 100%; background: #fff; border: 1px solid #ddd; border-radius: 6px; max-height: 200px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .search-item { padding: 12px 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .search-item:hover { background-color: #f0f7ff; }
+        .s-name { font-weight: 700; color: #333; }
+        .s-info { font-size: 12px; color: #888; }
+
+        /* ? íƒ???•ë³´ ì¹´ë“œ */
+        .recipient-card { background-color: #e6f7ff; border: 1px solid #91d5ff; padding: 20px; border-radius: 8px; display: none; margin-bottom: 30px; position: relative; }
+        .rc-row { display: flex; gap: 30px; margin-bottom: 5px; font-size: 14px; }
+        .rc-label { font-weight: 700; color: #0050b3; width: 80px; }
+        .btn-reset { position: absolute; top: 20px; right: 20px; background: #fff; border: 1px solid #ff4d4f; color: #ff4d4f; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600; }
+
+        /* ?‘ì„± ??ê³µí†µ */
+        .form-label { display: block; font-weight: 700; margin-bottom: 8px; color: #333; font-size: 14px; margin-top: 15px; }
+        .form-select { width: 100%; height: 46px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; font-size: 15px; margin-bottom: 5px; outline: none; }
+        .form-textarea { width: 100%; height: 120px; border: 1px solid #ddd; border-radius: 6px; padding: 15px; font-size: 15px; resize: none; margin-bottom: 5px; outline: none; }
+        .file-box { border: 2px dashed #ddd; padding: 20px; text-align: center; border-radius: 6px; background: #fafafa; margin-bottom: 20px; margin-top: 5px; }
+        
+        .btn-send { width: 100%; height: 50px; background-color: #1a1a2e; color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; margin-top: 20px; }
+        .btn-send:hover { background-color: #333; }
+        .btn-send.billing { background-color: #d32f2f; }
+        .btn-send.billing:hover { background-color: #b71c1c; }
+
+        /* ë¡œë”© ?¤ë²„?ˆì´ */
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; color: #fff; font-size: 20px; font-weight: 700; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">?¢</span> ê¸°ì—…?ë¬¸?¼í„°</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupCorp" class="submenu">
+                <li><a href="/pages/admin/admin.html">?“ ?ë¬¸ ê´€ë¦?/a></li>
+                <li><a href="/pages/admin/admin_requests.html">?“© ?”ì²­ ê´€ë¦¬í•¨</a></li>
+                <li><a href="/pages/admin/admin_report.html">?“Š ë¦¬í¬??ë°œì†¡</a></li>
+                <li><a href="/pages/admin/admin_members.html">?‘¥ ?Œì›/ê¸°ì—… ê´€ë¦?/a></li>
+                <li><a href="/pages/admin/admin_payments.html">?’³ ë§¤ì¶œ/ê²°ì œ ê´€ë¦?/a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="menu-category open active" onclick="toggleAdminMenu('groupLitigation', this)">
+                <div><span class="menu-icon">?–ï¸</span> ?„ì?Œì†¡/?¬ê±´</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupLitigation" class="submenu" style="display:block;">
+                <li><a href="/pages/admin/admin_litigation.html">?” ?„ì?Œì†¡ ê´€ë¦?/a></li>
+                <li><a href="/pages/admin/admin_clients.html">?“‡ ?¹ì‚¬??ê³ ê°) ê´€ë¦?/a></li>
+                <li><a href="/pages/admin/admin_submit.html" class="active">?“¤ ë¬¸ì„œ ?œì¶œ/ë°œì†¡</a></li>
+                <li><a href="#">?’° ë¹„ìš©ê´€ë¦?/a></li>
+            </ul>
+        </li>
+        <li class="menu-divider"></li>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?™ï¸ ?˜ê²½ ?¤ì •</a></li>
+        <li class="menu-divider"></li>
+        <li><a href="/index.html" class="menu-link">?  ë©”ì¸ ?ˆí˜?´ì?</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return; 
+        if (submenu.style.display === "block") {
+            submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active");
+        } else {
+            submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active");
+        }
+    }
+</script>
+
+<main class="main-content">
+    <h2 class="page-title">ë¬¸ì„œ ?œì¶œ ë°??Œë¦¼ ë°œì†¡ ?¼í„°</h2>
+
+    <div class="mode-switch">
+        <button class="btn-mode active" onclick="switchMode('general')">?“„ ?¼ë°˜ ë¬¸ì„œ ë°œì†¡</button>
+        <button class="btn-mode" onclick="switchMode('billing')">?’° ?˜ì„ë£??¤ë¹„ ì²?µ¬</button>
+    </div>
+
+    <div class="section-box">
+        <div class="box-title">1. ?˜ì‹  ?¬ê±´ ? íƒ</div>
+        <div class="search-wrap">
+            <input type="text" id="searchInput" class="search-input" placeholder="?¬ê±´ë²ˆí˜¸, ê³ ê°ëª? ?´ë‹¹?ë¡œ ê²€??.." onkeyup="searchCase()">
+            <div id="searchResults" class="search-results"></div>
+        </div>
+    </div>
+
+    <div id="recipientCard" class="recipient-card">
+        <button class="btn-reset" onclick="resetSelection()">? íƒ ì·¨ì†Œ</button>
+        <div class="rc-row"><span class="rc-label">?¬ê±´ëª?/span><span id="sel_case"></span></div>
+        <div class="rc-row"><span class="rc-label">ê³ ê°ëª?/span><span id="sel_name"></span></div>
+        <div class="rc-row"><span class="rc-label">?°ë½ì²?/span><span id="sel_phone"></span></div>
+        <div class="rc-row"><span class="rc-label">?´ë©”??/span><span id="sel_email"></span></div>
+    </div>
+
+    <div id="writeForm" class="section-box" style="display:none;">
+        <div class="box-title">2. ë°œì†¡ ?´ìš© ?‘ì„± (?¼ë°˜ ë¬¸ì„œ)</div>
+        
+        <label class="form-label">ë°œì‹  ?¼í„° (ë°œì‹ ë²ˆí˜¸ ? íƒ)</label>
+        <select id="genSenderPhone" class="form-select">
+            <option value="15336935">?¢ ê¸°ì—…?ë¬¸?¼í„° (1533-6935)</option>
+            <option value="15336092">?–ï¸ ?Œì†¡/?Œìƒ?¼í„° (1533-6092)</option>
+            <option value="15336935">?’¼ ?„ì¼?…ë¬´?¼í„° (1533-6935)</option>
+        </select>
+
+        <label class="form-label">ë¬¸ì„œ ì¢…ë¥˜ (?œí”Œë¦?</label>
+        <select id="docType" class="form-select">
+            <option value="?„ì¼ ?œì¶œ?œë©´ ?¡ë?">?“„ ?„ì¼ ?œì¶œ?œë©´ ?¡ë?</option>
+            <option value="?„ì¼ ?‘ì„±ë¬¸ê±´(ì´ˆì•ˆ) ?¡ë?">?“ ?‘ì„±ë¬¸ê±´(ì´ˆì•ˆ) ê²€? ìš”ì²?/option>
+            <option value="?ë?ë°??œì¶œ?œë©´ ?„ë‹¬">?“¨ ?ë?ë°??œì¶œ?œë©´ ?„ë‹¬</option>
+            <option value="ê¸°ê? ë°œì†¡ ë¬¸ì„œ">?›ï¸?ë²•ì›/ê¸°ê? ë¬¸ì„œ ?¡ë?</option>
+            <option value="?„ë‹¬?¬í•­ ?ˆë‚´">?“¢ ?¼ë°˜ ?„ë‹¬?¬í•­ ?ˆë‚´</option>
+        </select>
+
+        <label class="form-label">?„ë‹¬ ë©”ì‹œì§€ (? íƒ)</label>
+        <textarea id="note" class="form-textarea" placeholder="ê³ ê°?ê²Œ ?„ë‹¬??ì¶”ê? ì½”ë©˜?¸ê? ?ˆë‹¤ë©??…ë ¥?˜ì„¸??"></textarea>
+
+        <label class="form-label">?Œì¼ ì²¨ë? (? íƒ)</label>
+        <div class="file-box">
+            <input type="file" id="fileInput">
+            <p style="font-size:12px; color:#888; margin-top:5px;">???Œì¼ ?…ë¡œ?????¤ìš´ë¡œë“œ ë§í¬ê°€ ?ë™?¼ë¡œ ?ì„±?˜ì–´ ë¬¸ì???¬í•¨?©ë‹ˆ??</p>
+        </div>
+
+        <button class="btn-send" onclick="startSending()">?“¤ ?Œë¦¼??+ ?´ë©”??ë°œì†¡?˜ê¸°</button>
+    </div>
+
+    <div id="billingForm" class="section-box" style="display:none;">
+        <div class="box-title" style="color:#d32f2f; border-color:#d32f2f;">2. ì²?µ¬/?…ì´‰ ?´ìš© ?‘ì„± (PDF ?ë™?ì„±)</div>
+        
+        <label class="form-label">ë°œì‹  ?¼í„° (ë°œì‹ ë²ˆí˜¸ ? íƒ)</label>
+        <select id="billSenderPhone" class="form-select">
+            <option value="15336935">?¢ ê¸°ì—…?ë¬¸?¼í„° (1533-6935)</option>
+            <option value="15336092">?–ï¸ ?Œì†¡/?Œìƒ?¼í„° (1533-6092)</option>
+            <option value="15336935">?’¼ ?„ì¼?…ë¬´?¼í„° (1533-6935)</option>
+        </select>
+
+        <label class="form-label">ì²?µ¬ ? í˜•</label>
+        <select id="billType" class="form-select">
+            <option value="FEE">?’° ?˜ì„ë£?ì²?µ¬</option>
+            <option value="EXPENSE">?§¾ ?¤ë¹„ ì²?µ¬</option>
+            <option value="REMINDER">?š¨ ?…ì´‰ (?¬ë°œ??</option>
+            <option value="RECEIPT">???ìˆ˜ì¦?ë°œì†¡</option>
+        </select>
+
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label class="form-label">ì²?µ¬ ê¸ˆì•¡</label>
+                <input type="text" id="billCost" class="search-input" placeholder="?«ìë§??…ë ¥">
+            </div>
+            <div style="flex:1;">
+                <label class="form-label">?©ë? ê¸°í•œ / ?¼ì</label>
+                <input type="date" id="billDate" class="search-input">
+            </div>
+        </div>
+
+        <label class="form-label">ë¹„ê³  (?ì„¸ ?´ì—­)</label>
+        <textarea id="billNote" class="form-textarea" placeholder="?? ?¸ì??€, ?¡ë‹¬ë£??¬í•¨"></textarea>
+
+        <button class="btn-send billing" onclick="sendBilling()">?’° ì²?µ¬???ì„± ë°?ë°œì†¡?˜ê¸°</button>
+    </div>
+
+</main>
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div>?? ?œë²„?ì„œ ?‘ì—… ì¤‘ì…?ˆë‹¤...</div>
+    <div style="font-size:14px; margin-top:10px;">(PDF ?ì„± ë°?ë°œì†¡???œê°„??ê±¸ë¦´ ???ˆìŠµ?ˆë‹¤)</div>
+</div>
+
+<script type="module">
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+        
+        (async () => {
+            if (!requireAuth()) return;
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                
+                if (!checkRole(['master', 'admin', 'general_manager', 'lawyer'])) {
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+                console.log('Submit page loaded');
+            } catch (error) {
+                console.error('?˜ì´ì§€ ë¡œë“œ ?ëŸ¬:', error);
+                alert('?°ì´?°ë? ë¶ˆëŸ¬?¤ëŠ” ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆìŠµ?ˆë‹¤.');
+            }
+        })();
+        
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('ë¡œê·¸?„ì›ƒ ?ëŸ¬:', error);
+            }
+        };
+    </script>
+
+</body>
+</html>

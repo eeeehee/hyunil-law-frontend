@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기업자문 매출 및 CMS 관리 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [기본 스타일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, select { font-family: inherit; }
+
+        /* 사이드바 */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; letter-spacing: 1px; }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        /* 메인 컨텐츠 */
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+
+        /* 통계 카드 */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; }
+        .stat-label { font-size: 12px; color: #888; font-weight: 600; margin-bottom: 5px; }
+        .stat-value { font-size: 24px; font-weight: 800; color: #1a1a1a; }
+        .text-green { color: #52c41a; }
+        .text-red { color: #ff4d4f; }
+        .text-blue { color: #2c5bf2; }
+
+        /* 탭 */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .tab-btn { padding: 10px 20px; border-radius: 8px; background: #fff; border: 1px solid #ddd; cursor: pointer; font-weight: 700; color: #555; transition: 0.2s; }
+        .tab-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+        .tab-btn:hover:not(.active) { background: #f0f0f0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* 툴바 */
+        .toolbar { background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+        .filter-group { display: flex; gap: 8px; align-items: center; }
+        .filter-select { height: 36px; border: 1px solid #ddd; border-radius: 6px; padding: 0 10px; outline: none; min-width: 80px; font-size: 13px; }
+        .search-input { width: 250px; height: 36px; border: 1px solid #ddd; border-radius: 6px; padding: 0 10px; outline: none; font-size: 13px; }
+
+        .btn-group { display: flex; gap: 5px; }
+        .btn-filter { padding: 0 12px; height: 36px; border-radius: 6px; border: 1px solid #ddd; background: #fff; color: #555; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .btn-filter.active { background: #e6f7ff; color: #096dd9; border-color: #91d5ff; }
+
+        .btn-price-set { background-color: #fff; color: #2c5bf2; border: 1px solid #2c5bf2; padding: 0 15px; border-radius: 6px; font-weight: 700; cursor: pointer; height: 36px; font-size: 13px; }
+        .btn-add { background-color: #1a1a2e; color: #fff; border: none; padding: 0 15px; border-radius: 6px; font-weight: 700; cursor: pointer; height: 36px; font-size: 13px; }
+        .btn-generate { background-color: #722ed1; color: #fff; border: none; padding: 0 15px; border-radius: 6px; font-weight: 700; cursor: pointer; height: 36px; font-size: 13px; }
+
+        /* 테이블 */
+        .section-box { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th, .admin-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .admin-table th { background-color: #f9f9f9; color: #555; font-weight: 600; }
+        .admin-table tr:hover { background-color: #fafafa; }
+
+        /* 뱃지 */
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-block; text-align: center; min-width: 60px; }
+        .st-paid { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .st-scheduled { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; }
+        .st-overdue { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e; }
+        .st-refund { background: #f5f5f5; color: #595959; border: 1px solid #d9d9d9; text-decoration: line-through; }
+        .st-cancel { background: #fff2f0; color: #ff4d4f; border: 1px solid #ffccc7; }
+        .st-basic { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+        .st-ent { background: #fff0f6; color: #c41d7f; border: 1px solid #ffadd2; }
+
+        .cycle-badge { font-size: 10px; padding: 2px 5px; border-radius: 3px; margin-left: 5px; }
+        .cy-mon { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; }
+        .cy-ann { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+
+        .btn-sm { padding: 3px 6px; font-size: 11px; border-radius: 4px; border: 1px solid #ddd; background: #fff; cursor: pointer; margin-right: 2px; }
+        .btn-pay { border-color: #52c41a; color: #52c41a; } .btn-pay:hover { background: #f6ffed; }
+        .btn-overdue { border-color: #ff4d4f; color: #ff4d4f; } .btn-overdue:hover { background: #fff1f0; }
+        .btn-cancel { border-color: #d9d9d9; color: #595959; } .btn-cancel:hover { background: #f5f5f5; }
+        .btn-edit { border-color: #1a1a2e; color: #1a1a2e; }
+
+        /* 모달 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 480px; background-color: #fff; padding: 30px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
+        .form-group { margin-bottom: 15px; position: relative; }
+        .form-label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 13px; color:#555; }
+        .input-box { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 10px; box-sizing: border-box; }
+        .btn-submit { width: 100%; height: 45px; background-color: #1a1a2e; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .close-btn { float: right; font-size: 24px; cursor: pointer; margin-top: -10px; }
+
+        /* 계산기 영역 */
+        .calc-box { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px; }
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+        .calc-total { border-top: 1px solid #ddd; padding-top: 8px; margin-top: 8px; font-weight: 700; color: #d32f2f; }
+
+        /* 자동완성 리스트 */
+        .auto-list {
+            position: absolute; top: 65px; left: 0; width: 100%; background: #fff; border: 1px solid #ddd; border-radius: 6px;
+            max-height: 150px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .auto-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 13px; }
+        .auto-item:hover { background: #f0f7ff; }
+        .auto-item .ai-desc { font-size:11px; color:#888; display:block; margin-top:2px; }
+        .tag-info { font-size:10px; padding:2px 4px; border-radius:3px; margin-right:5px; font-weight:bold;}
+        .tag-cons { background:#e6f7ff; color:#096dd9; }
+        .tag-lit { background:#fff0f6; color:#c41d7f; }
+        .tag-corp { background:#f6ffed; color:#389e0d; }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category open active" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">🏢</span> 기업자문센터</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupCorp" class="submenu" style="display:block;">
+                <li><a href="/pages/admin/admin.html">📝 자문 관리 (전체)</a></li>
+                <li><a href="/pages/admin/admin_requests.html">📩 요청 관리함</a></li>
+                <li><a href="/pages/admin/admin_report.html">📊 리포트 발송</a></li>
+                <li><a href="/pages/admin/admin_members.html">👥 회원/기업 관리</a></li>
+                <li><a href="/pages/admin/admin_payments.html" class="active">💳 매출/CMS 관리</a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
+                <div><span class="menu-icon">⚖️</span> 전자소송/사건</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupLitigation" class="submenu">
+                <li><a href="/pages/public/real_data_upload.html" style="color:#52c41a; font-weight:700;">📥 엑셀 데이터 업로드</a></li>
+                <li><a href="/pages/admin/admin_litigation.html">🔎 전자소송 데이터 확인</a></li>
+                <li><a href="/pages/admin/admin_clients.html">📇 당사자(고객) 관리</a></li>
+                <li><a href="/pages/admin/admin_submit.html">📤 문서 제출/발송</a></li>
+                <li><a href="/pages/admin/admin_billing.html" style="color:#d32f2f; font-weight:700;">💰 비용/청구 관리</a></li>
+                <li><a href="admin_casereport.html">📢 사건 리포트 발송</a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupSpecial', this)">
+                <div><span class="menu-icon">📞</span> 파산/추심 센터</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupSpecial" class="submenu">
+                <li><a href="/pages/admin/admin_collection_consult.html">💰 채권 추심 상담</a></li>
+                <li><a href="/pages/admin/admin_collection.html">💰 채권 추심 사건</a></li>
+                <li><a href="/pages/admin/admin_pasan_consult.html">📉 파산/회생 상담</a></li>
+                <li><a href="/pages/admin/admin_pasan.html">📉 파산/회생 사건</a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupEtc', this)">
+                <div><span class="menu-icon">⚔️</span> 분쟁 및 종결</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupEtc" class="submenu">
+                <li><a href="/pages/admin/admin_conflict.html" style="color:#fa8c16; font-weight:700;">⚔️ 분쟁/협상 (Conflict)</a></li>
+                <li><a href="/pages/admin/admin_finished.html" style="color:#999; font-weight:700;">🏁 종결 사건 (Archive)</a></li>
+            </ul>
+        </li>
+        <li class="menu-divider"></li>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">⚙️ 환경 설정</a></li>
+        <li class="menu-divider"></li>
+        <li><a href="http://www.hyunillaw.com" target="_blank" class="menu-link" style="color:#a6a6b5;">🌐 법무그룹 현일 홈페이지</a></li>
+        <li><a href="/index.html" class="menu-link">🏢 기업자문 홈페이지</a></li>
+        <li><a href="/pages/user/dashboard.html" class="menu-link" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return;
+        if (submenu.style.display === "block") { submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active"); }
+        else { submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active"); }
+    }
+</script>
+
+<main class="main-content">
+    <div class="page-header">
+        <h2 class="page-title">기업자문 매출 및 CMS 관리</h2>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">💰 자문료 순매출 (환불차감)</div>
+            <div class="stat-value text-green" id="filteredRevenue">0 원</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">🤝 구독(CMS) 회원 수</div>
+            <div class="stat-value text-blue" id="statContract">0 개사</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">🚨 현재 미납 총액</div>
+            <div class="stat-value text-red" id="statOverdue">0 원</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">📅 이번달 발행 건수</div>
+            <div class="stat-value" id="statCount">0 건</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('transactions')">📊 매출 장부 (Advisory)</button>
+        <button class="tab-btn" onclick="switchTab('contracts')">🤝 구독 회원/계약 관리</button>
+    </div>
+
+    <div id="tabTransactions" class="tab-content active">
+        <div class="toolbar">
+            <div class="filter-group">
+                <span style="font-weight:700; margin-right:5px;">📅</span>
+                <select id="filterYear" class="filter-select" onchange="loadPayments()"></select>
+                <select id="filterMonth" class="filter-select" onchange="loadPayments()">
+                    <option value="all">전체 월</option>
+                    <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">${i}월</option>`);</script>
+                </select>
+
+                <div class="btn-group" style="margin-left:10px;">
+                    <button class="btn-filter active" onclick="setStatusFilter('all', this)">전체</button>
+                    <button class="btn-filter" onclick="setStatusFilter('paid', this)">완료</button>
+                    <button class="btn-filter" onclick="setStatusFilter('scheduled', this)">청구됨</button>
+                    <button class="btn-filter" onclick="setStatusFilter('overdue', this)">미납</button>
+                    <button class="btn-filter" onclick="setStatusFilter('refund', this)">환불/취소</button>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <input type="text" class="search-input" id="searchTrans" placeholder="기업명 검색..." onkeyup="searchPaymentList(this.value)">
+                <button class="btn-price-set" onclick="openPriceModal()">💰 기본단가 설정</button>
+                <button class="btn-add" onclick="openPaymentModal()">+ 매출 수동 등록</button>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <table class="admin-table">
+                <thead><tr><th>날짜</th><th>구분 (플랜)</th><th>기업명</th><th>비고</th><th>결제수단</th><th>금액</th><th>상태</th><th>관리</th></tr></thead>
+                <tbody id="transListBody"><tr><td colspan="8" style="text-align:center; padding:30px;">로딩 중...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tabContracts" class="tab-content">
+        <div class="toolbar">
+            <div class="filter-group">
+                <span style="font-weight:700;">CMS 회원 검색</span>
+                <input type="text" class="search-input" id="searchContract" placeholder="기업명 검색" onkeyup="loadContracts()">
+            </div>
+
+            <div class="filter-group">
+                <button class="btn-generate" onclick="generateMonthlyBills()">📅 이번달 청구서 생성 (1회)</button>
+                <button class="btn-add" onclick="openContractModal()">+ 구독 회원 수동 등록</button>
+            </div>
+        </div>
+        <div class="section-box">
+            <table class="admin-table">
+                <thead><tr><th>기업명</th><th>사업자번호</th><th>대표자</th><th>연락처</th><th>현재 구독 플랜</th><th>결제 주기</th><th>월 결제액</th><th>계약종료일</th><th>상태</th><th>관리</th></tr></thead>
+                <tbody id="contractListBody"><tr><td colspan="10" style="text-align:center; padding:30px;">로딩 중...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div id="paymentModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('paymentModal')">✕</span>
+        <h3 style="margin-bottom:20px;">+ 자문료/매출 등록</h3>
+
+        <div class="form-group" style="position:relative;">
+            <label class="form-label">대상 기업 (전체 DB 검색)</label>
+            <input type="text" id="payCompany" class="input-box" onkeyup="searchAllClients(this.value, 'payCompany')" placeholder="소송고객/상담DB/기업회원 통합검색">
+            <div id="payCompanyAuto" class="auto-list"></div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">구분 (Type)</label>
+            <select id="payType" class="input-box">
+                <option value="advisory">🏢 기업자문 (1회성)</option>
+                <option value="Basic">🌱 Basic (정기)</option>
+                <option value="Standard">🌿 Standard (정기)</option>
+                <option value="Pro">🌳 Pro (정기)</option>
+                <option value="Premium">👑 Premium (정기)</option>
+                <option value="Enterprise">🏢 Enterprise (맞춤)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">금액</label>
+            <input type="text" id="payAmount" class="input-box" placeholder="숫자만 입력" oninput="formatCurrency(this)">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">결제 수단</label>
+            <select id="payMethod" class="input-box">
+                <option value="Transfer">계좌이체 (세금계산서)</option>
+                <option value="Card">신용카드</option>
+                <option value="Unknown">미정 (청구서 발송용)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">결제 상태</label>
+            <select id="payStatus" class="input-box" style="font-weight:bold;">
+                <option value="scheduled">📅 청구 예정 (미납)</option>
+                <option value="paid">✅ 결제 완료</option>
+                <option value="overdue">🚨 연체 중</option>
+            </select>
+        </div>
+
+        <button class="btn-submit" onclick="savePayment()">저장하기</button>
+    </div>
+</div>
+
+<div id="contractModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('contractModal')">✕</span>
+        <h3 style="margin-bottom:20px;">🤝 구독(CMS) 회원 설정</h3>
+
+        <input type="hidden" id="contractUid">
+
+        <div class="form-group" style="position:relative;">
+            <label class="form-label">대상 기업명</label>
+            <input type="text" id="contractCompany" class="input-box" placeholder="기업명 입력" readonly style="background:#f9f9f9;">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">사업자등록번호</label>
+            <input type="text" id="contractBizNum" class="input-box" placeholder="000-00-00000" maxlength="12">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">적용 플랜</label>
+            <select id="contractPlan" class="input-box">
+                <option value="none">구독 해지 (None)</option>
+                <option value="Basic">Basic (월 정기결제)</option>
+                <option value="Standard">Standard (월 정기결제)</option>
+                <option value="Pro">Pro (월 정기결제)</option>
+                <option value="Premium">Premium (월 정기결제)</option>
+                <option value="Enterprise">Enterprise (기업 맞춤)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">결제 주기 (Billing Cycle)</label>
+            <select id="contractCycle" class="input-box">
+                <option value="monthly">📅 매월 (자동 청구서 생성)</option>
+                <option value="annual">🗓️ 연납/선납 (자동 생성 안함)</option>
+            </select>
+            <p style="font-size:11px; color:#888; margin-top:3px;">* 연납 선택 시 매월 청구서가 자동 생성되지 않으며, 매출 장부에 수동으로 1년치 금액을 등록해야 합니다.</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">월 결제 금액 (사용자 지정)</label>
+            <input type="text" id="contractCost" class="input-box" placeholder="비워둘 시 기본단가 적용" oninput="formatCurrency(this)">
+            <p style="font-size:11px; color:#888; margin-top:3px;">* Enterprise는 필수 입력, 그 외 플랜도 입력 시 이 금액이 우선 적용됨</p>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">계약 종료일 (선택)</label>
+            <input type="date" id="contractEnd" class="input-box">
+        </div>
+
+        <button class="btn-submit" onclick="saveContract()">설정 저장</button>
+    </div>
+</div>
+
+<div id="refundConfirmModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('refundConfirmModal')">✕</span>
+        <h3 style="margin-bottom:20px;">💸 환불 처리 (매출차감)</h3>
+        <input type="hidden" id="rcDocId">
+        <input type="hidden" id="rcOriginalAmt">
+
+        <div class="form-group">
+            <label class="form-label">기존 결제 금액</label>
+            <input type="text" id="rcDisplayAmt" class="input-box" readonly style="background:#f9f9f9;">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">실제 환불해줄 금액 (입력)</label>
+            <input type="text" id="rcAmount" class="input-box" oninput="formatCurrency(this)" placeholder="예: 50,000" style="color:#d32f2f; font-weight:bold;">
+            <p style="font-size:11px; color:#888; margin-top:5px;">* 이 금액만큼만 매출에서 차감됩니다.</p>
+        </div>
+
+        <button class="btn-submit" onclick="executeRefund()">환불 처리 완료</button>
+    </div>
+</div>
+
+<div id="priceModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('priceModal')">✕</span>
+        <h3 style="margin-bottom:20px;">💰 기본 서비스 단가 설정</h3>
+        <div class="form-group"><label class="form-label">⚡ 단기 자문 (1회)</label><input type="text" id="priceOneTime" class="input-box" oninput="formatCurrency(this)"></div>
+        <div class="form-group"><label class="form-label">🌱 Basic 플랜</label><input type="text" id="priceBasic" class="input-box" oninput="formatCurrency(this)"></div>
+        <div class="form-group"><label class="form-label">🌿 Standard 플랜</label><input type="text" id="priceStandard" class="input-box" oninput="formatCurrency(this)"></div>
+        <div class="form-group"><label class="form-label">🌳 Pro 플랜</label><input type="text" id="pricePro" class="input-box" oninput="formatCurrency(this)"></div>
+        <div class="form-group"><label class="form-label">👑 Premium 플랜</label><input type="text" id="pricePremium" class="input-box" oninput="formatCurrency(this)"></div>
+        <button class="btn-submit" onclick="savePriceSettings()">단가 설정 저장</button>
+    </div>
+</div>
+
+
+<script type="module">
+    const API_BASE = 'http://localhost:3000/api';
+    const token = localStorage.getItem('auth_token');
+
+    let allPayments = [];
+    let allClientsCache = [];
+    let currentStatusFilter = 'all';
+    let servicePrices = {};
+    let editingUserId = null;
+
+    // 인증 확인
+    if (!token) {
+        location.href = "/pages/public/login.html";
+    }
+
+    // API 호출 헬퍼
+    async function apiCall(endpoint, options = {}) {
+        console.log(`🔌 [API] 호출: ${options.method || 'GET'} ${endpoint}`);
+
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            ...options,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+
+        console.log(`📡 [API] 응답: ${response.status} ${response.statusText}`);
+
+        if (!response.ok) {
+            console.error(`❌ [API] 오류 응답:`, response);
+            if (response.status === 401 || response.status === 403) {
+                alert('권한이 없습니다.');
+                location.href = "/pages/public/login.html";
+                throw new Error('Unauthorized');
+            }
+            try {
+                const error = await response.json();
+                throw new Error(error.message || '오류가 발생했습니다.');
+            } catch(jsonError) {
+                console.error('❌ [API] JSON 파싱 오류:', jsonError);
+                throw new Error(`서버 오류 (${response.status})`);
+            }
+        }
+
+        console.log('📥 [API] 응답 본문 파싱 중...');
+        try {
+            const data = await response.json();
+            console.log('✅ [API] 응답 데이터:', data);
+            return data;
+        } catch(jsonError) {
+            console.error('❌ [API] 응답 JSON 파싱 실패:', jsonError);
+            throw new Error('서버 응답을 읽을 수 없습니다.');
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // 1. 초기화 및 통합 검색
+    // -------------------------------------------------------------------------
+    async function init() {
+        initDateFilters();
+        await loadPriceSettings();
+        await loadAllClients();
+        await loadPayments();
+        await loadContracts();
+    }
+
+    async function loadAllClients() {
+        try {
+            const data = await apiCall('/payments-admin/search-clients');
+            allClientsCache = data.clients || [];
+        } catch(e) {
+            console.error("Client load error:", e);
+        }
+    }
+
+    window.searchAllClients = function(val, targetId) {
+        let listId = targetId === 'payCompany' ? 'payCompanyAuto' : 'contractCompanyAuto';
+        const list = document.getElementById(listId);
+        list.innerHTML = "";
+
+        if(!val || val.length < 1) { list.style.display = 'none'; return; }
+
+        const filtered = allClientsCache.filter(c => c.name.includes(val));
+        if(filtered.length > 0) {
+            list.style.display = 'block';
+            filtered.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'auto-item';
+
+                let tagClass = 'tag-corp';
+                if(c.type === 'lit') tagClass = 'tag-lit';
+                if(c.type === 'cons') tagClass = 'tag-cons';
+
+                div.innerHTML = `<span class="tag-info ${tagClass}">${c.info}</span><span class="ai-name">${c.name}</span>`;
+                div.onclick = () => {
+                    document.getElementById(targetId).value = c.name;
+                    list.style.display = 'none';
+                };
+                list.appendChild(div);
+            });
+        } else { list.style.display = 'none'; }
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. 매출 장부 로직
+    // -------------------------------------------------------------------------
+    async function loadPayments() {
+        const yearEl = document.getElementById('filterYear');
+        const monthEl = document.getElementById('filterMonth');
+        const filterY = yearEl ? yearEl.value : 'all';
+        const filterM = monthEl ? monthEl.value : 'all';
+        const searchVal = document.getElementById('searchTrans')?.value || '';
+
+        try {
+            const params = new URLSearchParams();
+            if (filterY !== 'all') params.append('year', filterY);
+            if (filterM !== 'all') params.append('month', filterM);
+            if (currentStatusFilter !== 'all') params.append('status', currentStatusFilter);
+            if (searchVal) params.append('search', searchVal);
+
+            const data = await apiCall(`/payments-admin?${params.toString()}`);
+            allPayments = data.payments || [];
+
+            // 통계 조회
+            const statsParams = new URLSearchParams();
+            if (filterY !== 'all') statsParams.append('year', filterY);
+            if (filterM !== 'all') statsParams.append('month', filterM);
+
+            const stats = await apiCall(`/payments-admin/stats?${statsParams.toString()}`);
+
+            document.getElementById('filteredRevenue').innerText = (stats.revenue || 0).toLocaleString() + " 원";
+            document.getElementById('statOverdue').innerText = (stats.overdueAmount || 0).toLocaleString() + " 원";
+            document.getElementById('statCount').innerText = (stats.totalCount || 0) + " 건";
+            document.getElementById('statContract').innerText = (stats.contractCount || 0) + " 개사";
+
+            renderPaymentTable(allPayments);
+        } catch (e) {
+            console.error("Load Error:", e);
+            alert('매출 데이터를 불러오는데 실패했습니다.');
+        }
+    }
+
+    function renderPaymentTable(data) {
+        const tbody = document.getElementById('transListBody');
+
+        let html = "";
+        if(data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#888;">내역이 없습니다.</td></tr>`;
+            return;
+        }
+
+        data.forEach(p => {
+            let dateStr = new Date(p.date).toLocaleDateString('ko-KR');
+            const amt = Number(p.amount||0).toLocaleString();
+
+            let typeBadge = `<span style="font-size:11px; background:#eee; padding:2px 6px; border-radius:4px;">일반자문</span>`;
+            if(p.plan === 'Enterprise') typeBadge = `<span class="status-badge st-ent">Enterprise</span>`;
+            else if(['Basic','Standard','Pro','Premium'].includes(p.plan || p.type)) {
+                typeBadge = `<span style="background:#f9f0ff; color:#722ed1; font-weight:700; padding:2px 6px; border-radius:4px;">${p.plan||p.type}</span>`;
+            }
+
+            let statusBadge = "";
+            let actionBtn = "";
+
+            if(p.status === 'paid') {
+                statusBadge = `<span class="status-badge st-paid">완료</span>`;
+                actionBtn = `<button class="btn-sm" onclick="openRefundConfirmModal('${p.docId}', ${p.amount})">환불/취소</button>`;
+            } else if(p.status === 'scheduled') {
+                statusBadge = `<span class="status-badge st-scheduled">청구됨</span>`;
+                actionBtn = `
+                    <button class="btn-sm btn-pay" onclick="updateStatus('${p.docId}', 'paid')">입금확인</button>
+                    <button class="btn-sm btn-overdue" onclick="updateStatus('${p.docId}', 'overdue')">미납</button>
+                    <button class="btn-sm btn-cancel" onclick="updateStatus('${p.docId}', 'cancelled')">취소</button>
+                `;
+            } else if(p.status === 'overdue') {
+                statusBadge = `<span class="status-badge st-overdue">미납</span>`;
+                actionBtn = `<button class="btn-sm btn-pay" onclick="updateStatus('${p.docId}', 'paid')">입금확인</button>`;
+            } else if(p.status === 'refund') {
+                statusBadge = `<span class="status-badge st-refund">환불됨</span>`;
+            } else if(p.status === 'cancelled') {
+                statusBadge = `<span class="status-badge st-cancel">취소됨</span>`;
+            }
+
+            html += `<tr>
+                <td>${dateStr}</td>
+                <td>${typeBadge}</td>
+                <td style="font-weight:600;">${p.companyName || '(미지정)'}</td>
+                <td style="color:#666;">${p.note || '-'}</td>
+                <td>${p.method || '-'}</td>
+                <td style="text-align:right; font-weight:700; ${p.status==='refund' || p.status==='cancelled'?'text-decoration:line-through; color:#999;':''}">${amt}원</td>
+                <td>${statusBadge}</td>
+                <td>${actionBtn}</td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    window.searchPaymentList = function(val) { loadPayments(); }
+
+    window.setStatusFilter = function(status, btn) {
+        currentStatusFilter = status;
+        document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadPayments();
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. 구독 회원 관리
+    // -------------------------------------------------------------------------
+    async function loadContracts() {
+        const tbody = document.getElementById('contractListBody');
+        const searchVal = document.getElementById('searchContract')?.value || '';
+
+        try {
+            const params = new URLSearchParams();
+            if (searchVal) params.append('search', searchVal);
+
+            const data = await apiCall(`/payments-admin/contracts?${params.toString()}`);
+            const contracts = data.contracts || [];
+
+            let html = "";
+
+            if(contracts.length === 0) {
+                html = `<tr><td colspan="10" style="text-align:center; padding:30px;">구독 회원이 없습니다.</td></tr>`;
+            } else {
+                contracts.forEach(u => {
+                    let costDisplay = u.customCost ? `<span style="font-weight:bold; color:#096dd9;">${Number(u.customCost).toLocaleString()}원</span>` : `<span style="color:#888;">기본단가</span>`;
+                    let endDate = u.contractEndDate ? new Date(u.contractEndDate).toLocaleDateString('ko-KR') : '-';
+                    let bizNum = u.bizNum || '-';
+
+                    let cycleBadge = `<span class="cycle-badge cy-mon">매월</span>`;
+                    if(u.billingCycle === 'annual') cycleBadge = `<span class="cycle-badge cy-ann">연납(선납)</span>`;
+
+                    html += `<tr>
+                        <td style="font-weight:bold;">${u.companyName}</td>
+                        <td style="font-size:12px; color:#555;">${bizNum}</td>
+                        <td>${u.ownerName || '-'}</td>
+                        <td>${u.phone || '-'}</td>
+                        <td><span class="status-badge st-basic">${u.plan}</span></td>
+                        <td>${cycleBadge}</td>
+                        <td>${costDisplay}</td>
+                        <td>${endDate}</td>
+                        <td><span style="color:#2c5bf2; font-weight:700;">구독중</span></td>
+                        <td>
+                            <button class="btn-sm btn-edit" onclick="openContractModal('${u.uid}', '${u.companyName}', '${u.plan}', '${u.customCost||''}', '${u.contractEndDate||''}', '${u.billingCycle||'monthly'}', '${bizNum}')">수정</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+
+            tbody.innerHTML = html;
+        } catch(e) {
+            console.error(e);
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:#ff4d4f;">오류: ${e.message}</td></tr>`;
+        }
+    }
+
+    window.generateMonthlyBills = async function() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = now.getMonth() + 1;
+
+        if(!confirm(`${y}년 ${m}월 정기결제 청구서를 생성하시겠습니까?\n(이미 생성된 기업 및 '연납' 회원은 제외됩니다)`)) return;
+
+        try {
+            const data = await apiCall('/payments-admin/generate-monthly', { method: 'POST' });
+            alert(`완료되었습니다. 신규: ${data.generated}건`);
+            loadPayments();
+        } catch(e) {
+            alert('오류: ' + e.message);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. 모달 및 저장 로직
+    // -------------------------------------------------------------------------
+    window.switchTab = function(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
+        if(tabName === 'transactions') { document.getElementById('tabTransactions').classList.add('active'); loadPayments(); }
+        else if(tabName === 'contracts') { document.getElementById('tabContracts').classList.add('active'); loadContracts(); }
+    }
+
+    window.openPaymentModal = function() {
+        document.getElementById('payCompany').value = '';
+        document.getElementById('payAmount').value = '';
+        document.getElementById('payType').value = 'advisory';
+        document.getElementById('payMethod').value = 'Transfer';
+        document.getElementById('payStatus').value = 'scheduled';
+        document.getElementById('paymentModal').style.display = 'block';
+    }
+
+    window.savePayment = async function() {
+        const company = document.getElementById('payCompany').value;
+        const type = document.getElementById('payType').value;
+        const amount = Number(document.getElementById('payAmount').value.replace(/,/g,''));
+        const status = document.getElementById('payStatus').value;
+        const method = document.getElementById('payMethod').value;
+
+        if(!company || !amount) { alert("기업명과 금액을 입력해주세요."); return; }
+
+        try {
+            await apiCall('/payments-admin', {
+                method: 'POST',
+                body: JSON.stringify({
+                    companyName: company,
+                    type: type === 'advisory' ? 'advisory' : 'subscription',
+                    plan: type,
+                    amount: amount,
+                    method: method,
+                    status: status,
+                    note: '수동 등록'
+                })
+            });
+
+            alert("등록되었습니다.");
+            closeModal('paymentModal');
+            loadPayments();
+        } catch(e) { alert("실패: " + e.message); }
+    }
+
+    window.openContractModal = function(uid, name, plan, cost, endDate, cycle, bizNum) {
+        document.getElementById('contractUid').value = uid || '';
+        document.getElementById('contractCompany').value = name || '';
+        document.getElementById('contractPlan').value = plan || 'Basic';
+        document.getElementById('contractCost').value = cost ? Number(cost).toLocaleString() : '';
+        document.getElementById('contractEnd').value = endDate && endDate !== '-' ? endDate : '';
+        document.getElementById('contractCycle').value = cycle || 'monthly';
+        document.getElementById('contractBizNum').value = (bizNum && bizNum !== '-') ? bizNum : '';
+        document.getElementById('contractModal').style.display = 'block';
+    }
+
+    window.saveContract = async function() {
+        const uid = document.getElementById('contractUid').value;
+        const name = document.getElementById('contractCompany').value;
+        const bizNum = document.getElementById('contractBizNum').value;
+        const plan = document.getElementById('contractPlan').value;
+        const cycle = document.getElementById('contractCycle').value;
+        const costStr = document.getElementById('contractCost').value.replace(/,/g,'');
+        const cost = costStr ? Number(costStr) : null;
+        const end = document.getElementById('contractEnd').value;
+
+        if(!uid) { alert("회원을 선택해주세요."); return; }
+        if(!name) { alert("기업명을 입력하세요."); return; }
+
+        if(plan === 'Enterprise' && cycle === 'monthly' && !cost) {
+            alert("Enterprise 플랜(월납)은 월 결제 금액을 반드시 입력해야 합니다.");
+            return;
+        }
+
+        try {
+            await apiCall(`/payments-admin/contracts/${uid}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    plan: plan,
+                    customCost: cost,
+                    contractEndDate: end || null,
+                    billingCycle: cycle,
+                    bizNum: bizNum || null
+                })
+            });
+
+            alert("수정되었습니다.");
+            closeModal('contractModal');
+            loadContracts();
+        } catch(e) { alert("오류: "+e.message); }
+    }
+
+    window.updateStatus = async function(docId, newStatus) {
+        if(!confirm("상태를 변경하시겠습니까?")) return;
+        try {
+            await apiCall(`/payments-admin/${docId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ status: newStatus })
+            });
+            loadPayments();
+        } catch(e) { alert("오류: " + e.message); }
+    }
+
+    window.openRefundConfirmModal = function(id, amount) {
+        document.getElementById('refundConfirmModal').style.display = 'block';
+        document.getElementById('rcDocId').value = id;
+        document.getElementById('rcOriginalAmt').value = amount;
+        document.getElementById('rcDisplayAmt').value = Number(amount).toLocaleString() + "원";
+        document.getElementById('rcAmount').value = '';
+    }
+
+    window.executeRefund = async function() {
+        const id = document.getElementById('rcDocId').value;
+        const realRefundStr = document.getElementById('rcAmount').value.replace(/,/g, '');
+        const realRefund = realRefundStr ? Number(realRefundStr) : 0;
+
+        if(!realRefund) { alert("환불 금액을 입력해주세요."); return; }
+        if(!confirm(`실제 환불액 ${realRefund.toLocaleString()}원으로 처리하시겠습니까?\n매출은 (원금 - ${realRefund.toLocaleString()})원으로 집계됩니다.`)) return;
+
+        try {
+            await apiCall(`/payments-admin/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    status: 'refund',
+                    refundAmount: realRefund
+                })
+            });
+
+            alert("처리되었습니다.");
+            closeModal('refundConfirmModal');
+            loadPayments();
+        } catch(e) { alert("오류: " + e.message); }
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. 서비스 단가 설정
+    // -------------------------------------------------------------------------
+    async function loadPriceSettings() {
+        try {
+            const data = await apiCall('/payments-admin/service-prices');
+            servicePrices = {};
+
+            (data.prices || []).forEach(p => {
+                servicePrices[p.type] = p.price;
+            });
+
+            document.getElementById('priceOneTime').value = (servicePrices.oneTime || 110000).toLocaleString();
+            document.getElementById('priceBasic').value = (servicePrices.Basic || 110000).toLocaleString();
+            document.getElementById('priceStandard').value = (servicePrices.Standard || 330000).toLocaleString();
+            document.getElementById('pricePro').value = (servicePrices.Pro || 550000).toLocaleString();
+            document.getElementById('pricePremium').value = (servicePrices.Premium || 990000).toLocaleString();
+        } catch(e) {
+            console.error("Price load error:", e);
+        }
+    }
+
+    window.openPriceModal = function() {
+        document.getElementById('priceModal').style.display = 'block';
+    }
+
+    window.savePriceSettings = async function() {
+        const prices = {
+            oneTime: Number(document.getElementById('priceOneTime').value.replace(/,/g,'')),
+            Basic: Number(document.getElementById('priceBasic').value.replace(/,/g,'')),
+            Standard: Number(document.getElementById('priceStandard').value.replace(/,/g,'')),
+            Pro: Number(document.getElementById('pricePro').value.replace(/,/g,'')),
+            Premium: Number(document.getElementById('pricePremium').value.replace(/,/g,''))
+        };
+
+        console.log('📝 [단가 설정] 저장 시작');
+        console.log('전송할 데이터:', prices);
+
+        try {
+            console.log('🚀 [단가 설정] API 호출 중...');
+
+            const result = await apiCall('/payments-admin/service-prices', {
+                method: 'PUT',
+                body: JSON.stringify({ prices })
+            });
+
+            console.log('✅ [단가 설정] API 응답:', result);
+
+            alert('저장되었습니다.');
+            closeModal('priceModal');
+            await loadPriceSettings();
+        } catch(e) {
+            console.error('❌ [단가 설정] 오류 발생:', e);
+            console.error('오류 상세:', e.message);
+            console.error('오류 스택:', e.stack);
+            alert('오류: ' + e.message);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. 유틸리티
+    // -------------------------------------------------------------------------
+    function initDateFilters() {
+        const y = document.getElementById('filterYear');
+        const cy = new Date().getFullYear();
+        y.innerHTML = `<option value="all">전체 연도</option>`;
+        for(let i=cy; i>=2023; i--) y.innerHTML += `<option value="${i}">${i}년</option>`;
+    }
+
+    window.closeModal = function(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    window.formatCurrency = function(input) {
+        let val = input.value.replace(/[^0-9]/g, '');
+        input.value = val ? Number(val).toLocaleString() : '';
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. 구독 회원 등록/수정
+    // -------------------------------------------------------------------------
+    window.openContractModal = function(uid, name, plan, cost, end, cycle, bizNum) {
+        editingUserId = uid || null;
+        document.getElementById('contractCompany').value = name || '';
+        document.getElementById('contractBizNum').value = bizNum || '';
+        document.getElementById('contractPlan').value = plan || 'none';
+        document.getElementById('contractCycle').value = cycle || 'monthly';
+        document.getElementById('contractCost').value = cost ? Number(cost).toLocaleString() : '';
+        document.getElementById('contractEnd').value = end || '';
+        document.getElementById('contractModal').style.display = 'block';
+    }
+
+    window.saveContract = async function() {
+        const name = document.getElementById('contractCompany').value;
+        const bizNum = document.getElementById('contractBizNum').value;
+        const plan = document.getElementById('contractPlan').value;
+        const cycle = document.getElementById('contractCycle').value;
+        const costStr = document.getElementById('contractCost').value.replace(/,/g, '');
+        const cost = costStr ? Number(costStr) : null;
+        const end = document.getElementById('contractEnd').value;
+
+        if (!name) {
+            alert("기업명을 입력하세요.");
+            return;
+        }
+
+        if (plan === 'Enterprise' && cycle === 'monthly' && !cost) {
+            alert("Enterprise 플랜(월납)은 월 결제 금액을 반드시 입력해야 합니다.");
+            return;
+        }
+
+        try {
+            if (editingUserId) {
+                // 기존 회원 수정
+                await apiCall(`/payments-admin/contracts/${editingUserId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        plan: plan,
+                        customCost: cost,
+                        contractEndDate: end,
+                        billingCycle: cycle,
+                        bizNum: bizNum
+                    })
+                });
+                alert("수정되었습니다.");
+            } else {
+                // 신규 등록 - users 테이블에서 기업명으로 검색
+                const usersData = await apiCall('/users');
+                const users = usersData.users || [];
+                const foundUser = users.find(u => u.company_name === name);
+
+                if (!foundUser) {
+                    alert("해당 기업명으로 등록된 회원을 찾을 수 없습니다.\n먼저 기업회원을 등록해주세요.");
+                    return;
+                }
+
+                // 찾은 유저 업데이트
+                await apiCall(`/payments-admin/contracts/${foundUser.uid}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        plan: plan,
+                        customCost: cost,
+                        contractEndDate: end,
+                        billingCycle: cycle,
+                        bizNum: bizNum
+                    })
+                });
+                alert("등록되었습니다.");
+            }
+
+            closeModal('contractModal');
+            loadContracts();
+        } catch(e) {
+            alert("오류: " + e.message);
+        }
+    }
+
+    // 초기화
+    init();
+</script>
+</body>
+</html>

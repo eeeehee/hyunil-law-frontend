@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경영 �??�무 ?�합 리포??- 법무그룹 ?�일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <style>
+        /* [기본 ?��??? */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, select { font-family: inherit; }
+
+        /* ?�이?�바 */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; letter-spacing: 1px; }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        /* 메인 컨텐�?*/
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; max-width: 1600px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; display: flex; align-items: center; gap: 10px; }
+        .page-badge { background: #391085; color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 20px; }
+
+        /* ?�터 ?�바 */
+        .filter-bar { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+        .filter-select { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; font-size: 14px; font-weight: 600; }
+        .btn-search { height: 40px; background: #1a1a2e; color: #fff; border: none; border-radius: 6px; padding: 0 20px; font-weight: 700; cursor: pointer; }
+
+        /* ?�계 카드 그리??*/
+        .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #fff; padding: 25px; border-radius: 12px; border: 1px solid #e5e5e5; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .sc-title { font-size: 13px; color: #888; font-weight: 700; margin-bottom: 10px; }
+        .sc-value { font-size: 28px; font-weight: 800; color: #333; }
+        .sc-sub { font-size: 12px; margin-top: 5px; font-weight: 500; }
+        
+        .text-blue { color: #2c5bf2; }
+        .text-green { color: #52c41a; }
+        .text-red { color: #ff4d4f; }
+        .text-orange { color: #fa8c16; }
+
+        /* 차트 ?�역 */
+        .chart-section { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .chart-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; height: 400px; }
+        
+        /* ?�합 ?�이�?*/
+        .table-box { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow: hidden; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th { background: #f9f9f9; padding: 12px 15px; text-align: left; color: #555; font-weight: 700; border-bottom: 1px solid #eee; }
+        .data-table td { padding: 12px 15px; border-bottom: 1px solid #eee; color: #333; }
+        .data-table tr:hover { background: #fafafa; }
+
+        /* 구분 뱃�? */
+        .source-badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-block; width: 60px; text-align: center; }
+        .src-corp { background: #f0f5ff; color: #2c5bf2; border: 1px solid #adc6ff; }
+        .src-lit { background: #fff2e8; color: #d4380d; border: 1px solid #ffbb96; }
+        
+        .type-inc { color: #2c5bf2; } /* ?�입 */
+        .type-exp { color: #cf1322; } /* 지�?비용 */
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">?��</span> 기업?�문?�터</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupCorp" class="submenu">
+                <li><a href="/pages/admin/admin.html">?�� ?�문 관�?/a></li>
+                <li><a href="/pages/admin/admin_requests.html">?�� ?�청 관리함</a></li>
+                <li><a href="/pages/admin/admin_report.html">?�� 리포??발송</a></li>
+                <li><a href="/pages/admin/admin_corpbilling.html">?�� ?�문�?�?��/발송</a></li>
+                <li><a href="/pages/admin/admin_members.html">?�� ?�원/기업 관�?/a></li>
+                <li><a href="/pages/admin/admin_payments.html">?�� 매출/결제 관�?/a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
+                <div><span class="menu-icon">?�️</span> ?�자?�송/?�건</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupLitigation" class="submenu">
+                <li><a href="/pages/admin/admin_litigation.html">?�� ?�자?�송 관�?/a></li>
+                <li><a href="/pages/admin/admin_billing.html">?�� 비용/�?�� 관�?/a></li>
+            </ul>
+        </li>
+        <div style="margin: 20px 0; border-top: 1px solid #2c2c45;"></div>
+        
+        <li class="menu-category open active" style="background:#2c2c45;">
+            <div style="color:#fff;"><span class="menu-icon">?��</span> 경영/?�무 ?�합</div>
+        </li>
+        <ul class="submenu" style="display:block;">
+            <li><a href="/pages/admin/admin_finance.html" class="active" style="color:#fff; font-weight:700;">?�� ?�합 매출/지�?리포??/a></li>
+        </ul>
+        
+        <div style="margin: 20px 0; border-top: 1px solid #2c2c45;"></div>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
+        <li><a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return; 
+        if (submenu.style.display === "block") { submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active"); } 
+        else { submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active"); }
+    }
+</script>
+
+<main class="main-content">
+    <div class="page-header">
+        <h2 class="page-title">경영 �??�무 ?�합 리포??<span class="page-badge">Total Finance</span></h2>
+        <div style="font-size:13px; color:#666;">
+            * 기업?�문 매출�??�송/?�건 ?�임료�? ?�산?�여 보여줍니??
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <select id="filterYear" class="filter-select">
+            <script>
+                const y = new Date().getFullYear();
+                for(let i=y; i>=2023; i--) document.write(`<option value="${i}">${i}??/option>`);
+            </script>
+        </select>
+        <select id="filterMonth" class="filter-select">
+            <option value="all">?�체 ??(1~12??</option>
+            <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}??/option>`);</script>
+        </select>
+        <button class="btn-search" onclick="loadAllFinanceData()">?�� ?�이??조회</button>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="sc-title">?�� �?매출 (?�입)</div>
+            <div class="sc-value text-blue" id="totalRevenue">0 ??/div>
+            <div class="sc-sub">기업?�문 + ?�송?�임�?/div>
+        </div>
+        <div class="stat-card">
+            <div class="sc-title">?�� 미수�?(�?�� �?</div>
+            <div class="sc-value text-orange" id="totalReceivable">0 ??/div>
+            <div class="sc-sub">?��? ?�정??금액</div>
+        </div>
+        <div class="stat-card">
+            <div class="sc-title">?�� �?지�?(?�비/비용)</div>
+            <div class="sc-value text-red" id="totalExpense">0 ??/div>
+            <div class="sc-sub">?��??�, ?�달�???/div>
+        </div>
+        <div class="stat-card">
+            <div class="sc-title">?�� ?�이??(추정)</div>
+            <div class="sc-value text-green" id="netProfit">0 ??/div>
+            <div class="sc-sub">매출 - 지�?/div>
+        </div>
+    </div>
+
+    <div class="chart-section">
+        <div class="chart-box">
+            <h4>?�� ?�별 매출 추이</h4>
+            <canvas id="revenueChart"></canvas>
+        </div>
+        <div class="chart-box">
+            <h4>?�� 매출 구성�?(?�문 vs ?�송)</h4>
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <div style="padding:15px; font-weight:700; border-bottom:1px solid #eee;">?�� ?�합 거래 ?�역 (최신??</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>?�짜</th>
+                    <th>출처</th>
+                    <th>구분</th>
+                    <th>?�용 (기업�??�건�?</th>
+                    <th>금액</th>
+                    <th>?�태</th>
+                </tr>
+            </thead>
+            <tbody id="financeTableBody">
+                <tr><td colspan="6" style="text-align:center; padding:30px;">조회 버튼???�러 ?�이?��? 불러?�세??</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script type="module">
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+        
+        (async () => {
+            if (!requireAuth()) return;
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                
+                if (!checkRole(['master', 'admin', 'general_manager'])) {
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+                const expensesData = await expenses.getAll();
+                console.log('Expenses:', expensesData);
+            } catch (error) {
+                console.error('?�이지 로드 ?�러:', error);
+                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
+            }
+        })();
+        
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('로그?�웃 ?�러:', error);
+            }
+        };
+    </script>
+</body>
+</html>

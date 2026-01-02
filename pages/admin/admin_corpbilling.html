@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>청구서/영수증 자동화 센터 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; letter-spacing: 1px; }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
+        .page-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; }
+        .stat-label { font-size: 12px; color: #888; font-weight: 600; margin-bottom: 8px; }
+        .stat-value { font-size: 24px; font-weight: 800; color: #1a1a1a; }
+        .text-blue { color: #2c5bf2; }
+        .text-green { color: #52c41a; }
+        .text-red { color: #ff4d4f; }
+
+        .toolbar-box { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
+        .filter-item { display: flex; flex-direction: column; gap: 6px; }
+        .filter-label { font-size: 12px; font-weight: 700; color: #555; }
+        .input-control { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 12px; min-width: 160px; font-size: 13px; }
+        .btn-search { height: 40px; padding: 0 20px; background: #1a1a2e; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+        .btn-manual { height: 40px; padding: 0 20px; background: #2c5bf2; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; margin-left: auto; }
+        .btn-manual:hover { background: #1b44c9; }
+
+        .table-container { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow: hidden; }
+        .billing-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .billing-table th { background: #f9fafb; padding: 15px; text-align: left; font-weight: 600; color: #555; border-bottom: 1px solid #eee; }
+        .billing-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; color: #333; vertical-align: middle; }
+        .billing-table tr:hover { background: #f8f9fa; }
+
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-block; }
+        .bd-bill { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; }
+        .bd-receipt { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center; }
+        .modal-box { background: #fff; width: 550px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333; }
+        .close-modal { float: right; font-size: 24px; cursor: pointer; color: #999; }
+
+        .form-row { margin-bottom: 15px; }
+        .form-label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 13px; color: #555; }
+        .form-input { width: 100%; height: 42px; border: 1px solid #ddd; border-radius: 6px; padding: 0 12px; }
+        .form-textarea { width: 100%; height: 100px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; resize: vertical; }
+        .btn-full { width: 100%; height: 50px; background: #2c5bf2; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 10px; }
+        .btn-full:hover { background: #1b44c9; }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category open active" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">🏢</span> 기업자문센터</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupCorp" class="submenu" style="display:block;">
+                <li><a href="admin.html">📝 자문 관리 (전체)</a></li>
+                <li><a href="admin_requests.html">📩 요청 관리함</a></li>
+                <li><a href="admin_report.html">📊 리포트 발송</a></li>
+                <li><a href="admin_corpbilling.html" class="active">💸 자문료 청구/발송</a></li>
+                <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
+                <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
+                <div><span class="menu-icon">⚖️</span> 전자소송/사건</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupLitigation" class="submenu">
+                <li><a href="admin_litigation.html">🔎 전자소송 데이터 확인</a></li>
+                <li><a href="admin_clients.html">📇 당사자(고객) 관리</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupSpecial', this)">
+                <div><span class="menu-icon">📞</span> 파산/추심 센터</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupSpecial" class="submenu">
+                <li><a href="admin_collection_consult.html">💰 채권 추심 상담</a></li>
+                <li><a href="admin_collection.html">💰 채권 추심 사건</a></li>
+                <li><a href="admin_pasan_consult.html">📉 파산/회생 상담</a></li>
+                <li><a href="admin_pasan.html">📉 파산/회생 사건</a></li>
+            </ul>
+        </li>
+
+        <li class="menu-divider"></li>
+
+        <li><a href="admin_settings.html" class="menu-link">⚙️ 환경 설정</a></li>
+        <li class="menu-divider"></li>
+        <li><a href="/" class="menu-link">🏢 기업자문 홈페이지</a></li>
+        <li><a href="../user/dashboard.html" class="menu-link" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return;
+        if (submenu.style.display === "block") { submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active"); }
+        else { submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active"); }
+    }
+</script>
+
+<main class="main-content">
+    <h2 class="page-title">청구서 및 영수증 자동화 센터</h2>
+    <p style="color:#666; margin-bottom:20px;">메일 발송 현황을 실시간으로 모니터링하고 수동 청구를 관리합니다.</p>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">이번달 발송된 청구서</div>
+            <div class="stat-value text-blue" id="statBillCount">0 건</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">이번달 발송된 영수증</div>
+            <div class="stat-value text-green" id="statReceiptCount">0 건</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">매출 미연동 건</div>
+            <div class="stat-value" id="statPendingCount">0 건</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">발송 실패 / 오류</div>
+            <div class="stat-value text-red" id="statFailCount">0 건</div>
+        </div>
+    </div>
+
+    <div class="toolbar-box">
+        <div class="filter-item">
+            <label class="filter-label">기간 설정 (Start)</label>
+            <input type="date" id="filterStart" class="input-control">
+        </div>
+        <div class="filter-item">
+            <label class="filter-label">기간 설정 (End)</label>
+            <input type="date" id="filterEnd" class="input-control">
+        </div>
+        <div class="filter-item">
+            <label class="filter-label">기업명 검색</label>
+            <input type="text" id="searchCompany" class="input-control" placeholder="기업명 입력">
+        </div>
+        <div class="filter-item">
+            <label class="filter-label">&nbsp;</label>
+            <button class="btn-search" onclick="loadBillingHistory()">조회하기</button>
+        </div>
+        <button class="btn-manual" onclick="openManualModal()">✉️ 수동 청구서 작성</button>
+    </div>
+
+    <div class="table-container">
+        <table class="billing-table">
+            <thead>
+                <tr>
+                    <th>발송 일시</th>
+                    <th>유형</th>
+                    <th>기업명 (수신자)</th>
+                    <th>제목</th>
+                    <th>금액 (원)</th>
+                    <th>매출장부 연동</th>
+                    <th>발송 상태</th>
+                </tr>
+            </thead>
+            <tbody id="billingListBody">
+                <tr><td colspan="7" style="text-align:center; padding:50px; color:#888;">데이터를 불러오는 중입니다...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div id="manualModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="modal-title">✉️ 수동 청구서 작성 및 발송 <span class="close-modal" onclick="closeModal()">✕</span></h3>
+
+        <div class="form-row">
+            <label class="form-label">수신 기업명</label>
+            <input type="text" id="manualCompany" class="form-input" placeholder="기업명 입력">
+        </div>
+
+        <div class="form-row">
+            <label class="form-label">수신 이메일</label>
+            <input type="email" id="manualEmail" class="form-input" placeholder="example@company.com">
+        </div>
+
+        <div class="form-row" style="display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label class="form-label">청구 유형</label>
+                <select id="manualType" class="form-input">
+                    <option value="BILL">청구서 (Invoice)</option>
+                    <option value="RECEIPT">영수증 (Receipt)</option>
+                </select>
+            </div>
+            <div style="flex:1;">
+                <label class="form-label">청구 금액 (원)</label>
+                <input type="text" id="manualAmount" class="form-input" placeholder="숫자만 입력" oninput="formatCurrency(this)">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label class="form-label">문서 제목</label>
+            <input type="text" id="manualTitle" class="form-input" placeholder="예: 12월 추가 자문료 청구의 건">
+        </div>
+
+        <div class="form-row">
+            <label class="form-label">상세 내용 (메일 본문/비고)</label>
+            <textarea id="manualNote" class="form-textarea" placeholder="청구 상세 내용 또는 전달할 메시지를 입력하세요."></textarea>
+        </div>
+
+        <div style="background:#f0f7ff; padding:10px; border-radius:6px; font-size:12px; color:#096dd9; margin-bottom:15px;">
+            ℹ️ <strong>자동 연동:</strong> 발송 완료 시, 해당 내용을 매출 장부(CMS 관리)에 자동 등록할지 물어봅니다.
+        </div>
+
+        <button class="btn-full" onclick="sendManualInvoice()">발송하기</button>
+    </div>
+</div>
+
+<script type="module">
+    import { users, billing, admin } from '/js/api.js';
+
+    // 로그인 확인
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        location.href = '../public/login.html';
+    }
+
+    // 권한 확인 및 초기화
+    (async () => {
+        try {
+            const userData = await users.getMe();
+            const adminRoles = ['master', 'admin'];
+            if (!adminRoles.includes(userData.role)) {
+                alert('관리자 권한이 없습니다.');
+                location.href = '../user/dashboard.html';
+                return;
+            }
+
+            initDateFilter();
+            await updateStats();
+            await loadBillingHistory();
+        } catch (error) {
+            console.error('초기화 에러:', error);
+            alert('로그인 정보를 확인할 수 없습니다.');
+            location.href = '../public/login.html';
+        }
+    })();
+
+    function initDateFilter() {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2,'0');
+        document.getElementById('filterStart').value = `${y}-${m}-01`;
+        document.getElementById('filterEnd').value = today.toISOString().split('T')[0];
+    }
+
+    async function updateStats() {
+        try {
+            const stats = await billing.getStats();
+            document.getElementById('statBillCount').innerText = (stats.billCount || 0) + ' 건';
+            document.getElementById('statReceiptCount').innerText = (stats.receiptCount || 0) + ' 건';
+            document.getElementById('statPendingCount').innerText = (stats.pendingCount || 0) + ' 건';
+            document.getElementById('statFailCount').innerText = (stats.failCount || 0) + ' 건';
+        } catch (error) {
+            console.error('통계 조회 에러:', error);
+        }
+    }
+
+    window.loadBillingHistory = async function() {
+        const tbody = document.getElementById('billingListBody');
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px;">로딩 중...</td></tr>`;
+
+        const startDate = document.getElementById('filterStart').value;
+        const endDate = document.getElementById('filterEnd').value;
+        const companyName = document.getElementById('searchCompany').value;
+
+        try {
+            const params = {};
+            if (startDate) params.startDate = startDate;
+            if (endDate) params.endDate = endDate;
+            if (companyName) params.companyName = companyName;
+
+            const data = await billing.getLogs(params);
+            const logs = data.logs || [];
+
+            let html = "";
+
+            logs.forEach(d => {
+                const date = new Date(d.sentAt).toLocaleString();
+                const typeBadge = d.type === 'BILL'
+                    ? `<span class="badge bd-bill">청구서</span>`
+                    : `<span class="badge bd-receipt">영수증</span>`;
+
+                const statusText = d.status === 'sent' ? '✅ 발송성공' : '❌ 실패';
+                const linkedText = d.linkedToPayment
+                    ? `<span style="color:#52c41a; font-weight:bold;">✔ 연동됨</span>`
+                    : `<span style="color:#999;">미연동</span>`;
+
+                html += `<tr>
+                    <td>${date}</td>
+                    <td>${typeBadge}</td>
+                    <td style="font-weight:bold;">${d.companyName}</td>
+                    <td>${d.title}</td>
+                    <td style="font-weight:700;">${Number(d.amount).toLocaleString()}원</td>
+                    <td>${linkedText}</td>
+                    <td>${statusText}</td>
+                </tr>`;
+            });
+
+            if(html === "") html = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#888;">조회된 내역이 없습니다.</td></tr>`;
+            tbody.innerHTML = html;
+
+        } catch(e) {
+            console.error(e);
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">데이터 로드 실패</td></tr>`;
+        }
+    }
+
+    window.openManualModal = function() {
+        document.getElementById('manualCompany').value = '';
+        document.getElementById('manualEmail').value = '';
+        document.getElementById('manualAmount').value = '';
+        document.getElementById('manualTitle').value = '';
+        document.getElementById('manualNote').value = '';
+        document.getElementById('manualModal').style.display = 'flex';
+    }
+
+    window.closeModal = function() {
+        document.getElementById('manualModal').style.display = 'none';
+    }
+
+    window.sendManualInvoice = async function() {
+        const companyName = document.getElementById('manualCompany').value;
+        const email = document.getElementById('manualEmail').value;
+        const type = document.getElementById('manualType').value;
+        const amtStr = document.getElementById('manualAmount').value.replace(/,/g,'');
+        const title = document.getElementById('manualTitle').value;
+        const note = document.getElementById('manualNote').value;
+
+        if(!companyName || !email || !amtStr || !title) {
+            alert("필수 정보를 모두 입력해주세요.");
+            return;
+        }
+        const amount = Number(amtStr);
+
+        if(!confirm(`[${companyName}] 앞으로 메일을 발송하시겠습니까?`)) return;
+
+        try {
+            let registerToPayment = false;
+
+            if(type === 'BILL') {
+                registerToPayment = confirm(`매출/CMS 관리 페이지(장부)에\n'${title}' 건을 '청구됨(Scheduled)' 상태로 자동 등록하시겠습니까?\n\n(이미 등록했다면 '취소'를 누르세요)`);
+            } else if (type === 'RECEIPT') {
+                registerToPayment = confirm(`영수증 발송 건입니다. 매출 장부에 '결제완료(Paid)' 상태로 등록하시겠습니까?`);
+            }
+
+            await billing.sendAndRegister({
+                companyName,
+                email,
+                type,
+                amount,
+                title,
+                note,
+                registerToPayment
+            });
+
+            alert("✅ 메일이 성공적으로 발송되었습니다.");
+            closeModal();
+            loadBillingHistory();
+            updateStats();
+
+        } catch(e) {
+            console.error(e);
+            alert("발송 실패: " + (e.message || '알 수 없는 오류'));
+        }
+    }
+
+    window.formatCurrency = function(e) {
+        e.value = e.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+</script>
+
+</body>
+</html>
