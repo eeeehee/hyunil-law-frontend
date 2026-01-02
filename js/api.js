@@ -1,6 +1,6 @@
 // js/api.js - Firebase를 대체하는 REST API 클라이언트
 
-const API_BASE_URL = 'https://hyunil-law-backend.onrender.com';
+const API_BASE_URL = 'https://hyunil-law-backend.onrender.com/api';
 
 // 로컬 스토리지에서 토큰 가져오기
 function getToken() {
