@@ -186,7 +186,7 @@
         let selectedDocId = null;
 
         // 로그인 확인
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         if (!token) {
             location.href = '../public/login.html';
         }

@@ -802,7 +802,7 @@ alert(`✅ 등록 완료: ${name}`);
 
         try {
             // 기업 수동 등록은 /auth/signup 을 사용하되(백엔드 구조상), 관리자 세션이 덮이지 않도록 토큰을 백업/복구합니다.
-    const prevToken = localStorage.getItem('token');
+    const prevToken = localStorage.getItem('auth_token');
     const prevUser = localStorage.getItem('current_user');
 
     const signupResp = await auth.signup({

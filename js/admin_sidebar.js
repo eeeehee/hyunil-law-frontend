@@ -2,13 +2,10 @@
 // MariaDB API 연동 버전
 
 function renderAdminSidebar() {
-    // 토큰 체크 - 토큰이 없으면 로그인 페이지로 리다이렉트
+    // 토큰 체크 - 토큰이 없으면 사이드바만 렌더링하고 각 페이지에서 처리
     const token = localStorage.getItem('auth_token');
     if (!token) {
-        console.warn('⚠️ 관리자 토큰이 없습니다. 로그인 페이지로 이동합니다.');
-        alert('로그인이 필요합니다.');
-        location.href = '../public/login.html';
-        return;
+        console.warn('⚠️ 관리자 토큰이 없습니다. 각 페이지에서 권한 체크를 진행합니다.');
     }
 
     // 스타일 주입
