@@ -343,21 +343,21 @@
             const heroBtn = document.getElementById('heroStartBtn');
             
             if (user) {
-                if(navBtn) { navBtn.innerText = "대시보드"; navBtn.href = "/pages/user/dashboard.html"; navBtn.style.color = "#2c5bf2"; navBtn.style.fontWeight = "800"; }
-                if(heroBtn) { heroBtn.innerText = "대시보드 바로가기"; heroBtn.href = "/pages/user/dashboard.html"; }
-                
+                if(navBtn) { navBtn.innerText = "대시보드"; navBtn.href = "pages/user/dashboard.html"; navBtn.style.color = "#2c5bf2"; navBtn.style.fontWeight = "800"; }
+                if(heroBtn) { heroBtn.innerText = "대시보드 바로가기"; heroBtn.href = "pages/user/dashboard.html"; }
+
                 // 관리자면 admin.html로 (master는 최상위 권한)
                 const isAdmin = user.role === 'master' || user.role === 'admin' || user.role === 'general_manager' || user.role === 'lawyer';
                 if (isAdmin) {
-                    if(navBtn) navBtn.href = "/pages/admin/admin.html";
-                    if(heroBtn) heroBtn.href = "/pages/admin/admin.html";
+                    if(navBtn) navBtn.href = "pages/admin/admin.html";
+                    if(heroBtn) heroBtn.href = "pages/admin/admin.html";
                 }
             }
         } else {
             const navBtn = document.getElementById('navLoginBtn');
             const heroBtn = document.getElementById('heroStartBtn');
-            if(navBtn) { navBtn.innerText = "로그인"; navBtn.href = "/pages/public/login.html"; navBtn.style.color = ""; }
-            if(heroBtn) { heroBtn.innerText = "시작하기"; heroBtn.href = "/pages/public/login.html"; }
+            if(navBtn) { navBtn.innerText = "로그인"; navBtn.href = "pages/public/login.html"; navBtn.style.color = ""; }
+            if(heroBtn) { heroBtn.innerText = "시작하기"; heroBtn.href = "pages/public/login.html"; }
         }
 
         // 모달 도입 문의 제출
