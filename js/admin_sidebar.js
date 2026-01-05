@@ -56,9 +56,13 @@ function renderAdminSidebar() {
                     <span class="profile-name" id="sb_userName">Guest</span>
                     <span class="profile-email" id="sb_userEmail">로그인 필요</span>
                     <span class="profile-role" id="sb_userRole"></span>
+                    <!-- legacy id 호환 (admin.html 일부 코드가 찾을 수 있음) -->
+                    <span id="adminUserName" style="display:none;"></span>
+                    <span id="adminUserEmail" style="display:none;"></span>
+                    <span id="adminUserRole" style="display:none;"></span>
                 </div>
             </div>
-            <button class="btn-logout-mini" onclick="adminLogout()">로그아웃</button>
+            <button class="btn-logout-mini" id="adminLogoutBtn" onclick="adminLogout()">로그아웃</button>
         </div>
 
         <ul class="sidebar-menu">
@@ -135,6 +139,20 @@ function renderAdminSidebar() {
 
     // 사용자 정보 로드 및 표시
     loadAdminUserInfo();
+
+    // legacy id 동기화 (adminUserName/adminUserEmail/adminUserRole)
+    try {
+        const sbName = document.getElementById('sb_userName');
+        const sbEmail = document.getElementById('sb_userEmail');
+        const sbRole = document.getElementById('sb_userRole');
+        const lgName = document.getElementById('adminUserName');
+        const lgEmail = document.getElementById('adminUserEmail');
+        const lgRole = document.getElementById('adminUserRole');
+        if (sbName && lgName) lgName.textContent = sbName.textContent;
+        if (sbEmail && lgEmail) lgEmail.textContent = sbEmail.textContent;
+        if (sbRole && lgRole) lgRole.textContent = sbRole.textContent;
+    } catch (e) {}
+
 }
 
 // 카테고리 토글 함수
