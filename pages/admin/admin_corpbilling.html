@@ -183,6 +183,12 @@
 </div>
 
 <script src="../../js/admin_sidebar.js"></script>
+<script>
+    // 사이드바 즉시 렌더링
+    if (typeof renderAdminSidebar === 'function') {
+        renderAdminSidebar();
+    }
+</script>
 <script type="module">
     import { users, billing, admin } from '../../js/api.js';
 
@@ -201,11 +207,6 @@
                 alert('관리자 권한이 없습니다.');
                 location.href = '../user/dashboard.html';
                 return;
-            }
-
-            // 사이드바 렌더링
-            if (typeof renderAdminSidebar === 'function') {
-                renderAdminSidebar();
             }
 
             initDateFilter();
