@@ -130,8 +130,8 @@ window.toggleAdminMenu = function(menuId, catElement) {
 // 관리자 정보 로드
 async function loadAdminUserInfo() {
     try {
-        // 토큰 확인 (token으로 통일)
-        const token = localStorage.getItem('token');
+        // 토큰 확인
+        const token = localStorage.getItem('auth_token');
         if (!token) {
             console.log('관리자 토큰 없음');
             return;
@@ -178,7 +178,7 @@ async function loadAdminUserInfo() {
 // 로그아웃 함수
 window.adminLogout = function() {
     if (confirm('로그아웃 하시겠습니까?')) {
-        localStorage.removeItem('token');
+        localStorage.removeItem('auth_token');
         location.href = '../public/login.html';
     }
 };

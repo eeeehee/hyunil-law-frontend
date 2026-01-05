@@ -456,7 +456,11 @@
 
 
 <script type="module">
-    const API_BASE = 'http://localhost:3000/api';
+    // 환경에 따라 API URL 자동 설정
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000/api'
+        : 'https://hyunil-law-backend.onrender.com/api';
+
     const token = localStorage.getItem('auth_token');
 
     let allPayments = [];

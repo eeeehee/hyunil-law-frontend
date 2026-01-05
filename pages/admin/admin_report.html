@@ -101,7 +101,7 @@
 
         // 권한 확인 및 초기화
         (async () => {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('auth_token');
             if (!token) {
                 location.href = '../public/login.html';
                 return;

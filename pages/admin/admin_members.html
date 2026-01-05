@@ -869,7 +869,7 @@ alert(`✅ 등록 완료: ${name}`);
 
         try {
             // 기업 수동 등록은 /auth/signup 을 사용하되(백엔드 구조상), 관리자 세션이 덮이지 않도록 토큰을 백업/복구합니다.
-    const prevToken = localStorage.getItem('auth_token');
+    const prevToken = localStorage.getItem('token');
     const prevUser = localStorage.getItem('current_user');
 
     const signupResp = await auth.signup({
@@ -885,8 +885,8 @@ alert(`✅ 등록 완료: ${name}`);
     });
 
     // 관리자 세션 복구
-    if (prevToken) localStorage.setItem('auth_token', prevToken);
-    else localStorage.removeItem('auth_token');
+    if (prevToken) localStorage.setItem('token', prevToken);
+    else localStorage.removeItem('token');
 
     if (prevUser) localStorage.setItem('current_user', prevUser);
     else localStorage.removeItem('current_user');

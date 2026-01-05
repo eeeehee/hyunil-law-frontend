@@ -333,7 +333,7 @@
     let allPostsMap = {}; // docId -> post 데이터 매핑
 
     // 로그인 확인
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('token');
     if (!token) {
         location.href = '../public/login.html';
     }

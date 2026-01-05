@@ -315,7 +315,7 @@
 
         // 권한 확인 및 데이터 로드
         (async () => {
-            const token = localStorage.getItem('auth_token');
+            const token = localStorage.getItem('token');
             if (!token) {
                 location.href = '../public/login.html';
                 return;
