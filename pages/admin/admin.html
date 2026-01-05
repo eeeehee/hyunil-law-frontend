@@ -272,13 +272,6 @@
     let companyMeta = {};
     let allPostsMap = {}; // docId -> post 데이터 매핑
 
-    // 로그인 확인
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-        alert('로그인이 필요합니다.');
-        location.href = '../public/login.html';
-    }
-
     // ============================================
     // 사용자 정보 표시 함수
     // ============================================
