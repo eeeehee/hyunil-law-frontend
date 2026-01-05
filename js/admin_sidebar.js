@@ -57,43 +57,65 @@ function renderAdminSidebar() {
 
         <ul class="sidebar-menu">
             <li>
-                <div class="menu-category" id="cat_groupCorp" onclick="toggleAdminMenu('groupCorp', this)">
+                <div class="menu-category open active" id="cat_groupCorp" onclick="toggleAdminMenu('groupCorp', this)">
                     <div><span class="menu-icon">🏢</span> 기업자문센터</div>
                     <span style="font-size:10px;">▼</span>
                 </div>
                 <ul id="groupCorp" class="submenu" style="display:block;">
-                    <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
-                    <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
                     <li><a href="admin.html">📝 자문 관리 (전체)</a></li>
                     <li><a href="admin_requests.html">📩 요청 관리함</a></li>
+                    <li><a href="admin_report.html">📊 리포트 발송</a></li>
+                    <li><a href="admin_corpbilling.html">💰 자문료 청구/발송</a></li>
+                    <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
+                    <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
                 </ul>
             </li>
 
             <li>
                 <div class="menu-category" id="cat_groupLitigation" onclick="toggleAdminMenu('groupLitigation', this)">
-                    <div><span class="menu-icon">⚖️</span> 종합소송센터</div>
+                    <div><span class="menu-icon">⚖️</span> 전자소송/사건</div>
                     <span style="font-size:10px;">▼</span>
                 </div>
                 <ul id="groupLitigation" class="submenu">
-                    <li><a href="admin_litigation.html">🔎 소송 관리</a></li>
+                    <li><a href="../public/real_data_upload.html" style="color:#52c41a; font-weight:700;">📥 엑셀 데이터 업로드</a></li>
+                    <li><a href="admin_litigation.html">🔎 전자소송 데이터 확인</a></li>
                     <li><a href="admin_clients.html">📇 당사자(고객) 관리</a></li>
+                    <li><a href="admin_submit.html">📤 문서 제출/발송</a></li>
+                    <li><a href="admin_billing.html" style="color:#d32f2f; font-weight:700;">💰 비용/청구 관리</a></li>
+                    <li><a href="admin_casereport.html">📢 사건 리포트 발송</a></li>
                 </ul>
             </li>
 
             <li>
-                <div class="menu-category" id="cat_groupBill" onclick="toggleAdminMenu('groupBill', this)">
-                    <div><span class="menu-icon">💰</span> 채권추심센터</div>
+                <div class="menu-category" id="cat_groupSpecial" onclick="toggleAdminMenu('groupSpecial', this)">
+                    <div><span class="menu-icon">📞</span> 파산/추심 센터</div>
                     <span style="font-size:10px;">▼</span>
                 </div>
-                <ul id="groupBill" class="submenu">
-                    <li><a href="admin_collection.html">💰 채권 관리</a></li>
-                    <li><a href="admin_pasan.html">📋 파산 관리</a></li>
+                <ul id="groupSpecial" class="submenu">
+                    <li><a href="admin_collection_consult.html">💰 채권 추심 상담</a></li>
+                    <li><a href="admin_collection.html">💰 채권 추심 사건</a></li>
+                    <li><a href="admin_pasan_consult.html">📉 파산/회생 상담</a></li>
+                    <li><a href="admin_pasan.html">📉 파산/회생 사건</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <div class="menu-category" id="cat_groupEtc" onclick="toggleAdminMenu('groupEtc', this)">
+                    <div><span class="menu-icon">⚔️</span> 분쟁 및 종결</div>
+                    <span style="font-size:10px;">▼</span>
+                </div>
+                <ul id="groupEtc" class="submenu">
+                    <li><a href="admin_conflict.html" style="color:#fa8c16; font-weight:700;">⚔️ 분쟁/협상 (Conflict)</a></li>
+                    <li><a href="admin_finished.html" style="color:#999; font-weight:700;">🏁 종결 사건 (Archive)</a></li>
                 </ul>
             </li>
 
             <li><div class="menu-divider"></div></li>
-
-            <li><a href="../user/dashboard.html" class="menu-category" style="color:#52c41a; font-weight:bold;">← 사용자 화면으로</a></li>
+            <li><a href="admin_settings.html" class="menu-category">⚙️ 환경 설정</a></li>
+            <li><div class="menu-divider"></div></li>
+            <li><a href="http://www.hyunillaw.com" target="_blank" class="menu-category" style="color:#a6a6b5;">🌐 법무그룹 현일 홈페이지</a></li>
+            <li><a href="../../index.html" class="menu-category">🏢 기업자문 홈페이지</a></li>
+            <li><a href="../user/dashboard.html" class="menu-category" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
         </ul>
     </nav>
     `;
