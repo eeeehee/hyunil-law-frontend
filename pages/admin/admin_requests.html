@@ -309,7 +309,7 @@
         document.getElementById('adminLogoutBtn')?.addEventListener('click', async function() {
             if (confirm('로그아웃 하시겠습니까?')) {
                 await auth.logout();
-                location.href = '/pages/public/login.html';
+                location.href = '../../pages/public/login.html';
             }
         });
 

@@ -486,7 +486,7 @@
     // 1. 관리자 로그인 체크
     (async () => {
         if (!requireAuth()) {
-            location.href = '/pages/public/login.html';
+            location.href = '../../pages/public/login.html';
             return;
         }
 
@@ -516,7 +516,7 @@
             document.getElementById('adminLogoutBtn')?.addEventListener('click', async function() {
                 if (confirm('로그아웃 하시겠습니까?')) {
                     await auth.logout();
-                    location.href = '/pages/public/login.html';
+                    location.href = '../../pages/public/login.html';
                 }
             });
 
@@ -530,7 +530,7 @@
             const roleNorm = (userData.role || '').toLowerCase();
             if (!['master','owner'].includes(roleNorm)) {
                 alert('Master 또는 Owner 권한이 필요합니다.');
-                location.href = '/pages/user/dashboard.html';
+                location.href = '../../pages/user/dashboard.html';
                 return;
             }
 
@@ -541,7 +541,7 @@
 
         } catch (error) {
             console.error('권한 체크 에러:', error);
-            location.href = '/pages/public/login.html';
+            location.href = '../../pages/public/login.html';
         }
     })();
 

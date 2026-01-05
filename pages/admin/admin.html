@@ -317,7 +317,7 @@
 </div>
 
 <script type="module">
-    import { auth, users, posts, admin } from '/js/api.js';
+    import { auth, users, posts, admin } from '../../js/api.js';
 
     const PLAN_SPECS = {
         'none': { qa: 0, phone: 0, label: '미가입' },
@@ -364,7 +364,7 @@
     document.getElementById('adminLogoutBtn')?.addEventListener('click', async function() {
         if (confirm('로그아웃 하시겠습니까?')) {
             await auth.logout();
-            location.href = '/pages/public/login.html';
+            location.href = '../../pages/public/login.html';
         }
     });
 

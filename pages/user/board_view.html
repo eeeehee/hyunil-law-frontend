@@ -208,7 +208,7 @@
 
                 if (!postId) {
                     alert('게시글 ID가 없습니다.');
-                    location.href = '/pages/user/board_list.html';
+                    location.href = '../../pages/user/board_list.html';
                     return;
                 }
 
@@ -222,7 +222,7 @@
             } catch (error) {
                 console.error('게시글 로드 에러:', error);
                 alert('게시글을 불러오는데 실패했습니다.');
-                location.href = '/pages/user/board_list.html';
+                location.href = '../../pages/user/board_list.html';
             }
         })();
 
@@ -587,7 +587,7 @@
             try {
                 await posts.delete(postId);
                 alert('자문 요청이 취소되었습니다.');
-                location.href = '/pages/user/board_list.html';
+                location.href = '../../pages/user/board_list.html';
             } catch (error) {
                 console.error('취소 실패:', error);
                 alert('취소에 실패했습니다.');

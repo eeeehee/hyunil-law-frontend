@@ -342,13 +342,13 @@
 
             if (qaLimit === 0) {
                 alert('플랜을 먼저 구독해주세요.');
-                location.href = '/pages/user/payment.html';
+                location.href = '../../pages/user/payment.html';
                 return;
             }
 
             if (qaRemaining === 0) {
                 alert('사용 가능한 자문 횟수가 없습니다.\n결제/구독 관리 페이지에서 추가 구매하시거나 플랜을 업그레이드해주세요.');
-                location.href = '/pages/user/payment.html';
+                location.href = '../../pages/user/payment.html';
                 return;
             }
 
@@ -381,7 +381,7 @@
                 });
 
                 alert('자문 신청이 완료되었습니다.\n사용 가능 횟수가 1회 차감되었습니다.');
-                location.href = '/pages/user/board_list.html';
+                location.href = '../../pages/user/board_list.html';
 
             } catch (error) {
                 console.error('등록 에러:', error);
@@ -395,7 +395,7 @@
 
         window.handleLogout = async () => {
             await auth.logout();
-            location.href = '/';
+            location.href = '../../index.html';
         };
     </script>
 </body>

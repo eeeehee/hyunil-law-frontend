@@ -255,7 +255,7 @@
     </div>
 
     <script type="module">
-        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '../../js/api.js';
 
         (async () => {
             if (!requireAuth()) return;
@@ -270,7 +270,7 @@
 
                 if (!checkRole(['master', 'admin'])) {
                     alert('관리자 권한이 필요합니다.');
-                    location.href = '/pages/user/dashboard.html';
+                    location.href = '../../pages/user/dashboard.html';
                     return;
                 }
 

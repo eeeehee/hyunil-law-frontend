@@ -89,8 +89,8 @@
     </main>
 
     <script type="module">
-        import { auth, users, posts } from '/js/api.js';
-        import { renderClientSidebar } from '/js/client_ui.js';
+        import { auth, users, posts } from '../../js/api.js';
+        import { renderClientSidebar } from '../../js/client_ui.js';
 
         let currentUserData = null;
 
@@ -113,7 +113,7 @@
                 }
             } else {
                 alert('로그인이 필요합니다.');
-                location.href = '/pages/public/login.html';
+                location.href = '../../pages/public/login.html';
             }
         })();
 
@@ -169,7 +169,7 @@ ${content}
                 });
 
                 alert('전화상담 신청이 완료되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
-                location.href = '/pages/user/dashboard.html';
+                location.href = '../../pages/user/dashboard.html';
 
             } catch (error) {
                 console.error('신청 에러:', error);
@@ -181,7 +181,7 @@ ${content}
 
         window.handleLogout = async () => {
             await auth.logout();
-            location.href = '/';
+            location.href = '../../index.html';
         };
     </script>
 </body>

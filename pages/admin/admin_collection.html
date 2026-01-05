@@ -251,8 +251,8 @@
 </div>
 
     <script type="module">
-        import { auth, users, requireAuth, checkRole } from '/js/api.js';
-        import { renderAdminSidebar } from '/js/admin_ui.js';
+        import { auth, users, requireAuth, checkRole } from '../../js/api.js';
+        import { renderAdminSidebar } from '../../js/admin_ui.js';
 
         const PAGE_MAP = {
             'admin_litigation.html': 'litigation',
@@ -268,13 +268,13 @@
 
         (async () => {
             if (!requireAuth()) {
-                location.href = '/pages/public/login.html';
+                location.href = '../../pages/public/login.html';
                 return;
             }
 
             const user = auth.getCurrentUser();
             if (!user) {
-                location.href = '/pages/public/login.html';
+                location.href = '../../pages/public/login.html';
                 return;
             }
 
@@ -283,7 +283,7 @@
                 
                 if (!checkRole(['master', 'admin', 'general_manager', 'lawyer'])) {
                     alert('관리자 권한???�요?�니??');
-                    location.href = '/pages/user/dashboard.html';
+                    location.href = '../../pages/user/dashboard.html';
                     return;
                 }
 
@@ -297,7 +297,7 @@
 
         window.handleLogout = async () => {
             await auth.logout();
-            location.href = '/';
+            location.href = '../../index.html';
         };
     </script>
 </body>

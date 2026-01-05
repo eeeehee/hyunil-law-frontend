@@ -183,7 +183,7 @@
                 // master, admin, owner만 접근 가능
                 if (!['master', 'admin', 'owner'].includes(userData.role)) {
                     alert('대표(CEO) 또는 관리자만 접근 가능합니다.');
-                    location.href = '/pages/user/dashboard.html';
+                    location.href = '../../pages/user/dashboard.html';
                     return;
                 }
 

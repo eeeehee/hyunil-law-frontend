@@ -87,7 +87,7 @@
 </main>
 
 <script type="module">
-        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '../../js/api.js';
         
         (async () => {
             if (!requireAuth()) return;
@@ -101,7 +101,7 @@
                 const userData = await users.getMe();
                 
                 if (!checkRole(['master', 'admin', 'general_manager'])) {
-                    location.href = '/pages/user/dashboard.html';
+                    location.href = '../../pages/user/dashboard.html';
                     return;
                 }
                 console.log('Staff upload page loaded');
