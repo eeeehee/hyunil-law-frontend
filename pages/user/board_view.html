@@ -120,14 +120,14 @@
 <body>
 
  <nav class="sidebar">
-    <div class="sidebar-logo"><a href="/index.html"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a></div>
+    <div class="sidebar-logo"><a href="../../index.html"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a></div>
     <ul class="menu-list">
-        <li><a href="/pages/user/dashboard.html" class="menu-link">대시보드</a></li>
-        <li><a href="/pages/user/board_list.html" class="menu-link">나의 자문 내역</a></li>
-        <li><a href="/pages/user/payment.html" class="menu-link">결제/구독 관리</a></li>
-        <li><a href="/pages/user/member_info.html" class="menu-link">회원 정보 수정</a></li>
-        <li><a href="/pages/public/faq.html" target="_blank" class="menu-link">❓ 자주 묻는 질문</a></li>
-        <li><a href="/pages/user/company_members.html" class="menu-link" id="menuCeoOnly">👥 직원 관리 (CEO)</a></li>
+        <li><a href="../../pages/user/dashboard.html" class="menu-link">대시보드</a></li>
+        <li><a href="../../pages/user/board_list.html" class="menu-link">나의 자문 내역</a></li>
+        <li><a href="../../pages/user/payment.html" class="menu-link">결제/구독 관리</a></li>
+        <li><a href="../../pages/user/member_info.html" class="menu-link">회원 정보 수정</a></li>
+        <li><a href="../../pages/public/faq.html" target="_blank" class="menu-link">❓ 자주 묻는 질문</a></li>
+        <li><a href="../../pages/user/company_members.html" class="menu-link" id="menuCeoOnly">👥 직원 관리 (CEO)</a></li>
     </ul>
     <div class="logout-btn" onclick="handleLogout()">로그아웃</div>
 </nav>
@@ -166,7 +166,7 @@
                 </div>
 
                 <div class="btn-wrap">
-                    <a href="/pages/user/board_list.html" class="btn-list">목록으로</a>
+                    <a href="../../pages/user/board_list.html" class="btn-list">목록으로</a>
                     <button class="btn-instant" id="btnInstant" onclick="instantAccept()">⚡ 즉시 접수하기</button>
                     <button class="btn-cancel" id="btnCancel" onclick="cancelRequest()">접수 취소</button>
                 </div>
@@ -184,7 +184,7 @@
     </main>
 
     <script type="module">
-        import { auth, users, requireAuth, posts } from "/js/api.js";
+        import { auth, users, requireAuth, posts } from "../../js/api.js";
         import { renderClientSidebar } from "/js/client_ui.js";
 
         (async () => {
