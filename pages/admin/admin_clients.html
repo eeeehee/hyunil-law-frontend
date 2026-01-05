@@ -3,46 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>고객 ?�보 관�?- 법무그룹 ?�일</title>
+    <base href="/hyunil-law-frontend/">
+    <title>고객 ?�보 관�?- 법무그룹 ?�일</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        /* [관리자 공통 ?��??? */
+        /* [관리자 공통 ?��??? */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
         body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
         a { text-decoration: none; color: inherit; }
         ul, li { list-style: none; }
         input, select, textarea { font-family: inherit; }
 
-        /* ?�이?�바 */
+        /* ?�이?�바 */
         .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
         .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 50px; padding-left: 10px; color: #fff; }
         .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 15px; transition: 0.2s; margin-bottom: 5px; }
         .menu-link:hover, .menu-link.active { background-color: #2c2c45; color: #fff; font-weight: 600; }
 
-        /* 메인 컨텐�?*/
+        /* 메인 컨텐�?*/
         .main-content { flex: 1; margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
 
-        /* 검??�?버튼 */
+        /* 검??�?버튼 */
         .filter-box { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
         .search-input { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; flex: 1; outline: none; }
         .btn-search { background: #1a1a1a; color: #fff; border: none; padding: 0 20px; height: 40px; border-radius: 6px; font-weight: 700; cursor: pointer; }
         .btn-add { background-color: #2c5bf2; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 14px; }
         .btn-add:hover { background-color: #1b42c4; }
 
-        /* ?�이�?*/
+        /* ?�이�?*/
         .table-container { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
         .client-table { width: 100%; border-collapse: collapse; min-width: 1000px; }
         .client-table th, .client-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
         .client-table th { background-color: #f9f9f9; color: #555; font-weight: 700; }
         .client-table tr:hover { background-color: #f0f7ff; cursor: pointer; }
 
-        /* 뱃�? */
+        /* 뱃�? */
         .case-count-badge { background: #e6f7ff; color: #1890ff; padding: 4px 8px; border-radius: 12px; font-weight: 700; font-size: 12px; }
         .badge-corp { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 5px; font-weight: 700; }
         
-        /* [NEW] ?�문 ?�원 뱃�? & 버튼 */
+        /* [NEW] ?�문 ?�원 뱃�? & 버튼 */
         .badge-member { background: #1a1a1a; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 5px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
         .btn-link-member { background: #fff; border: 1px solid #333; color: #333; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 700; margin-left: 5px; }
         .btn-link-member:hover { background: #333; color: #fff; }
@@ -50,7 +51,7 @@
         .btn-edit { background: #fff; border: 1px solid #ddd; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #555; }
         .btn-edit:hover { background: #f0f0f0; border-color: #bbb; }
 
-        /* 모달 ?��???*/
+        /* 모달 ?��???*/
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
         .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; background: #fff; padding: 30px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
@@ -85,27 +86,27 @@
 <nav class="sidebar">
     <div class="sidebar-brand">ADMINISTRATOR</div>
     <ul class="sidebar-menu">
-        <li><a href="/pages/admin/admin.html" class="menu-link">?�� ?�문 관�?/a></li>
-        <li><a href="/pages/admin/admin_requests.html" class="menu-link">?�� ?�청 관리함</a></li>
-        <li><a href="/pages/admin/admin_litigation.html" class="menu-link">?�� ?�자?�송 관�?/a></li>
-        <li><a href="/pages/admin/admin_clients.html" class="menu-link active">?�� ?�사??고객) 관�?/a></li>
-        <li><a href="/pages/admin/admin_members.html" class="menu-link">?�� ?�원/기업 관�?/a></li>
-        <li><a href="/pages/admin/admin_payments.html" class="menu-link">?�� 매출/결제 관�?/a></li>
-        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
+        <li><a href="/pages/admin/admin.html" class="menu-link">?�� ?�문 관�?/a></li>
+        <li><a href="/pages/admin/admin_requests.html" class="menu-link">?�� ?�청 관리함</a></li>
+        <li><a href="/pages/admin/admin_litigation.html" class="menu-link">?�� ?�자?�송 관�?/a></li>
+        <li><a href="/pages/admin/admin_clients.html" class="menu-link active">?�� ?�사??고객) 관�?/a></li>
+        <li><a href="/pages/admin/admin_members.html" class="menu-link">?�� ?�원/기업 관�?/a></li>
+        <li><a href="/pages/admin/admin_payments.html" class="menu-link">?�� 매출/결제 관�?/a></li>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
         <li style="margin-top: 20px; border-top: 1px solid #2c2c45; padding-top: 20px;">
-            <a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a>
+            <a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a>
         </li>
     </ul>
 </nav>
 
 <main class="main-content">
     <div class="page-header">
-        <h2 class="page-title">?�사??고객) ?�보 관�?/h2>
-        <button class="btn-add" onclick="openEditModal('new')">+ ?�규 고객 ?�록</button>
+        <h2 class="page-title">?�사??고객) ?�보 관�?/h2>
+        <button class="btn-add" onclick="openEditModal('new')">+ ?�규 고객 ?�록</button>
     </div>
 
     <div class="filter-box">
-        <input type="text" id="searchInput" class="search-input" placeholder="?�름, ?�화번호�?검??.." onkeyup="filterClients()">
+        <input type="text" id="searchInput" class="search-input" placeholder="?�름, ?�화번호�?검??.." onkeyup="filterClients()">
         <button class="btn-search">검??/button>
     </div>
 
@@ -113,15 +114,15 @@
         <table class="client-table">
             <thead>
                 <tr>
-                    <th style="width:20%">고객�?/th>
-                    <th style="width:20%">?�락�?/th>
-                    <th style="width:10%">?�건 ??/th>
-                    <th style="width:20%">?�문 ?�원 ?��?</th> <th style="width:15%">최근 ?�뢰??/th>
-                    <th style="width:15%">관�?/th>
+                    <th style="width:20%">고객�?/th>
+                    <th style="width:20%">?�락�?/th>
+                    <th style="width:10%">?�건 ??/th>
+                    <th style="width:20%">?�문 ?�원 ?��?</th> <th style="width:15%">최근 ?�뢰??/th>
+                    <th style="width:15%">관�?/th>
                 </tr>
             </thead>
             <tbody id="clientListBody">
-                <tr><td colspan="6" style="text-align:center; padding:40px;">?�이??분석 �??�원 ?��?�?..</td></tr>
+                <tr><td colspan="6" style="text-align:center; padding:40px;">?�이??분석 �??�원 ?��?�?..</td></tr>
             </tbody>
         </table>
     </div>
@@ -130,29 +131,29 @@
 <div id="clientModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <div class="modal-title">?�� 고객 ?�세 ?�보</div>
+            <div class="modal-title">?�� 고객 ?�세 ?�보</div>
             <div class="close-btn" onclick="closeModal('clientModal')">??/div>
         </div>
 
         <div class="client-profile">
             <div class="profile-item">
-                <label>고객�?/label>
+                <label>고객�?/label>
                 <div id="m_name" style="font-size:18px;">-</div>
             </div>
             <div class="profile-item">
-                <label>?�원 ?��?</label>
+                <label>?�원 ?��?</label>
                 <div id="m_member_status">-</div>
             </div>
             <div class="profile-item">
-                <label>�??�건 진행</label>
+                <label>�??�건 진행</label>
                 <div id="m_count" style="color:#2c5bf2;">-</div>
             </div>
         </div>
 
-        <h4 style="margin-bottom:10px; font-size:15px;">?�� ?�록???�락�?(?�직??</h4>
+        <h4 style="margin-bottom:10px; font-size:15px;">?�� ?�록???�락�?(?�직??</h4>
         <div class="contact-list-box" id="m_contacts"></div>
 
-        <h4 style="margin-bottom:10px; font-size:15px;">?�� ?�건/?�문 ?�력</h4>
+        <h4 style="margin-bottom:10px; font-size:15px;">?�� ?�건/?�문 ?�력</h4>
         <div class="history-list" id="m_history"></div>
     </div>
 </div>
@@ -160,23 +161,23 @@
 <div id="editModal" class="modal-overlay">
     <div class="modal-content" style="width:500px;">
         <div class="modal-header">
-            <div class="modal-title" id="modalTitle">?�규 고객 ?�록</div>
+            <div class="modal-title" id="modalTitle">?�규 고객 ?�록</div>
             <div class="close-btn" onclick="closeModal('editModal')">??/div>
         </div>
         <input type="hidden" id="editDocId">
         <div class="form-group">
-            <label class="form-label">고객�?(법인�??�함)</label>
-            <input type="text" id="inputName" class="input-box" placeholder="?? ?�성?�자 or ?�길??>
+            <label class="form-label">고객�?(법인�??�함)</label>
+            <input type="text" id="inputName" class="input-box" placeholder="?? ?�성?�자 or ?�길??>
         </div>
         <div class="form-group">
-            <label class="form-label">?�???�락�?/label>
+            <label class="form-label">?�???�락�?/label>
             <input type="text" id="inputPhone" class="input-box" placeholder="010-0000-0000">
         </div>
         <div class="form-group">
-            <label class="form-label">?�메??/label>
+            <label class="form-label">?�메??/label>
             <input type="text" id="inputEmail" class="input-box" placeholder="example@email.com">
         </div>
-        <button class="btn-save" onclick="saveClient()">?�?�하�?/button>
+        <button class="btn-save" onclick="saveClient()">?�?�하�?/button>
     </div>
 </div>
 
@@ -212,16 +213,16 @@
                 const userData = await users.getMe();
                 
                 if (!checkRole(['master', 'admin', 'general_manager', 'lawyer'])) {
-                    alert('관리자 권한???�요?�니??');
+                    alert('관리자 권한???�요?�니??');
                     location.href = '/pages/user/dashboard.html';
                     return;
                 }
 
                 renderAdminSidebar(pageKey, userData);
-                console.log('?�이지 로드:', pageKey, userData);
+                console.log('?�이지 로드:', pageKey, userData);
 
             } catch (error) {
-                console.error('?�이지 로드 ?�러:', error);
+                console.error('?�이지 로드 ?�러:', error);
             }
         })();
 

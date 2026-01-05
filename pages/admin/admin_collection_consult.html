@@ -2,10 +2,11 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>채권추심 ?�담 관�?- 법무그룹 ?�일</title>
+    <base href="/hyunil-law-frontend/">
+    <title>채권추심 ?�담 관�?- 법무그룹 ?�일</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        /* (???�일�??�일???��????�용 - ?�략 가?�하지�??�의???�체 코드 ?�공) */
+        /* (???�일�??�일???��????�용 - ?�략 가?�하지�??�의???�체 코드 ?�공) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
         body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
         
@@ -47,38 +48,38 @@
 <nav class="sidebar">
     <div class="sidebar-brand">ADMINISTRATOR</div>
     <ul class="sidebar-menu">
-        <li><a href="/pages/admin/admin.html" class="menu-link">?�� ?�문 관�?/a></li>
-        <li style="margin: 15px 0 5px 15px; font-size: 12px; color: #666; font-weight: 700;">?�담 ?�수 관�?(Gmail ?�동)</li>
-        <li><a href="/pages/admin/admin_pasan_consult.html" class="menu-link">?�� ?�생/?�산 ?�담</a></li>
-        <li><a href="/pages/admin/admin_collection_consult.html" class="menu-link active">?�� 채권추심 ?�담</a></li>
+        <li><a href="/pages/admin/admin.html" class="menu-link">?�� ?�문 관�?/a></li>
+        <li style="margin: 15px 0 5px 15px; font-size: 12px; color: #666; font-weight: 700;">?�담 ?�수 관�?(Gmail ?�동)</li>
+        <li><a href="/pages/admin/admin_pasan_consult.html" class="menu-link">?�� ?�생/?�산 ?�담</a></li>
+        <li><a href="/pages/admin/admin_collection_consult.html" class="menu-link active">?�� 채권추심 ?�담</a></li>
         
-        <li style="margin: 15px 0 5px 15px; font-size: 12px; color: #666; font-weight: 700;">?�건 진행 관�?/li>
-        <li><a href="/pages/admin/admin_pasan.html" class="menu-link">?�� ?�생/?�산 ?�건</a></li>
-        <li><a href="/index.html" class="menu-link" style="margin-top:20px;">?�� 메인?�로</a></li>
+        <li style="margin: 15px 0 5px 15px; font-size: 12px; color: #666; font-weight: 700;">?�건 진행 관�?/li>
+        <li><a href="/pages/admin/admin_pasan.html" class="menu-link">?�� ?�생/?�산 ?�건</a></li>
+        <li><a href="/index.html" class="menu-link" style="margin-top:20px;">?�� 메인?�로</a></li>
     </ul>
 </nav>
 
 <main class="main-content">
     <div class="page-header">
-        <h2 class="page-title">?�� 채권추심 ?�담 ?�수 ?�황</h2>
-        <button class="btn-action" style="background:#333;" onclick="alert('Gmail ?�동 ?�동 ?�기중 (Python)')">?�� 메일 ?�동 가?�오�?/button>
+        <h2 class="page-title">?�� 채권추심 ?�담 ?�수 ?�황</h2>
+        <button class="btn-action" style="background:#333;" onclick="alert('Gmail ?�동 ?�동 ?�기중 (Python)')">?�� 메일 ?�동 가?�오�?/button>
     </div>
 
     <div class="section-box">
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th style="width:10%">?�태</th>
-                    <th style="width:12%">?�수??/th>
-                    <th>?�뢰??/th>
-                    <th>채무???�름</th>
+                    <th style="width:10%">?�태</th>
+                    <th style="width:12%">?�수??/th>
+                    <th>?�뢰??/th>
+                    <th>채무???�름</th>
                     <th>미수 금액</th>
-                    <th>증거 ?��?</th>
-                    <th>관�?/th>
+                    <th>증거 ?��?</th>
+                    <th>관�?/th>
                 </tr>
             </thead>
             <tbody id="listBody">
-                <tr><td colspan="7" style="text-align:center; padding:30px;">로딩 �?..</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding:30px;">로딩 �?..</td></tr>
             </tbody>
         </table>
     </div>
@@ -87,16 +88,16 @@
 <div id="consultModal" class="modal-overlay">
     <div class="modal-card">
         <span class="close-btn" onclick="closeModal()">??/span>
-        <h3 style="margin-bottom:20px; font-size:20px; font-weight:700;">추심 ?�담 ?�세</h3>
+        <h3 style="margin-bottom:20px; font-size:20px; font-weight:700;">추심 ?�담 ?�세</h3>
         
         <div id="modalContent"></div>
         
-        <h4 style="margin-top:20px; margin-bottom:10px;">?�� ?�담 메모</h4>
-        <textarea id="adminMemo" class="consult-note" placeholder="채무???�산 ?�태 ??메모"></textarea>
+        <h4 style="margin-top:20px; margin-bottom:10px;">?�� ?�담 메모</h4>
+        <textarea id="adminMemo" class="consult-note" placeholder="채무???�산 ?�태 ??메모"></textarea>
         
         <div style="margin-top:20px; text-align:right;">
-            <button class="btn-action" style="background:#722ed1; margin-right:10px;" onclick="alert('추심 ?�건 DB ?�동 ?�정')">?? ?�건 ?�임</button>
-            <button class="btn-action" onclick="saveMemo()">?�??/button>
+            <button class="btn-action" style="background:#722ed1; margin-right:10px;" onclick="alert('추심 ?�건 DB ?�동 ?�정')">?? ?�건 ?�임</button>
+            <button class="btn-action" onclick="saveMemo()">?�??/button>
         </div>
     </div>
 </div>
@@ -122,8 +123,8 @@
                 const debtCases = await cases.getDebtCases();
                 console.log('Debt cases:', debtCases);
             } catch (error) {
-                console.error('?�이지 로드 ?�러:', error);
-                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
+                console.error('?�이지 로드 ?�러:', error);
+                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
             }
         })();
         
@@ -132,7 +133,7 @@
                 await auth.logout();
                 location.href = "/";
             } catch (error) {
-                console.error('로그?�웃 ?�러:', error);
+                console.error('로그?�웃 ?�러:', error);
             }
         };
     </script>

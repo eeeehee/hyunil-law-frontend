@@ -3,47 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>?�자?�송 관�?- 법무그룹 ?�일</title>
+    <base href="/hyunil-law-frontend/">
+    <title>?�자?�송 관�?- 법무그룹 ?�일</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        /* [관리자 공통 ?��??? */
+        /* [관리자 공통 ?��??? */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
         body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
         a { text-decoration: none; color: inherit; }
         ul, li { list-style: none; }
 
-        /* ?�이?�바 ?��???(기존�??�일) */
+        /* ?�이?�바 ?��???(기존�??�일) */
         .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
         .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 50px; padding-left: 10px; color: #fff; }
         .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 15px; transition: 0.2s; margin-bottom: 5px; }
         .menu-link:hover, .menu-link.active { background-color: #2c2c45; color: #fff; font-weight: 600; }
 
-        /* 메인 ?�역 */
+        /* 메인 ?�역 */
         .main-content { flex: 1; margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
 
-        /* 검???�터 */
+        /* 검???�터 */
         .filter-box { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
         .search-input { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; flex: 1; outline: none; }
         .btn-search { background: #2c5bf2; color: #fff; border: none; padding: 0 20px; height: 40px; border-radius: 6px; font-weight: 700; cursor: pointer; }
 
-        /* ?�이�??��???*/
+        /* ?�이�??��???*/
         .table-container { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-        .lit-table { width: 100%; border-collapse: collapse; min-width: 1200px; } /* 가�??�크�??�??*/
+        .lit-table { width: 100%; border-collapse: collapse; min-width: 1200px; } /* 가�??�크�??�??*/
         .lit-table th, .lit-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
         .lit-table th { background-color: #f9f9f9; color: #555; font-weight: 700; position: sticky; top: 0; z-index: 10; }
         .lit-table tr:hover { background-color: #f0f7ff; }
 
-        /* ?�태 뱃�? */
+        /* ?�태 뱃�? */
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-        .bg-sent { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; } /* ?�송??*/
-        .bg-wait { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; } /* ?��?FALSE */
-        .bg-done { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; } /* ?�결 */
+        .bg-sent { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; } /* ?�송??*/
+        .bg-wait { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; } /* ?��?FALSE */
+        .bg-done { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; } /* ?�결 */
 
         .staff-tag { font-size: 11px; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; margin-right: 4px; color: #555; }
         
-        /* 모달 (?�세보기) */
+        /* 모달 (?�세보기) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
         .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; background: #fff; padding: 30px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
         .modal-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
@@ -59,27 +60,27 @@
 <nav class="sidebar">
     <div class="sidebar-brand">ADMINISTRATOR</div>
     <ul class="sidebar-menu">
-        <li><a href="/pages/admin/admin.html" class="menu-link">?�� ?�문 관�?/a></li>
-        <li><a href="/pages/admin/admin_requests.html" class="menu-link">?�� ?�청 관리함</a></li>
-        <li><a href="/pages/admin/admin_litigation.html" class="menu-link active">?�� ?�자?�송 관�?/a></li>
-        <li><a href="/pages/admin/admin_members.html" class="menu-link">?�� ?�원/기업 관�?/a></li>
-        <li><a href="/pages/admin/admin_report.html" class="menu-link">?�� 리포??발송</a></li>
-        <li><a href="/pages/admin/admin_payments.html" class="menu-link">?�� 매출/결제 관�?/a></li>
-        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
+        <li><a href="/pages/admin/admin.html" class="menu-link">?�� ?�문 관�?/a></li>
+        <li><a href="/pages/admin/admin_requests.html" class="menu-link">?�� ?�청 관리함</a></li>
+        <li><a href="/pages/admin/admin_litigation.html" class="menu-link active">?�� ?�자?�송 관�?/a></li>
+        <li><a href="/pages/admin/admin_members.html" class="menu-link">?�� ?�원/기업 관�?/a></li>
+        <li><a href="/pages/admin/admin_report.html" class="menu-link">?�� 리포??발송</a></li>
+        <li><a href="/pages/admin/admin_payments.html" class="menu-link">?�� 매출/결제 관�?/a></li>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?�️ ?�경 ?�정</a></li>
         <li style="margin-top: 20px; border-top: 1px solid #2c2c45; padding-top: 20px;">
-            <a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a>
+            <a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a>
         </li>
     </ul>
 </nav>
 
 <main class="main-content">
     <div class="page-header">
-        <h2 class="page-title">?�자?�송 ?�이???�인</h2>
-        <button class="btn-search" style="background:#333;" onclick="alert('?�도???�버 ?�롤???�태: ?�상 (가??')">?���??�롤???�태 ?�인</button>
+        <h2 class="page-title">?�자?�송 ?�이???�인</h2>
+        <button class="btn-search" style="background:#333;" onclick="alert('?�도???�버 ?�롤???�태: ?�상 (가??')">?���??�롤???�태 ?�인</button>
     </div>
 
     <div class="filter-box">
-        <input type="text" id="searchInput" class="search-input" placeholder="?�건번호, ?�사?�명, ?�당?�로 검??.." onkeyup="filterTable()">
+        <input type="text" id="searchInput" class="search-input" placeholder="?�건번호, ?�사?�명, ?�당?�로 검??.." onkeyup="filterTable()">
         <button class="btn-search">검??/button>
     </div>
 
@@ -87,17 +88,17 @@
         <table class="lit-table">
             <thead>
                 <tr>
-                    <th>?�태 (DB?�송)</th>
-                    <th>법원 / ?�건번호</th>
-                    <th>?�건�?/th>
-                    <th>?�사??(?�뢰??</th>
-                    <th>?�당??(�?부)</th>
-                    <th>?�락�?/th>
-                    <th>관�?/th>
+                    <th>?�태 (DB?�송)</th>
+                    <th>법원 / ?�건번호</th>
+                    <th>?�건�?/th>
+                    <th>?�사??(?�뢰??</th>
+                    <th>?�당??(�?부)</th>
+                    <th>?�락�?/th>
+                    <th>관�?/th>
                 </tr>
             </thead>
             <tbody id="litigationListBody">
-                <tr><td colspan="7" style="text-align:center; padding:30px;">?�이?��? 불러?�는 �?..</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding:30px;">?�이?��? 불러?�는 �?..</td></tr>
             </tbody>
         </table>
     </div>
@@ -106,11 +107,11 @@
 <div id="detailModal" class="modal-overlay">
     <div class="modal-content">
         <button class="btn-close" onclick="closeModal()">??/button>
-        <div class="modal-header">?�건 ?�세 ?�보</div>
+        <div class="modal-header">?�건 ?�세 ?�보</div>
         <div class="info-grid" id="modalDetailContent">
             </div>
         <div style="margin-top:20px; text-align:right;">
-            <button class="btn-search" onclick="alert('?�림??발송 기능?� ?�동 ?�정?�니??')">?�� ?�림??발송</button>
+            <button class="btn-search" onclick="alert('?�림??발송 기능?� ?�동 ?�정?�니??')">?�� ?�림??발송</button>
         </div>
     </div>
 </div>
@@ -147,16 +148,16 @@
                 const userData = await users.getMe();
                 
                 if (!checkRole(['master', 'admin', 'general_manager', 'lawyer'])) {
-                    alert('관리자 권한???�요?�니??');
+                    alert('관리자 권한???�요?�니??');
                     location.href = '/pages/user/dashboard.html';
                     return;
                 }
 
                 renderAdminSidebar(pageKey, userData);
-                console.log('?�이지 로드:', pageKey, userData);
+                console.log('?�이지 로드:', pageKey, userData);
 
             } catch (error) {
-                console.error('?�이지 로드 ?�러:', error);
+                console.error('?�이지 로드 ?�러:', error);
             }
         })();
 

@@ -2,14 +2,15 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>?�산/?�생 ?�담 관�?- 법무그룹 ?�일</title>
+    <base href="/hyunil-law-frontend/">
+    <title>?�산/?�생 ?�담 관�?- 법무그룹 ?�일</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        /* [공통 ?��????��?] */
+        /* [공통 ?��????��?] */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
         body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
         
-        /* ?�이?�바 */
+        /* ?�이?�바 */
         .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
         .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; }
         .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
@@ -21,7 +22,7 @@
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
 
-        /* ?�이�?*/
+        /* ?�이�?*/
         .section-box { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
         .admin-table { width: 100%; border-collapse: collapse; }
         .admin-table th, .admin-table td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
@@ -43,7 +44,7 @@
         .consult-note { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; resize: vertical; margin-top: 10px; }
         
         .btn-action { padding: 10px 20px; background: #2c5bf2; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; }
-        .btn-convert { background: #722ed1; margin-right: 10px; } /* ?�임?�환 버튼 */
+        .btn-convert { background: #722ed1; margin-right: 10px; } /* ?�임?�환 버튼 */
     </style>
 </head>
 <body>
@@ -51,38 +52,38 @@
 <nav class="sidebar">
     <div class="sidebar-brand">ADMINISTRATOR</div>
     <ul class="sidebar-menu">
-        <li><a href="/pages/admin/admin.html" class="menu-link">?�� ?�문 관�?/a></li>
-        <li style="margin: 15px 0 5px 15px; font-size: 12px; color: #666; font-weight: 700;">?�담 ?�수 관�?(Gmail ?�동)</li>
-        <li><a href="/pages/admin/admin_pasan_consult.html" class="menu-link active">?�� ?�생/?�산 ?�담</a></li>
-        <li><a href="/pages/admin/admin_collection_consult.html" class="menu-link">?�� 채권추심 ?�담</a></li>
+        <li><a href="/pages/admin/admin.html" class="menu-link">?�� ?�문 관�?/a></li>
+        <li style="margin: 15px 0 5px 15px; font-size: 12px; color: #666; font-weight: 700;">?�담 ?�수 관�?(Gmail ?�동)</li>
+        <li><a href="/pages/admin/admin_pasan_consult.html" class="menu-link active">?�� ?�생/?�산 ?�담</a></li>
+        <li><a href="/pages/admin/admin_collection_consult.html" class="menu-link">?�� 채권추심 ?�담</a></li>
         
-        <li style="margin: 15px 0 5px 15px; font-size: 12px; color: #666; font-weight: 700;">?�건 진행 관�?/li>
-        <li><a href="/pages/admin/admin_pasan.html" class="menu-link">?�� ?�생/?�산 ?�건</a></li>
-        <li><a href="/index.html" class="menu-link" style="margin-top:20px;">?�� 메인?�로</a></li>
+        <li style="margin: 15px 0 5px 15px; font-size: 12px; color: #666; font-weight: 700;">?�건 진행 관�?/li>
+        <li><a href="/pages/admin/admin_pasan.html" class="menu-link">?�� ?�생/?�산 ?�건</a></li>
+        <li><a href="/index.html" class="menu-link" style="margin-top:20px;">?�� 메인?�로</a></li>
     </ul>
 </nav>
 
 <main class="main-content">
     <div class="page-header">
-        <h2 class="page-title">?�� ?�생/?�산 ?�담 ?�수 ?�황</h2>
-        <button class="btn-action" style="background:#333;" onclick="alert('Gmail ?�동 ?�동 ?�기중 (Python)')">?�� 메일 ?�동 가?�오�?/button>
+        <h2 class="page-title">?�� ?�생/?�산 ?�담 ?�수 ?�황</h2>
+        <button class="btn-action" style="background:#333;" onclick="alert('Gmail ?�동 ?�동 ?�기중 (Python)')">?�� 메일 ?�동 가?�오�?/button>
     </div>
 
     <div class="section-box">
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th style="width:10%">?�태</th>
-                    <th style="width:12%">?�수??/th>
-                    <th>?�청???�름</th>
-                    <th>?�락�?/th>
-                    <th>�?채무??/th>
-                    <th>?�득 ?�태</th>
-                    <th>관�?/th>
+                    <th style="width:10%">?�태</th>
+                    <th style="width:12%">?�수??/th>
+                    <th>?�청???�름</th>
+                    <th>?�락�?/th>
+                    <th>�?채무??/th>
+                    <th>?�득 ?�태</th>
+                    <th>관�?/th>
                 </tr>
             </thead>
             <tbody id="listBody">
-                <tr><td colspan="7" style="text-align:center; padding:30px;">로딩 �?..</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding:30px;">로딩 �?..</td></tr>
             </tbody>
         </table>
     </div>
@@ -91,16 +92,16 @@
 <div id="consultModal" class="modal-overlay">
     <div class="modal-card">
         <span class="close-btn" onclick="closeModal()">??/span>
-        <h3 style="margin-bottom:20px; font-size:20px; font-weight:700;">?�담 ?�세 ?�보</h3>
+        <h3 style="margin-bottom:20px; font-size:20px; font-weight:700;">?�담 ?�세 ?�보</h3>
         
         <div id="modalContent"></div>
         
-        <h4 style="margin-top:20px; margin-bottom:10px;">?�� ?�담 메모</h4>
-        <textarea id="adminMemo" class="consult-note" placeholder="?�담 ?�용??기록?�세??"></textarea>
+        <h4 style="margin-top:20px; margin-bottom:10px;">?�� ?�담 메모</h4>
+        <textarea id="adminMemo" class="consult-note" placeholder="?�담 ?�용??기록?�세??"></textarea>
         
         <div style="margin-top:20px; text-align:right;">
-            <button class="btn-action btn-convert" onclick="convertToCase()">?? ?�건?�로 ?�환 (?�임)</button>
-            <button class="btn-action" onclick="saveMemo()">?�??/button>
+            <button class="btn-action btn-convert" onclick="convertToCase()">?? ?�건?�로 ?�환 (?�임)</button>
+            <button class="btn-action" onclick="saveMemo()">?�??/button>
         </div>
     </div>
 </div>
@@ -126,8 +127,8 @@
                 const pasanCases = await cases.getPasanCases();
                 console.log('Pasan cases:', pasanCases);
             } catch (error) {
-                console.error('?�이지 로드 ?�러:', error);
-                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
+                console.error('?�이지 로드 ?�러:', error);
+                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
             }
         })();
         
@@ -136,7 +137,7 @@
                 await auth.logout();
                 location.href = "/";
             } catch (error) {
-                console.error('로그?�웃 ?�러:', error);
+                console.error('로그?�웃 ?�러:', error);
             }
         };
     </script>

@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>분쟁/?�상 관�?- 법무그룹 ?�일</title>
+    <base href="/hyunil-law-frontend/">
+    <title>분쟁/?�상 관�?- 법무그룹 ?�일</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        /* [관리자 공통 ?��??? */
+        /* [관리자 공통 ?��??? */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
         body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
         a { text-decoration: none; color: inherit; }
         ul, li { list-style: none; }
 
-        /* ?�이?�바 */
+        /* ?�이?�바 */
         .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
         .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; }
         .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
@@ -27,18 +28,18 @@
         .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
         .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
 
-        /* 메인 컨텐�?*/
+        /* 메인 컨텐�?*/
         .main-content { flex: 1; margin-left: 260px; padding: 40px; }
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; display: flex; align-items: center; gap: 10px; }
         
-        /* ?�계 카드 */
+        /* ?�계 카드 */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
         .stat-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; display: flex; flex-direction: column; justify-content: center; }
         .stat-label { font-size: 12px; color: #888; font-weight: 600; margin-bottom: 5px; }
         .stat-value { font-size: 24px; font-weight: 800; color: #1a1a1a; }
 
-        /* ?�터 �??�이�?*/
+        /* ?�터 �??�이�?*/
         .filter-box { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
         .search-input { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; flex: 1; outline: none; }
         .filter-select { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; outline: none; }
@@ -49,11 +50,11 @@
         .conf-table th { background-color: #f9f9f9; color: #555; font-weight: 700; position: sticky; top: 0; }
         .conf-table tr:hover { background-color: #f0f7ff; cursor: pointer; }
 
-        /* 분쟁 ?�용 뱃�? */
+        /* 분쟁 ?�용 뱃�? */
         .type-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; margin-right: 5px; }
-        .type-cert { background: #fff2e8; color: #d4380d; border: 1px solid #ffbb96; } /* ?�용증명 */
-        .type-coop { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; } /* ?�무?�조 */
-        .type-nego { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; } /* ?�상/?�의 */
+        .type-cert { background: #fff2e8; color: #d4380d; border: 1px solid #ffbb96; } /* ?�용증명 */
+        .type-coop { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; } /* ?�무?�조 */
+        .type-nego { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; } /* ?�상/?�의 */
         
         .status-pill { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-block; }
         .st-ing { background: #e6fffb; color: #08979c; border: 1px solid #87e8de; } 
@@ -86,30 +87,30 @@
     <ul class="sidebar-menu">
         <li>
             <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
-                <div><span class="menu-icon">?��</span> 기업?�문?�터</div>
+                <div><span class="menu-icon">?��</span> 기업?�문?�터</div>
                 <span class="menu-arrow">??/span>
             </div>
             <ul id="groupCorp" class="submenu">
-                <li><a href="/pages/admin/admin.html">?�� ?�문 관�?/a></li>
-                <li><a href="/pages/admin/admin_requests.html">?�� ?�청 관리함</a></li>
-                <li><a href="/pages/admin/admin_report.html">?�� 리포??발송</a></li>
-                <li><a href="/pages/admin/admin_members.html">?�� ?�원/기업 관�?/a></li>
+                <li><a href="/pages/admin/admin.html">?�� ?�문 관�?/a></li>
+                <li><a href="/pages/admin/admin_requests.html">?�� ?�청 관리함</a></li>
+                <li><a href="/pages/admin/admin_report.html">?�� 리포??발송</a></li>
+                <li><a href="/pages/admin/admin_members.html">?�� ?�원/기업 관�?/a></li>
             </ul>
         </li>
         <li>
             <div class="menu-category open active" onclick="toggleAdminMenu('groupConsult', this)">
-                <div><span class="menu-icon">?�️</span> ?�건 관�?/div>
+                <div><span class="menu-icon">?�️</span> ?�건 관�?/div>
                 <span class="menu-arrow">??/span>
             </div>
             <ul id="groupConsult" class="submenu" style="display:block;">
-                <li><a href="/pages/admin/admin_litigation.html">?�� ?�자?�송 관�?/a></li>
-                <li><a href="/pages/admin/admin_pasan.html">?�� ?�산/?�생 ?�터</a></li>
-                <li><a href="/pages/admin/admin_collection.html">?�� 채권 추심?�터</a></li>
-                <li><a href="/pages/admin/admin_conflict.html" class="active" style="color:#fa8c16; font-weight:700;">?�️ 분쟁/?�상 관�?/a></li>
+                <li><a href="/pages/admin/admin_litigation.html">?�� ?�자?�송 관�?/a></li>
+                <li><a href="/pages/admin/admin_pasan.html">?�� ?�산/?�생 ?�터</a></li>
+                <li><a href="/pages/admin/admin_collection.html">?�� 채권 추심?�터</a></li>
+                <li><a href="/pages/admin/admin_conflict.html" class="active" style="color:#fa8c16; font-weight:700;">?�️ 분쟁/?�상 관�?/a></li>
             </ul>
         </li>
         <li class="menu-divider"></li>
-        <li><a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a></li>
+        <li><a href="/index.html" class="menu-link">?�� 메인 ?�페?��?</a></li>
     </ul>
 </nav>
 
@@ -124,38 +125,38 @@
 
 <main class="main-content">
     <div class="page-header">
-        <h2 class="page-title">?�️ 분쟁 �??�상 관�?/h2>
-        <button class="btn-add" onclick="openModal('new')">+ 분쟁 ?�건 ?�록</button>
+        <h2 class="page-title">?�️ 분쟁 �??�상 관�?/h2>
+        <button class="btn-add" onclick="openModal('new')">+ 분쟁 ?�건 ?�록</button>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">진행 중인 분쟁</div>
-            <div class="stat-value" id="st_total">- �?/div>
+            <div class="stat-value" id="st_total">- �?/div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">?�용증명/?��?</div>
-            <div class="stat-value" style="color:#d4380d;" id="st_cert">- �?/div>
+            <div class="stat-label">?�용증명/?��?</div>
+            <div class="stat-value" style="color:#d4380d;" id="st_cert">- �?/div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">?�상/?�의 진행</div>
-            <div class="stat-value" style="color:#722ed1;" id="st_nego">- �?/div>
+            <div class="stat-label">?�상/?�의 진행</div>
+            <div class="stat-value" style="color:#722ed1;" id="st_nego">- �?/div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">?�결(종결) ?�료</div>
-            <div class="stat-value" style="color:#389e0d;" id="st_done">- �?/div>
+            <div class="stat-label">?�결(종결) ?�료</div>
+            <div class="stat-value" style="color:#389e0d;" id="st_done">- �?/div>
         </div>
     </div>
 
     <div class="filter-box">
         <select id="filterType" class="filter-select" onchange="filterTable()">
-            <option value="all">?�체 구분</option>
-            <option value="?�용증명">?�용증명</option>
-            <option value="?�무?�조">?�무?�조?�청</option>
-            <option value="?�상">?�상/?�의</option>
-            <option value="계약?��?">계약?��? ?�보</option>
+            <option value="all">?�체 구분</option>
+            <option value="?�용증명">?�용증명</option>
+            <option value="?�무?�조">?�무?�조?�청</option>
+            <option value="?�상">?�상/?�의</option>
+            <option value="계약?��?">계약?��? ?�보</option>
         </select>
-        <input type="text" id="searchInput" class="search-input" placeholder="?�뢰?? ?��?�? ?�건 검??.." onkeyup="filterTable()">
+        <input type="text" id="searchInput" class="search-input" placeholder="?�뢰?? ?��?�? ?�건 검??.." onkeyup="filterTable()">
         <button class="btn-add" style="background:#333; padding:0 15px;" onclick="filterTable()">검??/button>
     </div>
 
@@ -164,16 +165,16 @@
             <thead>
                 <tr>
                     <th style="width:12%">구분</th>
-                    <th>?�건 (?�목)</th>
-                    <th>?�뢰??/th>
-                    <th>?��?�?(Counterparty)</th>
-                    <th>진행?�태</th>
-                    <th>?�당??/th>
-                    <th style="width:10%">?�수??/th>
+                    <th>?�건 (?�목)</th>
+                    <th>?�뢰??/th>
+                    <th>?��?�?(Counterparty)</th>
+                    <th>진행?�태</th>
+                    <th>?�당??/th>
+                    <th style="width:10%">?�수??/th>
                 </tr>
             </thead>
             <tbody id="confListBody">
-                <tr><td colspan="7" style="text-align:center; padding:40px;">?�이??로딩 �?..</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding:40px;">?�이??로딩 �?..</td></tr>
             </tbody>
         </table>
     </div>
@@ -182,72 +183,72 @@
 <div id="confModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <span id="modalTitle">분쟁 ?�건 ?�록</span>
+            <span id="modalTitle">분쟁 ?�건 ?�록</span>
             <span class="close-btn" onclick="closeModal()">??/span>
         </div>
         <input type="hidden" id="editDocId">
         
         <div class="info-grid">
             <div class="form-group">
-                <label class="form-label">분쟁 ?�형 *</label>
+                <label class="form-label">분쟁 ?�형 *</label>
                 <select id="c_type" class="input-box">
-                    <option value="">?�택?�세??/option>
-                    <option value="?�용증명">?�용증명 (?�촉/?��?)</option>
-                    <option value="?�무?�조">?�무?�조?�청??/option>
-                    <option value="?�상">?�상/?�의 ?��?/option>
-                    <option value="계약?��?">계약?��? ?�보</option>
-                    <option value="기�?분쟁">기�? 분쟁</option>
+                    <option value="">?�택?�세??/option>
+                    <option value="?�용증명">?�용증명 (?�촉/?��?)</option>
+                    <option value="?�무?�조">?�무?�조?�청??/option>
+                    <option value="?�상">?�상/?�의 ?��?/option>
+                    <option value="계약?��?">계약?��? ?�보</option>
+                    <option value="기�?분쟁">기�? 분쟁</option>
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">진행 ?�태</label>
+                <label class="form-label">진행 ?�태</label>
                 <select id="c_status" class="input-box">
-                    <option value="?�성�?>문안 ?�성 �?/option>
-                    <option value="발송?�료">발송/?�달 ?�료</option>
-                    <option value="?�상�?>?�상 진행 �?/option>
-                    <option value="?�의?�료">?�의/?�결 ?�료</option>
-                    <option value="결렬">결렬 (?�송 ?�정)</option>
+                    <option value="?�성�?>문안 ?�성 �?/option>
+                    <option value="발송?�료">발송/?�달 ?�료</option>
+                    <option value="?�상�?>?�상 진행 �?/option>
+                    <option value="?�의?�료">?�의/?�결 ?�료</option>
+                    <option value="결렬">결렬 (?�송 ?�정)</option>
                 </select>
             </div>
         </div>
 
         <div class="form-group">
-            <label class="form-label">?�건 (?�목) *</label>
-            <input type="text" id="c_title" class="input-box" placeholder="?? 미�?�??�역�??�촉??�?>
+            <label class="form-label">?�건 (?�목) *</label>
+            <input type="text" id="c_title" class="input-box" placeholder="?? 미�?�??�역�??�촉??�?>
         </div>
 
         <div class="info-grid">
             <div class="form-group">
-                <label class="form-label">?�뢰??(?�리�? *</label>
-                <input type="text" id="c_client" class="input-box" placeholder="고객�?>
+                <label class="form-label">?�뢰??(?�리�? *</label>
+                <input type="text" id="c_client" class="input-box" placeholder="고객�?>
             </div>
             <div class="form-group">
-                <label class="form-label">?��?�?(Counterparty) *</label>
-                <input type="text" id="c_opponent" class="input-box" placeholder="?��?�??�름/?�호">
+                <label class="form-label">?��?�?(Counterparty) *</label>
+                <input type="text" id="c_opponent" class="input-box" placeholder="?��?�??�름/?�호">
             </div>
         </div>
 
         <div class="info-grid">
             <div class="form-group">
-                <label class="form-label">관??금액 (?�택)</label>
+                <label class="form-label">관??금액 (?�택)</label>
                 <input type="text" id="c_amount" class="input-box" placeholder="분쟁 금액" oninput="formatNumber(this)">
             </div>
             <div class="form-group">
-                <label class="form-label">?�당??/label>
-                <input type="text" id="c_staff" class="input-box" placeholder="?? ?�나??>
+                <label class="form-label">?�당??/label>
+                <input type="text" id="c_staff" class="input-box" placeholder="?? ?�나??>
             </div>
         </div>
 
         <div class="form-group">
-            <label class="form-label">진행 메모 / ?�점</label>
-            <input type="text" id="c_note" class="input-box" placeholder="주요 ?�점 ?�항 메모">
+            <label class="form-label">진행 메모 / ?�점</label>
+            <input type="text" id="c_note" class="input-box" placeholder="주요 ?�점 ?�항 메모">
         </div>
 
-        <button class="btn-save" onclick="saveConflict()">?�?�하�?/button>
+        <button class="btn-save" onclick="saveConflict()">?�?�하�?/button>
 
         <div class="transfer-area">
-            <span style="font-size:12px; color:#666; font-weight:700;">?�상 결렬 ???�� </span>
-            <button class="btn-litigation" onclick="transferToLitigation()">?���?민사?�송?�로 ?�환 (?��?)</button>
+            <span style="font-size:12px; color:#666; font-weight:700;">?�상 결렬 ???�� </span>
+            <button class="btn-litigation" onclick="transferToLitigation()">?���?민사?�송?�로 ?�환 (?��?)</button>
         </div>
     </div>
 </div>
@@ -272,8 +273,8 @@
                 }
                 console.log('Conflict management page loaded');
             } catch (error) {
-                console.error('?�이지 로드 ?�러:', error);
-                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
+                console.error('?�이지 로드 ?�러:', error);
+                alert('?�이?��? 불러?�는 �??�류가 발생?�습?�다.');
             }
         })();
         
@@ -282,7 +283,7 @@
                 await auth.logout();
                 location.href = "/";
             } catch (error) {
-                console.error('로그?�웃 ?�러:', error);
+                console.error('로그?�웃 ?�러:', error);
             }
         };
     </script>
