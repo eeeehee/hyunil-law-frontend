@@ -119,7 +119,7 @@
 <body>
 
  <nav class="sidebar">
-    <div class="sidebar-logo"><a href="/"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a></div>
+    <div class="sidebar-logo"><a href="../../index.html"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a></div>
     <ul class="menu-list">
         <li><a href="../../pages/user/dashboard.html" class="menu-link">대시보드</a></li>
         <li><a href="../../pages/user/board_list.html" class="menu-link">나의 자문 내역</a></li>
@@ -468,7 +468,7 @@
                     }
 
                     return `
-                        <li class="history-item" onclick="location.href='/pages/user/board_view.html?id=${p.docId}'">
+                        <li class="history-item" onclick="location.href='board_view.html?id=${p.docId}'">
                             <span class="h-status ${statusClass}">${statusText}</span>
                             <span class="h-subject">${p.title || '(제목 없음)'}</span>
                             <span class="h-date">${p.createdAt ? new Date(p.createdAt).toLocaleDateString('ko-KR') : ''}</span>

@@ -95,7 +95,7 @@
     <!-- Sidebar Skeleton (깜빡임 방지) -->
     <nav class="sidebar">
         <div class="sidebar-logo">
-            <a href="/"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a>
+            <a href="../../index.html"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a>
         </div>
         <div class="user-profile-area">
             <div class="user-name">로딩중...</div>
@@ -360,7 +360,7 @@
                 const deptCell = isOwner ? `<td>${displayDept}</td>` : '';
 
                 return `
-                    <tr onclick="location.href='/pages/user/board_view.html?id=${post.docId}'" style="cursor:pointer;">
+                    <tr onclick="location.href='board_view.html?id=${post.docId}'" style="cursor:pointer;">
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>${post.category || '-'}</td>
                         <td class="title-cell">${post.title || '(제목 없음)'}</td>

@@ -73,7 +73,7 @@
     <!-- Sidebar Skeleton (깜빡임 방지) -->
     <nav class="sidebar">
         <div class="sidebar-logo">
-            <a href="/"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a>
+            <a href="../../index.html"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a>
         </div>
         <div class="user-profile-area">
             <div class="user-name">로딩중...</div>
@@ -96,19 +96,19 @@
                 <h2 class="page-title">안녕하세요, <span id="userName">...</span>님! 👋</h2>
                 <p class="page-subtitle"><span id="userCompany">...</span>의 법률 리스크를 관리하고 있습니다.</p>
             </div>
-            <a href="../../pages/admin/admin.html" class="btn-admin" id="adminBtn">⚙️ 관리자 페이지</a>
+            <a href="../admin/admin.html" class="btn-admin" id="adminBtn">⚙️ 관리자 페이지</a>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card" id="cardTotal" onclick="location.href='/pages/user/board_list.html'">
+            <div class="stat-card" id="cardTotal" onclick="location.href='board_list.html'">
                 <div class="stat-header"><span class="stat-title">총 자문 신청</span><span class="stat-icon">📝</span></div>
                 <div class="stat-value" id="countTotal">-</div>
             </div>
-            <div class="stat-card" id="cardWaiting" onclick="location.href='/pages/user/board_list.html?status=waiting'">
+            <div class="stat-card" id="cardWaiting" onclick="location.href='board_list.html?status=waiting'">
                 <div class="stat-header"><span class="stat-title">답변 대기중</span><span class="stat-icon">⏳</span></div>
                 <div class="stat-value" style="color:#ff9800;" id="countWaiting">-</div>
             </div>
-            <div class="stat-card" id="cardDone" onclick="location.href='/pages/user/board_list.html?status=done'">
+            <div class="stat-card" id="cardDone" onclick="location.href='board_list.html?status=done'">
                 <div class="stat-header"><span class="stat-title">답변 완료</span><span class="stat-icon">✅</span></div>
                 <div class="stat-value" style="color:#52c41a;" id="countDone">-</div>
             </div>
@@ -116,11 +116,11 @@
 
         <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 15px;">빠른 실행</h3>
         <div class="quick-actions">
-            <div class="action-card" onclick="location.href='/pages/user/board_write.html'">
+            <div class="action-card" onclick="location.href='board_write.html'">
                 <div class="action-icon">✏️</div>
                 <div class="action-text"><h3>새 자문 신청하기</h3><p>법률 전문가에게 문의를 남겨보세요.</p></div>
             </div>
-            <div class="action-card" onclick="location.href='/pages/user/board_list.html'">
+            <div class="action-card" onclick="location.href='board_list.html'">
                 <div class="action-icon">📂</div>
                 <div class="action-text"><h3>내역 확인하기</h3><p>진행 중인 자문과 완료된 내역을 확인합니다.</p></div>
             </div>
