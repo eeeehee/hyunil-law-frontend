@@ -62,10 +62,10 @@ function renderAdminSidebar() {
                     <span style="font-size:10px;">▼</span>
                 </div>
                 <ul id="groupCorp" class="submenu" style="display:block;">
-                    <li><a href="/pages/admin/admin_members.html">👥 회원/기업 관리</a></li>
-                    <li><a href="/pages/admin/admin_payments.html">💳 매출/CMS 관리</a></li>
-                    <li><a href="/pages/admin/admin.html">📝 자문 관리 (전체)</a></li>
-                    <li><a href="/pages/admin/admin_requests.html">📩 요청 관리함</a></li>
+                    <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
+                    <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
+                    <li><a href="admin.html">📝 자문 관리 (전체)</a></li>
+                    <li><a href="admin_requests.html">📩 요청 관리함</a></li>
                 </ul>
             </li>
 
@@ -75,8 +75,8 @@ function renderAdminSidebar() {
                     <span style="font-size:10px;">▼</span>
                 </div>
                 <ul id="groupLitigation" class="submenu">
-                    <li><a href="/pages/admin/admin_litigation.html">🔎 소송 관리</a></li>
-                    <li><a href="/pages/admin/admin_clients.html">📇 당사자(고객) 관리</a></li>
+                    <li><a href="admin_litigation.html">🔎 소송 관리</a></li>
+                    <li><a href="admin_clients.html">📇 당사자(고객) 관리</a></li>
                 </ul>
             </li>
 
@@ -86,14 +86,14 @@ function renderAdminSidebar() {
                     <span style="font-size:10px;">▼</span>
                 </div>
                 <ul id="groupBill" class="submenu">
-                    <li><a href="/pages/admin/admin_collection.html">💰 채권 관리</a></li>
-                    <li><a href="/pages/admin/admin_pasan.html">📋 파산 관리</a></li>
+                    <li><a href="admin_collection.html">💰 채권 관리</a></li>
+                    <li><a href="admin_pasan.html">📋 파산 관리</a></li>
                 </ul>
             </li>
 
             <li><div class="menu-divider"></div></li>
 
-            <li><a href="/pages/user/dashboard.html" class="menu-category" style="color:#52c41a; font-weight:bold;">← 사용자 화면으로</a></li>
+            <li><a href="../user/dashboard.html" class="menu-category" style="color:#52c41a; font-weight:bold;">← 사용자 화면으로</a></li>
         </ul>
     </nav>
     `;
@@ -174,6 +174,6 @@ async function loadAdminUserInfo() {
 window.adminLogout = function() {
     if (confirm('로그아웃 하시겠습니까?')) {
         localStorage.removeItem('token');
-        location.href = '/pages/public/login.html';
+        location.href = '../public/login.html';
     }
 };

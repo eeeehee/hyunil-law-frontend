@@ -25,14 +25,14 @@ export function renderClientSidebar(currentPage, userData) {
 
     // 2) 직원 관리 메뉴 노출 (두번째 로직 유지)
     const ceoMenu = ['master', 'admin', 'owner'].includes(userData.role)
-        ? `<li><a href="/pages/user/company_members.html" class="menu-link ${currentPage === 'company_members' ? 'active' : ''}" style="color:#d46b08; font-weight:bold;">👥 직원 관리 (CEO)</a></li>`
+        ? `<li><a href="company_members.html" class="menu-link ${currentPage === 'company_members' ? 'active' : ''}" style="color:#d46b08; font-weight:bold;">👥 직원 관리 (CEO)</a></li>`
         : '';
 
     // 3) 사이드바 HTML 생성 (첫번째 UI 구조/클래스 유지)
     const sidebarHTML = `
     <nav class="sidebar">
         <div class="sidebar-logo">
-            <a href="/"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a>
+            <a href="../../index.html"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a>
         </div>
 
         <div class="user-profile-area">
@@ -42,11 +42,11 @@ export function renderClientSidebar(currentPage, userData) {
         </div>
 
         <ul class="menu-list">
-            <li><a href="/pages/user/dashboard.html" class="menu-link ${currentPage === 'dashboard' ? 'active' : ''}">대시보드</a></li>
-            <li><a href="/pages/user/board_list.html" class="menu-link ${currentPage === 'board_list' ? 'active' : ''}">나의 자문 내역</a></li>
-            <li><a href="/pages/user/payment.html" class="menu-link ${currentPage === 'payment' ? 'active' : ''}">결제/구독 관리</a></li>
-            <li><a href="/pages/user/member_info.html" class="menu-link ${currentPage === 'member_info' ? 'active' : ''}">회원 정보 수정</a></li>
-            <li><a href="/pages/public/user_guide.html" class="menu-link ${currentPage === 'user_guide' ? 'active' : ''}">📘 이용 가이드 (FAQ)</a></li>
+            <li><a href="dashboard.html" class="menu-link ${currentPage === 'dashboard' ? 'active' : ''}">대시보드</a></li>
+            <li><a href="board_list.html" class="menu-link ${currentPage === 'board_list' ? 'active' : ''}">나의 자문 내역</a></li>
+            <li><a href="payment.html" class="menu-link ${currentPage === 'payment' ? 'active' : ''}">결제/구독 관리</a></li>
+            <li><a href="member_info.html" class="menu-link ${currentPage === 'member_info' ? 'active' : ''}">회원 정보 수정</a></li>
+            <li><a href="../public/user_guide.html" class="menu-link ${currentPage === 'user_guide' ? 'active' : ''}">📘 이용 가이드 (FAQ)</a></li>
             ${ceoMenu}
         </ul>
 
@@ -67,7 +67,7 @@ export function renderClientSidebar(currentPage, userData) {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             if (window.handleLogout) window.handleLogout();
-            else location.href = '/';
+            else location.href = '../../index.html';
         });
     }
 }

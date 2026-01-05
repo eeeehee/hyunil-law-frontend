@@ -18,8 +18,8 @@ export function renderAdminSidebar(currentPage, userData) {
     const sidebarHTML = `
     <nav class="sidebar" style="width: 260px; background-color: #1a1a2e; color: #fff; padding: 40px 20px; position: fixed; height: 100vh; left: 0; top: 0; display: flex; flex-direction: column;">
         <div class="sidebar-logo" style="margin-bottom: 30px;">
-            <a href="/pages/admin/admin.html">
-                <img src="/assets/img/logo.png" alt="법무그룹 현일" style="height: 32px; filter: brightness(0) invert(1);">
+            <a href="admin.html">
+                <img src="../../assets/img/logo.png" alt="법무그룹 현일" style="height: 32px; filter: brightness(0) invert(1);">
             </a>
         </div>
 
@@ -30,16 +30,16 @@ export function renderAdminSidebar(currentPage, userData) {
         </div>
 
         <ul class="menu-list" style="flex: 1;">
-            <li style="margin-bottom: 8px;"><a href="/pages/admin/admin.html" class="menu-link ${currentPage === 'dashboard' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'dashboard' ? 'background-color: #2c5bf2; color: #fff;' : ''}">📊 대시보드</a></li>
-            <li style="margin-bottom: 8px;"><a href="/pages/admin/admin_members.html" class="menu-link ${currentPage === 'members' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'members' ? 'background-color: #2c5bf2; color: #fff;' : ''}">👥 회원 관리</a></li>
-            <li style="margin-bottom: 8px;"><a href="/pages/admin/admin_requests.html" class="menu-link ${currentPage === 'requests' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'requests' ? 'background-color: #2c5bf2; color: #fff;' : ''}">📝 자문 요청</a></li>
-            <li style="margin-bottom: 8px;"><a href="/pages/admin/admin_litigation.html" class="menu-link ${currentPage === 'litigation' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'litigation' ? 'background-color: #2c5bf2; color: #fff;' : ''}">⚖️ 소송 관리</a></li>
-            <li style="margin-bottom: 8px;"><a href="/pages/admin/admin_collection.html" class="menu-link ${currentPage === 'collection' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'collection' ? 'background-color: #2c5bf2; color: #fff;' : ''}">💰 채권 추심</a></li>
-            <li style="margin-bottom: 8px;"><a href="/pages/admin/admin_pasan.html" class="menu-link ${currentPage === 'pasan' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'pasan' ? 'background-color: #2c5bf2; color: #fff;' : ''}">📋 파산 관리</a></li>
-            <li style="margin-bottom: 8px;"><a href="/pages/admin/admin_payments.html" class="menu-link ${currentPage === 'payments' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'payments' ? 'background-color: #2c5bf2; color: #fff;' : ''}">💳 매출/CMS 관리</a></li>
-            <li style="margin-bottom: 8px;"><a href="/pages/admin/admin_clients.html" class="menu-link ${currentPage === 'clients' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'clients' ? 'background-color: #2c5bf2; color: #fff;' : ''}">🏢 고객사 관리</a></li>
+            <li style="margin-bottom: 8px;"><a href="admin.html" class="menu-link ${currentPage === 'dashboard' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'dashboard' ? 'background-color: #2c5bf2; color: #fff;' : ''}">📊 대시보드</a></li>
+            <li style="margin-bottom: 8px;"><a href="admin_members.html" class="menu-link ${currentPage === 'members' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'members' ? 'background-color: #2c5bf2; color: #fff;' : ''}">👥 회원 관리</a></li>
+            <li style="margin-bottom: 8px;"><a href="admin_requests.html" class="menu-link ${currentPage === 'requests' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'requests' ? 'background-color: #2c5bf2; color: #fff;' : ''}">📝 자문 요청</a></li>
+            <li style="margin-bottom: 8px;"><a href="admin_litigation.html" class="menu-link ${currentPage === 'litigation' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'litigation' ? 'background-color: #2c5bf2; color: #fff;' : ''}">⚖️ 소송 관리</a></li>
+            <li style="margin-bottom: 8px;"><a href="admin_collection.html" class="menu-link ${currentPage === 'collection' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'collection' ? 'background-color: #2c5bf2; color: #fff;' : ''}">💰 채권 추심</a></li>
+            <li style="margin-bottom: 8px;"><a href="admin_pasan.html" class="menu-link ${currentPage === 'pasan' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'pasan' ? 'background-color: #2c5bf2; color: #fff;' : ''}">📋 파산 관리</a></li>
+            <li style="margin-bottom: 8px;"><a href="admin_payments.html" class="menu-link ${currentPage === 'payments' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'payments' ? 'background-color: #2c5bf2; color: #fff;' : ''}">💳 매출/CMS 관리</a></li>
+            <li style="margin-bottom: 8px;"><a href="admin_clients.html" class="menu-link ${currentPage === 'clients' ? 'active' : ''}" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.7); transition: 0.2s; text-decoration: none; ${currentPage === 'clients' ? 'background-color: #2c5bf2; color: #fff;' : ''}">🏢 고객사 관리</a></li>
             <li style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                <a href="/pages/user/dashboard.html" class="menu-link" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.5); transition: 0.2s; text-decoration: none;">← 사용자 화면으로</a>
+                <a href="../user/dashboard.html" class="menu-link" style="display: block; padding: 14px 15px; border-radius: 8px; color: rgba(255,255,255,0.5); transition: 0.2s; text-decoration: none;">← 사용자 화면으로</a>
             </li>
         </ul>
 
@@ -60,7 +60,7 @@ export function renderAdminSidebar(currentPage, userData) {
             if(window.handleLogout) window.handleLogout();
             else {
                 localStorage.removeItem('token');
-                location.href = '/';
+                location.href = '../../index.html';
             }
         });
     }
