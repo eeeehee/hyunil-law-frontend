@@ -16,3 +16,4 @@ Then open:
 - Pages are under `/pages/public`, `/pages/user`, `/pages/admin`
 - Shared scripts are under `/js`
 - Images are under `/assets/img`
+# 강제 재배포
