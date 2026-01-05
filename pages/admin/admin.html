@@ -272,16 +272,19 @@
     let companyMeta = {};
     let allPostsMap = {}; // docId -> post 데이터 매핑
 
+   
     // ============================================
     // 사용자 정보 표시 함수
     // ============================================
     function displayAdminUserInfo(user) {
-        // 사용자 정보 표시
-        document.getElementById('adminUserName').textContent = user.managerName || user.manager_name || user.email || '관리자';
-        document.getElementById('adminUserEmail').textContent = user.email || '';
+        // admin_sidebar.js에서 생성하는 ID(sb_userName/sb_userEmail/sb_userRole)에 맞춰 표시
+        const nameEl = document.getElementById('sb_userName') || document.getElementById('adminUserName');
+        const emailEl = document.getElementById('sb_userEmail') || document.getElementById('adminUserEmail');
+        const roleEl = document.getElementById('sb_userRole') || document.getElementById('adminUserRole');
 
-        // 역할 배지
-        const roleElement = document.getElementById('adminUserRole');
+        if (nameEl) nameEl.textContent = user.managerName || user.manager_name || user.email || '관리자';
+        if (emailEl) emailEl.textContent = user.email || '';
+
         const roleMap = {
             'master': { label: 'MASTER', class: 'badge-master' },
             'admin': { label: 'ADMIN', class: 'badge-admin' },
@@ -289,9 +292,13 @@
             'lawyer': { label: 'LAWYER', class: 'badge-lawyer' }
         };
 
-        const roleInfo = roleMap[user.role] || { label: user.role?.toUpperCase() || 'USER', class: 'badge-admin' };
-        roleElement.textContent = roleInfo.label;
-        roleElement.className = `user-role ${roleInfo.class}`;
+        if (roleEl) {
+            const roleInfo = roleMap[user.role] || { label: (user.role?.toUpperCase() || 'USER'), class: 'badge-admin' };
+            roleEl.textContent = roleInfo.label;
+            // sidebar의 role 엘리먼트는 profile-role 이고, admin.html은 user-role을 씀. 둘 다 안전 처리
+            const baseClass = roleEl.classList.contains('profile-role') ? 'profile-role' : 'user-role';
+            roleEl.className = `${baseClass} ${roleInfo.class}`;
+        }
     }
 
     // 로그아웃 기능
@@ -338,7 +345,7 @@
             await loadData();
         } catch (error) {
             console.error('권한 확인 에러:', error);
-            alert('로그인 정보를 확인할 수 없습니다.');
+            alert('로그인 정보를 확인할 수 없습니다.\n' + (error?.message || error));
             location.href = '../public/login.html';
         }
     })();
