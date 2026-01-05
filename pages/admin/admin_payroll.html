@@ -335,7 +335,7 @@
             if (!requireAuth()) return;
             const user = auth.getCurrentUser();
             if (!user) {
-                location.href = "/pages/public/login.html";
+                location.href = "../../pages/public/login.html";
                 return;
             }
 
@@ -356,7 +356,7 @@
         window.handleLogout = async function() {
             try {
                 await auth.logout();
-                location.href = "/";
+                location.href = "../../index.html";
             } catch (error) {
                 console.error('로그?�웃 ?�러:', error);
             }

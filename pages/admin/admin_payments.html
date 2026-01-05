@@ -467,7 +467,7 @@
 
     // 인증 확인
     if (!token) {
-        location.href = "/pages/public/login.html";
+        location.href = "../../pages/public/login.html";
     }
 
     // ============================================
@@ -544,7 +544,7 @@
             console.error(`❌ [API] 오류 응답:`, response);
             if (response.status === 401 || response.status === 403) {
                 alert('권한이 없습니다.');
-                location.href = "/pages/public/login.html";
+                location.href = "../../pages/public/login.html";
                 throw new Error('Unauthorized');
             }
             try {

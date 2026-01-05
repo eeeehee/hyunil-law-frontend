@@ -581,7 +581,7 @@ import { auth, users, requireAuth, payments, posts } from '/js/api.js';
             if (!requireAuth()) return;
             const user = auth.getCurrentUser();
             if (!user) {
-                location.href = "/pages/public/login.html";
+                location.href = "../../pages/public/login.html";
                 return;
             }
 
@@ -856,7 +856,7 @@ import { auth, users, requireAuth, payments, posts } from '/js/api.js';
 window.handleLogout = async function() {
             try {
                 await auth.logout();
-                location.href = "/";
+                location.href = "../../index.html";
             } catch (error) {
                 console.error('로그아웃 에러:', error);
             }

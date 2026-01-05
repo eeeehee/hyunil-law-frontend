@@ -176,7 +176,7 @@
         (async () => {
             // 인증 확인
             if (!auth.isLoggedIn()) {
-                location.href = "/pages/public/login.html";
+                location.href = "../../pages/public/login.html";
                 return;
             }
 
@@ -213,7 +213,7 @@
             } catch (error) {
                 console.error('사용자 정보 로드 오류:', error);
                 alert('사용자 정보를 불러오는 중 오류가 발생했습니다.');
-                location.href = "/pages/public/login.html";
+                location.href = "../../pages/public/login.html";
             }
         })();
 
@@ -323,7 +323,7 @@
 
         window.handleLogout = function() {
             auth.logout();
-            location.href = "/index.html";
+            location.href = "../../index.html";
         }
 
         // 로그아웃 버튼 이벤트 추가

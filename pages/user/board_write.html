@@ -260,13 +260,13 @@
 
         (async () => {
             if (!requireAuth()) {
-                location.href = "/pages/public/login.html";
+                location.href = "../../pages/public/login.html";
                 return;
             }
             
             const user = auth.getCurrentUser();
             if (!user) {
-                location.href = "/pages/public/login.html";
+                location.href = "../../pages/public/login.html";
                 return;
             }
             
