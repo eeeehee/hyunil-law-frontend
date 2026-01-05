@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 프롬프트 매니저 Pro (v4.0)</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [공통 테마] */
+        :root { --bg-dark: #0f1015; --bg-panel: #1b1c25; --primary: #5046e5; --accent: #f59e0b; --text: #e2e8f0; --border: #2d3748; --safe: #10b981; --risk: #ef4444; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
+
+        .main-content { margin-left: 260px; padding: 30px 40px; width: calc(100% - 260px); display: flex; flex-direction: column; height: 100%; }
+        
+        .header { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .header h1 { font-size: 24px; font-weight: 800; color: #fff; }
+        .header h1 span { color: var(--accent); }
+
+        /* [NEW] System Prompt Area (Common) */
+        .system-section { flex-shrink: 0; margin-bottom: 20px; background: #14151b; border: 1px solid var(--accent); border-radius: 12px; padding: 15px; }
+        .section-label { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .system-textarea { 
+            width: 100%; height: 120px; background: #0b0c10; border: 1px solid #333; outline: none;
+            font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #fcd34d; line-height: 1.5;
+            resize: vertical; padding: 10px; border-radius: 6px;
+        }
+
+        /* Tabs */
+        .tabs-container { display: flex; align-items: center; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; flex-shrink: 0; }
+        .tab-btn { 
+            background: #252630; border: 1px solid #4a5568; color: #aaa; 
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; 
+            font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;
+        }
+        .tab-btn:hover { background: #2d3748; color: white; }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .tab-del { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; background: rgba(255,255,255,0.1); }
+        .tab-del:hover { background: var(--risk); }
+        .btn-add-tab { background: #333; border: 1px dashed #666; color: #888; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+
+        /* User Prompt Area (Specific) */
+        .prompt-container { flex: 1; background: #14151b; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .toolbar { padding: 10px 20px; background: #1b1c25; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .toolbar-title { font-size: 13px; font-weight: bold; color: #fff; }
+        
+        .editor-area { 
+            flex: 1; padding: 20px; background: #0b0c10; border: none; outline: none;
+            font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #d1d5db; line-height: 1.6;
+            resize: none; width: 100%;
+        }
+
+        /* Buttons */
+        .btn { padding: 6px 14px; border-radius: 6px; border: none; font-weight: 700; cursor: pointer; color: white; font-size: 12px; margin-left: 5px; }
+        .btn-copy { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-save { background: #d97706; }
+        .btn-hist { background: #475569; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        .modal-content { background: #1b1c25; width: 600px; padding: 25px; border-radius: 12px; border: 1px solid var(--border); }
+        .history-item { padding: 10px; border-bottom: 1px solid #333; cursor: pointer; display: flex; justify-content: space-between; color:#ddd; font-size:13px; }
+        .history-item:hover { background: #333; }
+
+        @media print { body { display: none; } }
+    </style>
+</head>
+<body>
+
+    <script type="module">
+        import { auth, users, requireAuth } from "/js/api.js";
+        import { renderRehabSidebar } from './corp_rehab_sidebar.js';
+        renderRehabSidebar('ov_prompt'); 
+    </script>
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>🤖 프롬프트 매니저 <span>Pro</span></h1>
+                <p>공통 규칙과 개별 지시사항을 통합 관리합니다.</p>
+            </div>
+            <div>
+                <button class="btn btn-hist" onclick="openHistory()">🕒 히스토리</button>
+                <button class="btn btn-save" onclick="saveToFirebase()">☁️ 저장하기</button>
+                <button class="btn btn-copy" onclick="copyFullPrompt()">📋 전체 복사 (공통+개별)</button>
+            </div>
+        </div>
+
+        <div class="system-section">
+            <div class="section-label">
+                <span>🔒 공통 시스템 프롬프트 (모든 탭에 자동 포함)</span>
+                <span style="color:#666; font-weight:normal;">* 역할, 규칙, 단위 통일 등</span>
+            </div>
+            <textarea id="systemEditor" class="system-textarea" oninput="markUnsaved()"></textarea>
+        </div>
+
+        <div class="tabs-container" id="tabsArea">
+            <button class="btn-add-tab" onclick="addNewTab()">+ 새 파일 추가</button>
+        </div>
+
+        <div class="prompt-container">
+            <div class="toolbar">
+                <div class="toolbar-title">📝 개별 지시사항 (<span id="currentTabName" style="color:var(--primary);">선택됨</span>)</div>
+                <span id="saveStatus" style="font-size:11px; color:var(--safe); display:none;">✅ 저장됨</span>
+            </div>
+            <textarea class="editor-area" id="userEditor" oninput="handleUserUnput()"></textarea>
+        </div>
+    </div>
+
+    <div id="historyModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color:white; margin-bottom:15px;">🕒 변경 이력 복원</h3>
+            <div id="historyList" style="max-height:400px; overflow-y:auto;"></div>
+            <button class="btn btn-hist" style="margin-top:15px; float:right;" onclick="document.getElementById('historyModal').style.display='none'">닫기</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // REMOVED: Firebase config import
+        // REMOVED: Firebase SDK import
+
+        // Global State
+        let systemPrompt = "";
+        let templates = [];
+        let activeTabId = null;
+
+        // [초기 공통 프롬프트 값]
+        const DEFAULT_SYSTEM = `당신은 20년 경력의 기업신용분석가이자 데이터 분석 전문가입니다.
+사용자가 제공하는 PDF 텍스트를 분석하여, 지정된 JSON 스키마에 맞는 데이터를 정확하게 추출하십시오.
+
+[작성 원칙]
+1. 데이터 매핑: 문서 내용을 JSON 필드에 정확히 매핑하십시오.
+2. 결측치 처리: 정보가 없으면 "-" 또는 "0"으로 기입하십시오. (null 금지)
+3. 단위 통일: 금액은 '원' 단위 숫자(콤마 제거), 비율은 '%' 제외한 숫자로 변환하십시오.
+4. JSON 포맷 준수: 마크다운 코드 블록(\`\`\`json) 안에 순수 JSON만 출력하십시오.`;
+
+        // [초기 템플릿 값]
+        const DEFAULT_TEMPLATES = [
+            { id: 'credit', name: '신용보고서', content: '[분석 대상] 신용보고서\n[Task] overview, ratings, credit_history 추출\n...' },
+            { id: 'tech', name: '기술/특허', content: '[분석 대상] 기술인증\n[Task] biz.rnd, biz.patent 추출\n...' }
+        ];
+
+        // 1. Init
+        async function init() {
+            try {
+                const docRef = doc(db, "settings", "prompts_v4");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    systemPrompt = data.systemPrompt || DEFAULT_SYSTEM;
+                    templates = data.list || DEFAULT_TEMPLATES;
+                } else {
+                    systemPrompt = DEFAULT_SYSTEM;
+                    templates = DEFAULT_TEMPLATES;
+                }
+
+                // UI Setting
+                document.getElementById('systemEditor').value = systemPrompt;
+                if(templates.length > 0) activeTabId = templates[0].id;
+                
+                renderTabs();
+                renderUserEditor();
+
+            } catch (e) {
+                console.error("Init Error:", e);
+                alert("데이터 로드 실패: " + e.message);
+            }
+        }
+
+        // 2. UI Logic
+        window.markUnsaved = function() {
+            document.getElementById('saveStatus').style.display = 'none';
+        }
+
+        window.handleUserUnput = function() {
+            const val = document.getElementById('userEditor').value;
+            const target = templates.find(t => t.id === activeTabId);
+            if(target) target.content = val;
+            markUnsaved();
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tabsArea');
+            const addBtn = container.querySelector('.btn-add-tab');
+            container.innerHTML = ''; // Clear excluding addBtn logic handled by re-append
+            
+            templates.forEach(t => {
+                const btn = document.createElement('div');
+                btn.className = `tab-btn ${t.id === activeTabId ? 'active' : ''}`;
+                btn.innerHTML = `
+                    <span onclick="window.selectTab('${t.id}')">${t.name}</span>
+                    <span class="tab-del" onclick="window.deleteTab('${t.id}', event)">✕</span>
+                `;
+                container.appendChild(btn);
+            });
+            container.appendChild(addBtn);
+        }
+
+        window.selectTab = function(id) {
+            activeTabId = id;
+            renderTabs();
+            renderUserEditor();
+        }
+
+        function renderUserEditor() {
+            const target = templates.find(t => t.id === activeTabId);
+            const editor = document.getElementById('userEditor');
+            const label = document.getElementById('currentTabName');
+
+            if(target) {
+                editor.value = target.content;
+                editor.disabled = false;
+                label.innerText = target.name;
+            } else {
+                editor.value = "";
+                editor.disabled = true;
+                label.innerText = "-";
+            }
+        }
+
+        window.addNewTab = function() {
+            const name = prompt("새 탭 이름 (예: 매입명세서):");
+            if(!name) return;
+            const newId = 'tab_' + Date.now();
+            templates.push({ id: newId, name: name, content: `[분석 대상] ${name}\n[Task] JSON 스키마를 정의하세요.` });
+            activeTabId = newId;
+            renderTabs();
+            renderUserEditor();
+            markUnsaved();
+        }
+
+        window.deleteTab = function(id, e) {
+            e.stopPropagation();
+            if(!confirm("이 탭을 삭제하시겠습니까?")) return;
+            templates = templates.filter(t => t.id !== id);
+            if(templates.length > 0) activeTabId = templates[0].id;
+            else activeTabId = null;
+            renderTabs();
+            renderUserEditor();
+            markUnsaved();
+        }
+
+        // 3. Action Logic (Save / Copy / History)
+        window.saveToFirebase = async function() {
+            if(!confirm("현재 상태를 클라우드에 저장하시겠습니까?")) return;
+            
+            const currentSystem = document.getElementById('systemEditor').value;
+            
+            try {
+                const data = {
+                    systemPrompt: currentSystem,
+                    list: templates,
+                    updatedAt: serverTimestamp()
+                };
+
+                // Save Current
+                await setDoc(doc(db, "settings", "prompts_v4"), data);
+                
+                // Save History
+                await addDoc(collection(db, "settings", "prompts_v4", "history"), data);
+
+                document.getElementById('saveStatus').style.display = 'block';
+                alert("✅ 저장되었습니다.");
+            } catch(e) {
+                alert("저장 실패: " + e.message);
+            }
+        }
+
+        window.copyFullPrompt = function() {
+            const sys = document.getElementById('systemEditor').value;
+            const usr = document.getElementById('userEditor').value;
+            const fullText = sys + "\n\n--------------------------------------------------\n\n" + usr;
+
+            navigator.clipboard.writeText(fullText).then(() => {
+                alert("📋 [공통 + 개별] 프롬프트가 모두 복사되었습니다.\nGPT에 붙여넣으세요.");
+            });
+        }
+
+        window.openHistory = async function() {
+            const listDiv = document.getElementById('historyList');
+            listDiv.innerHTML = "로딩 중...";
+            document.getElementById('historyModal').style.display = 'flex';
+
+            const q = query(collection(db, "settings", "prompts_v4", "history"), orderBy("updatedAt", "desc"), limit(10));
+            const snap = await getDocs(q);
+            
+            listDiv.innerHTML = "";
+            snap.forEach(docSnap => {
+                const d = docSnap.data();
+                const date = d.updatedAt ? d.updatedAt.toDate().toLocaleString() : "Unknown";
+                
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `<span>${date} (탭 ${d.list.length}개)</span> <span>복원</span>`;
+                item.onclick = () => {
+                    if(confirm("이 시점으로 복원하시겠습니까?")) {
+                        systemPrompt = d.systemPrompt;
+                        templates = d.list;
+                        document.getElementById('systemEditor').value = systemPrompt;
+                        if(templates.length>0) activeTabId = templates[0].id;
+                        renderTabs();
+                        renderUserEditor();
+                        document.getElementById('historyModal').style.display = 'none';
+                    }
+                };
+                listDiv.appendChild(item);
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

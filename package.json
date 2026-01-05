@@ -1,0 +1,20 @@
+{
+  "name": "hyunil-law-corporate-structured",
+  "version": "1.0.0",
+  "description": "현일 법무법인 기업자문센터 - 구조화 버전",
+  "scripts": {
+    "start": "http-server -p 8000 -o",
+    "dev": "http-server -p 8000 -c-1",
+    "serve": "http-server",
+    "fix": "node fix-ultimate.js"
+  },
+  "keywords": [
+    "hyunil",
+    "law"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

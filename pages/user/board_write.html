@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자문 신청하기 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [스타일 유지] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, textarea, select { font-family: inherit; }
+
+        /* [사이드바 스타일 - client_ui.js 대응] */
+        .sidebar { width: 260px; background-color: #fff; border-right: 1px solid #eee; padding: 40px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
+        .sidebar-logo { margin-bottom: 30px; padding-left: 10px; }
+        .sidebar-logo img { height: 32px; }
+        
+        .user-profile-area { background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #eee; }
+        .user-name { font-size: 16px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+        .user-email { font-size: 12px; color: #888; margin-bottom: 10px; word-break: break-all; }
+        .user-role { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+        .badge-owner { background: #1a1a2e; color: #fff; }
+        .badge-manager { background: #e6f7ff; color: #096dd9; }
+        .badge-staff { background: #f0f0f0; color: #555; }
+
+        .menu-list li { margin-bottom: 8px; }
+        .menu-link { display: block; padding: 14px 15px; border-radius: 8px; color: #555; font-weight: 500; transition: 0.2s; font-size: 15px; }
+        .menu-link:hover { background-color: #f0f0f0; color: #1a1a1a; }
+        .menu-link.active { background-color: #1a1a1a; color: #fff; font-weight: 700; }
+        .logout-btn { margin-top: auto; padding: 15px 20px; color: #999; font-size: 14px; cursor: pointer; }
+
+        /* 메인 컨텐츠 */
+        .main-content { flex: 1; margin-left: 260px; padding: 60px 50px; }
+        .page-header { margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+
+        .write-container { background: #fff; padding: 40px; border-radius: 12px; border: 1px solid #eee; max-width: 800px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+        .form-group { margin-bottom: 24px; }
+        .label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 15px; color: #333; }
+        .input-box { width: 100%; height: 48px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; font-size: 15px; outline: none; transition: 0.2s; background: #fff; }
+        .input-box:focus { border-color: #1a1a1a; }
+        .textarea-box { height: 300px; padding: 15px; resize: none; line-height: 1.6; }
+
+        .file-upload-box { border: 1px dashed #ddd; padding: 20px; border-radius: 6px; background-color: #fafafa; text-align: center; }
+        .file-input { display: none; }
+        .file-label { cursor: pointer; display: inline-block; padding: 8px 16px; background-color: #fff; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; font-weight: 600; color: #555; }
+        .file-name { margin-left: 10px; font-size: 13px; color: #2c5bf2; }
+
+        .usage-area { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 8px; }
+        .usage-badge { background-color: #e6f7ff; color: #096dd9; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; border: 1px solid #91d5ff; }
+        .usage-full { background-color: #fff1f0; color: #cf1322; border-color: #ffa39e; }
+
+        .btn-submit { background-color: #1a1a1a; color: #fff; border: none; padding: 15px 0; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-submit:hover { background-color: #333; }
+        .btn-submit:disabled { background-color: #ccc !important; cursor: not-allowed; color: #666; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 30px 20px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    
+    <!-- Sidebar Skeleton (깜빡임 방지) -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <a href="/"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a>
+        </div>
+        <div class="user-profile-area">
+            <div class="user-name">로딩중...</div>
+            <div class="user-email">...</div>
+            <div class="user-role badge-staff">...</div>
+        </div>
+        <ul class="menu-list">
+            <li><a href="/pages/user/dashboard.html" class="menu-link">대시보드</a></li>
+            <li><a href="/pages/user/board_list.html" class="menu-link">나의 자문 내역</a></li>
+            <li><a href="/pages/user/payment.html" class="menu-link">결제/구독 관리</a></li>
+            <li><a href="/pages/user/member_info.html" class="menu-link">회원 정보 수정</a></li>
+            <li><a href="/pages/public/user_guide.html" class="menu-link">📘 이용 가이드 (FAQ)</a></li>
+        </ul>
+        <div class="logout-btn" id="logoutBtn">로그아웃</div>
+    </nav>
+
+<main class="main-content">
+        <div class="page-header">
+            <div>
+                <h2 class="page-title">✏️ 자문 신청하기</h2>
+                <p style="color:#666; font-size:14px; margin-top:5px;">법률 전문가에게 정확한 솔루션을 받아보세요.</p>
+            </div>
+        </div>
+
+        <div class="write-container">
+            <div class="form-group">
+                <label class="label">상담 분야</label>
+                <select id="category" class="input-box">
+                    <option value="contract">계약 검토</option>
+                    <option value="labor">노무/인사</option>
+                    <option value="debt">채권/미수금</option>
+                    <option value="ip">지식재산권</option>
+                    <option value="etc">기타 자문</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="label">작성 부서</label>
+                <select id="department" class="input-box">
+                    <option value="">로딩 중...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="label">제목</label>
+                <input type="text" id="title" class="input-box" placeholder="제목을 입력하세요">
+            </div>
+
+            <div class="form-group">
+                <label class="label">첨부파일 (10MB 제한)</label>
+                <div class="file-upload-box">
+                    <label for="fileInput" class="file-label">파일 선택</label>
+                    <input type="file" id="fileInput" class="file-input" onchange="showFileName()">
+                    <span id="fileNameDisplay" class="file-name">선택된 파일 없음</span>
+                </div>
+                <div style="margin-top:10px; font-size:13px; color:#666;">
+                    <input type="checkbox" id="emailSendCheck" style="vertical-align:middle; margin-right:5px;">
+                    <label for="emailSendCheck" style="cursor:pointer;">📨 첨부파일: 별도 메일로 전달 신청</label>
+                    <div style="margin-top:4px; color:#888;">※ 10MB 이상 대용량 파일은 <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="046777446c7d716a6d686865732a676b69">[email&#160;protected]</a></strong>으로 발송 후 체크해주세요.</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="label">문의 내용</label>
+                <textarea id="content" class="input-box textarea-box" placeholder="구체적인 내용을 입력해주세요."></textarea>
+            </div>
+
+            <div class="usage-area">
+                <span style="font-size:13px; color:#666;">이번 달 서면 자문 현황:</span>
+                <div id="usageBadge" class="usage-badge">로딩중...</div>
+            </div>
+
+            <button id="btnSubmit" class="btn-submit" onclick="submitPost()">신청하기 (1회 차감)</button>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, users, requireAuth, posts } from "/js/api.js";
+        import { renderClientSidebar } from "/js/client_ui.js";
+
+        const PLAN_SPECS = {
+            'none': { qa: 0, phone: 0, label: '미가입' },
+            'Basic': { qa: 1, phone: 0, label: '🌱 Basic' },
+            'Standard': { qa: 3, phone: 1, label: '⭐ Standard' },
+            'Pro': { qa: 5, phone: 2, label: '💎 Pro' },
+            'Premium': { qa: 8, phone: 5, label: '👑 Premium' },
+            'Enterprise': { qa: 999, phone: 999, label: '🏢 Enterprise' }
+        };
+
+        let gUserData = null;
+
+        let uploadedFileUrl = null;
+
+        function updateUsageBadge(userData) {
+            const badge = document.getElementById('usageBadge');
+            const submitBtn = document.getElementById('btnSubmit');
+            if (!badge) return;
+
+            const spec = PLAN_SPECS[userData.plan] || PLAN_SPECS['none'];
+            const qaLimit = userData.plan === 'Enterprise' ? (userData.customQaLimit || 0) : spec.qa;
+            const qaUsed = userData.qaUsedCount || 0;
+            const qaRemaining = Math.max(0, qaLimit - qaUsed);
+
+            if (qaLimit === 0) {
+                badge.textContent = '플랜 미가입';
+                badge.className = 'usage-badge usage-full';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '플랜을 구독해주세요';
+                }
+            } else if (qaRemaining === 0) {
+                badge.textContent = `${qaUsed} / ${qaLimit} (한도 초과)`;
+                badge.className = 'usage-badge usage-full';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '사용 가능 횟수 초과';
+                }
+            } else {
+                badge.textContent = `${qaUsed} / ${qaLimit} (남은 ${qaRemaining}건)`;
+                badge.className = 'usage-badge';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '신청하기 (1회 차감)';
+                }
+            }
+        }
+
+        window.showFileName = async function() {
+            const fileInput = document.getElementById('fileInput');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+            if (fileInput && fileInput.files[0]) {
+                const file = fileInput.files[0];
+
+                // 파일 크기 체크 (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('파일 크기는 10MB 이하만 가능합니다.');
+                    fileInput.value = '';
+                    fileNameDisplay.textContent = '선택된 파일 없음';
+                    return;
+                }
+
+                // 업로드 중 표시
+                fileNameDisplay.textContent = '업로드 중...';
+                fileNameDisplay.style.color = '#2c5bf2';
+
+                try {
+                    // 파일 업로드
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const token = localStorage.getItem('auth_token');
+                    const response = await fetch('http://localhost:3000/api/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    // 업로드 실패 (백엔드에서 에러 반환)
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || '파일 업로드 실패');
+                    }
+
+                    // 업로드 성공
+                    uploadedFileUrl = result.fileUrl;
+                    fileNameDisplay.textContent = `✓ ${file.name} (업로드 완료)`;
+                    fileNameDisplay.style.color = '#52c41a';
+
+                } catch (error) {
+                    console.error('파일 업로드 에러:', error);
+                    alert(error.message);
+                    fileInput.value = '';
+                    fileNameDisplay.textContent = '선택된 파일 없음';
+                    fileNameDisplay.style.color = '#999';
+                    uploadedFileUrl = null;
+                }
+            } else if (fileNameDisplay) {
+                fileNameDisplay.textContent = '선택된 파일 없음';
+                fileNameDisplay.style.color = '#999';
+                uploadedFileUrl = null;
+            }
+        };
+
+        (async () => {
+            if (!requireAuth()) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+            
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+            
+            try {
+                gUserData = await users.getMe();
+                renderClientSidebar('board_write', gUserData);
+
+                // 부서 옵션 설정
+                const departmentSelect = document.getElementById('department');
+                if (departmentSelect) {
+                    console.log('사용자 데이터:', gUserData);
+                    console.log('departments 원본:', gUserData.departments);
+                    console.log('departments 타입:', typeof gUserData.departments);
+
+                    let departmentsList = [];
+
+                    // departments가 문자열인 경우 JSON 파싱 시도
+                    if (typeof gUserData.departments === 'string' && gUserData.departments.trim() !== '') {
+                        try {
+                            departmentsList = JSON.parse(gUserData.departments);
+                            console.log('JSON 파싱 성공:', departmentsList);
+                        } catch (e) {
+                            console.error('JSON 파싱 실패:', e);
+                            departmentsList = [];
+                        }
+                    }
+                    // departments가 이미 배열인 경우
+                    else if (Array.isArray(gUserData.departments)) {
+                        departmentsList = gUserData.departments;
+                    }
+
+                    // departments 배열이 있으면 (전사 권한) 모든 부서 표시
+                    if (departmentsList.length > 0) {
+                        const options = departmentsList.map(dept => {
+                            const selected = dept === gUserData.department ? ' selected' : '';
+                            return `<option value="${dept}"${selected}>${dept}</option>`;
+                        }).join('');
+                        departmentSelect.innerHTML = options;
+                        console.log('✅ 전사 권한: 모든 부서 표시', departmentsList);
+                    }
+                    // departments 배열이 없으면 자신의 부서만 표시
+                    else if (gUserData.department) {
+                        departmentSelect.innerHTML = `<option value="${gUserData.department}">${gUserData.department}</option>`;
+                        console.log('일반 권한: 본인 부서만 표시', gUserData.department);
+                    } else {
+                        departmentSelect.innerHTML = '<option value="일반">일반</option>';
+                        console.log('부서 정보 없음: 기본값 사용');
+                    }
+                }
+
+                // 사용량 표시
+                updateUsageBadge(gUserData);
+
+                console.log('자문 신청 페이지 로드:', gUserData);
+
+            } catch (error) {
+                console.error('페이지 로드 에러:', error);
+                alert('페이지를 불러오는 중 오류가 발생했습니다.');
+            }
+        })();
+
+        window.submitPost = async function() {
+            if (!gUserData) {
+                alert('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
+            // 사용량 체크
+            const spec = PLAN_SPECS[gUserData.plan] || PLAN_SPECS['none'];
+            const qaLimit = gUserData.plan === 'Enterprise' ? (gUserData.customQaLimit || 0) : spec.qa;
+            const qaUsed = gUserData.qaUsedCount || 0;
+            const qaRemaining = Math.max(0, qaLimit - qaUsed);
+
+            if (qaLimit === 0) {
+                alert('플랜을 먼저 구독해주세요.');
+                location.href = '/pages/user/payment.html';
+                return;
+            }
+
+            if (qaRemaining === 0) {
+                alert('사용 가능한 자문 횟수가 없습니다.\n결제/구독 관리 페이지에서 추가 구매하시거나 플랜을 업그레이드해주세요.');
+                location.href = '/pages/user/payment.html';
+                return;
+            }
+
+            const category = document.getElementById('category')?.value;
+            const title = document.getElementById('title')?.value;
+            const content = document.getElementById('content')?.value;
+            const department = document.getElementById('department')?.value;
+
+            if (!category || !title || !content) {
+                alert('모든 필수 항목을 입력해주세요.');
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmit');
+            if (btn) {
+                btn.innerText = '전송 중...';
+                btn.disabled = true;
+            }
+
+            try {
+                // 업로드된 파일 URL을 배열로 전달
+                const fileUrls = uploadedFileUrl ? [uploadedFileUrl] : [];
+
+                await posts.create({
+                    category,
+                    title,
+                    content,
+                    department,
+                    fileUrls: fileUrls
+                });
+
+                alert('자문 신청이 완료되었습니다.\n사용 가능 횟수가 1회 차감되었습니다.');
+                location.href = '/pages/user/board_list.html';
+
+            } catch (error) {
+                console.error('등록 에러:', error);
+                alert('등록 중 오류가 발생했습니다.');
+                if (btn) {
+                    btn.innerText = '신청하기 (1회 차감)';
+                    btn.disabled = false;
+                }
+            }
+        };
+
+        window.handleLogout = async () => {
+            await auth.logout();
+            location.href = '/';
+        };
+    </script>
+</body>
+</html>

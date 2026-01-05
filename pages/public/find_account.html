@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정 찾기 - 기업자문센터</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .find-container { background-color: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 480px; text-align: center; }
+        .logo { margin-bottom: 30px; }
+        .logo img { height: 32px; }
+        
+        /* [수정] 탭 메뉴 스타일 정교화 */
+        .tab-menu { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 30px; width: 100%; }
+        .tab { 
+            flex: 1; 
+            padding: 16px 0; 
+            font-size: 15px;
+            font-weight: 500; 
+            color: #888; 
+            cursor: pointer; 
+            border-bottom: 2px solid transparent; 
+            transition: all 0.2s;
+        }
+        .tab:hover { color: #555; }
+        .tab.active { 
+            color: #1a1a1a; 
+            font-weight: 700; 
+            border-bottom: 2px solid #1a1a1a; 
+        }
+        
+        /* 입력 폼 영역 */
+        .form-section { display: none; text-align: left; }
+        .form-section.active { display: block; animation: fadeIn 0.3s; }
+        
+        .input-box { width: 100%; height: 52px; padding: 0 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; transition: 0.2s; margin-bottom: 12px; }
+        .input-box:focus { border-color: #1a1a1a; }
+        
+        .btn-submit { width: 100%; height: 54px; background-color: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .btn-submit:hover { background-color: #333; }
+        
+        .info-text { font-size: 13px; color: #888; margin-top: 20px; line-height: 1.5; text-align: center; }
+        .result-box { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: center; display: none; }
+        .result-text { font-size: 16px; font-weight: 700; color: #2c5bf2; margin-bottom: 10px; display: block; }
+        
+        .back-link { display: block; margin-top: 30px; font-size: 14px; color: #666; text-decoration: underline; cursor: pointer; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="find-container">
+        <div class="logo"><img src="/assets/img/logo.png" alt="기업자문센터"></div>
+        
+        <div class="tab-menu">
+            <div class="tab" id="tab-id" onclick="switchTab('id')">아이디 찾기</div>
+            <div class="tab active" id="tab-pw" onclick="switchTab('pw')">비밀번호 찾기</div>
+        </div>
+
+        <div id="section-id" class="form-section">
+            <input type="text" id="find_id_name" class="input-box" placeholder="이름 (가입자명)">
+            <input type="text" id="find_id_phone" class="input-box" placeholder="휴대폰 번호 (- 없이 입력)">
+            <button class="btn-submit" onclick="handleFindId()">아이디 찾기</button>
+            
+            <div id="result-id" class="result-box">
+                회원님의 아이디는<br>
+                <span class="result-text" id="found-email"></span>
+                입니다.
+            </div>
+        </div>
+
+        <div id="section-pw" class="form-section active">
+            <input type="email" id="find_pw_email" class="input-box" placeholder="아이디 (이메일)">
+            <input type="text" id="find_pw_phone" class="input-box" placeholder="가입한 휴대폰 번호 (- 없이 입력)">
+            <button class="btn-submit" onclick="handleFindPw()">비밀번호 재설정 메일 발송</button>
+            <div class="info-text">
+                가입하신 이메일 주소로 재설정 링크가 전송됩니다.<br>
+                이메일이 기억나지 않는다면 [아이디 찾기]를 이용해주세요.
+            </div>
+        </div>
+
+        <a href="/pages/public/login.html" class="back-link">로그인 화면으로 돌아가기</a>
+    </div>
+
+    <script type="module">
+        import { auth } from '/js/api.js';
+        
+        window.findAccount = async function() {
+            const email = document.getElementById('email')?.value;
+            if (!email) {
+                alert('이메일을 입력해주세요.');
+                return;
+            }
+            
+            try {
+                await auth.resetPassword(email);
+                alert('비밀번호 재설정 이메일이 발송되었습니다.');
+            } catch (error) {
+                alert('이메일을 찾을 수 없습니다.');
+            }
+        };
+    </script>
+</body>
+</html>

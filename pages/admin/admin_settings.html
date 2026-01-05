@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설정 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [관리자 공통 스타일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f0f2f5; color: #333; display: flex; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, select, button { font-family: inherit; }
+
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; letter-spacing: 1px; }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; max-width: 1000px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 30px; }
+
+        /* 설정 박스 스타일 */
+        .setting-box { background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 30px; }
+        .box-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+
+        .form-group { margin-bottom: 20px; max-width: 500px; }
+        .form-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #555; }
+        .input-box { width: 100%; height: 46px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; font-size: 15px; outline: none; }
+        .input-box:focus { border-color: #1a1a2e; }
+
+        .btn-save { background-color: #1a1a2e; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+        .btn-save:hover { background-color: #333; }
+
+        /* 관리자 목록 테이블 */
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        .admin-table th { background-color: #f9f9f9; color: #555; font-weight: 600; }
+        .btn-delete { color: #ff4d4f; background: none; border: none; cursor: pointer; font-size: 12px; text-decoration: underline; margin-left: 10px; }
+        
+        /* 뱃지 스타일 */
+        .badge-role { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .role-admin { background: #1a1a2e; color: #fff; } /* 대표 */
+        .role-gm { background: #e6fffb; color: #006d75; border: 1px solid #87e8de; } /* 관리직원 (전체권한) */
+        .role-lawyer { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; } /* 변호사 (제한) */
+
+        /* 모달 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; background-color: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .close-btn { float: right; font-size: 24px; cursor: pointer; margin-top: -10px; }
+        .modal-h { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">🏢</span> 기업자문센터</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupCorp" class="submenu">
+                <li><a href="admin.html">📝 자문 관리 (전체)</a></li>
+                <li><a href="admin_requests.html">📩 요청 관리함</a></li>
+                <li><a href="admin_report.html">📊 리포트 발송</a></li>
+                <li><a href="admin_corpbilling.html">💸 자문료 청구/발송</a></li>
+                <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
+                <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
+                <div><span class="menu-icon">⚖️</span> 전자소송/사건</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupLitigation" class="submenu">
+                <li><a href="admin_litigation.html">🔎 전자소송 데이터 확인</a></li>
+                <li><a href="admin_clients.html">📇 당사자(고객) 관리</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupSpecial', this)">
+                <div><span class="menu-icon">📞</span> 파산/추심 센터</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupSpecial" class="submenu">
+                <li><a href="admin_collection_consult.html">💰 채권 추심 상담</a></li>
+                <li><a href="admin_collection.html">💰 채권 추심 사건</a></li>
+                <li><a href="admin_pasan_consult.html">📉 파산/회생 상담</a></li>
+                <li><a href="admin_pasan.html">📉 파산/회생 사건</a></li>
+            </ul>
+        </li>
+
+        <li class="menu-divider"></li>
+
+        <li><a href="admin_settings.html" class="menu-link" style="background-color: #2c2c45; color: #fff; font-weight: 700;">⚙️ 환경 설정</a></li>
+        <li class="menu-divider"></li>
+        <li><a href="/" class="menu-link">🏢 기업자문 홈페이지</a></li>
+        <li><a href="../user/dashboard.html" class="menu-link" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return;
+        if (submenu.style.display === "block") {
+            submenu.style.display = "none";
+            header.classList.remove("open");
+            header.classList.remove("active");
+        } else {
+            submenu.style.display = "block";
+            header.classList.add("open");
+            header.classList.add("active");
+        }
+    }
+</script>
+
+    <main class="main-content">
+        <h2 class="page-title">환경 설정</h2>
+
+        <div class="setting-box">
+            <h3 class="box-title">기본 정보 설정</h3>
+            <div class="form-group">
+                <label class="form-label">사이트명</label>
+                <input type="text" id="siteName" class="input-box" value="법무그룹 현일 기업자문센터">
+            </div>
+            <div class="form-group">
+                <label class="form-label">대표 관리자 이메일</label>
+                <input type="text" id="adminEmail" class="input-box" value="" disabled style="background:#f5f5f5;">
+            </div>
+            <button class="btn-save" onclick="alert('저장되었습니다.')">저장하기</button>
+        </div>
+
+        <div class="setting-box">
+            <h3 class="box-title" style="display:flex; justify-content:space-between; align-items:center;">
+                관리자 및 변호사 관리
+                <button class="btn-save" style="font-size:12px; padding:6px 12px;" onclick="openAdminModal()">+ 관리자 추가</button>
+            </h3>
+            <p style="font-size:13px; color:#666; margin-bottom:10px;">
+                ※ <strong>👑 최고 관리자 / 💼 일반 관리자</strong>: 모든 메뉴 접근 가능 (매출, 회원관리 포함)<br>
+                ※ <strong>⚖️ 변호사(Lawyer)</strong>: 자문 답변 및 요청 관리만 가능 (매출 등 숨김 처리)
+            </p>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>이메일</th>
+                        <th>권한(Role)</th>
+                        <th>등록일</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody id="adminListBody">
+                    <tr><td colspan="5" style="padding:20px; text-align:center; color:#888;">로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="setting-box">
+            <h3 class="box-title">⚖️ 개인회생 생계비 기준 관리 (중위소득 60%)</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">
+                * 매년 변경되는 기준 중위소득(60%)을 입력하면, <strong>자동 작성기 프로그램</strong>에 즉시 반영됩니다.
+            </p>
+
+            <div style="display:flex; gap:10px; align-items:flex-end; background:#f9f9f9; padding:20px; border-radius:8px;">
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">적용 연도</label>
+                    <input type="number" id="costYear" class="input-box" placeholder="예: 2026" style="width:100px;">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">1인 가구</label>
+                    <input type="text" id="cost1" class="input-box" onkeyup="formatCurrency(this)" placeholder="원">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">2인 가구</label>
+                    <input type="text" id="cost2" class="input-box" onkeyup="formatCurrency(this)" placeholder="원">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">3인 가구</label>
+                    <input type="text" id="cost3" class="input-box" onkeyup="formatCurrency(this)" placeholder="원">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">4인 가구</label>
+                    <input type="text" id="cost4" class="input-box" onkeyup="formatCurrency(this)" placeholder="원">
+                </div>
+                <button class="btn-save" onclick="saveLivingCost()">기준 저장</button>
+            </div>
+
+            <div style="margin-top:20px;">
+                <h4 style="font-size:14px; margin-bottom:10px;">📜 저장된 기준 목록</h4>
+                <ul id="costHistoryList" style="list-style:none; padding:0; font-size:13px; color:#555;">
+                    <li>로딩 중...</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+<script>
+    // 생계비 관리 기능 (향후 구현 예정)
+    window.saveLivingCost = function() {
+        alert('생계비 기준 관리 기능은 향후 구현 예정입니다.');
+    };
+
+    // 숫자 포맷팅 (천 단위 콤마)
+    window.formatCurrency = function(input) {
+        let value = input.value.replace(/,/g, '');
+        if (!isNaN(value) && value !== '') {
+            input.value = Number(value).toLocaleString();
+        }
+    };
+</script>
+
+    <div id="adminInviteModal" class="modal-overlay" onclick="closeAdminModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeAdminModal()">✕</span>
+            <div class="modal-h">관리자 권한 부여</div>
+            
+            <p style="font-size:13px; color:#666; margin-bottom:15px; line-height:1.4;">
+                이미 가입된 회원의 <strong>이메일</strong>을 입력하여<br>관리자 또는 변호사 권한을 부여합니다.
+            </p>
+
+            <div class="form-group" style="width:100%;">
+                <label class="form-label">대상 회원 이메일</label>
+                <input type="text" id="targetEmail" class="input-box" placeholder="example@email.com">
+            </div>
+
+            <div class="form-group" style="width:100%;">
+                <label class="form-label">부여할 권한</label>
+                <select id="targetRole" class="input-box">
+                    <option value="lawyer">⚖️ 변호사 (자문/요청 관리만)</option>
+                    <option value="general_manager">💼 일반 관리자 (전체 권한)</option>
+                    <option value="admin">👑 최고 관리자 (전체 권한)</option>
+                </select>
+            </div>
+
+            <button class="btn-save" style="width:100%; margin-top:10px;" onclick="promoteUser()">권한 부여하기</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+
+        (async () => {
+            if (!requireAuth()) return;
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+
+                if (!checkRole(['master', 'admin'])) {
+                    alert('관리자 권한이 필요합니다.');
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+
+                // ✅ 변호사 권한일 경우 특정 메뉴 숨김
+                if (userData.role === 'lawyer') {
+                    const hideMenus = [
+                        'admin_report.html',
+                        'admin_corpbilling.html',
+                        'admin_members.html',
+                        'admin_payments.html'
+                    ];
+
+                    hideMenus.forEach(menuFile => {
+                        const menuLink = document.querySelector(`a[href="${menuFile}"]`);
+                        if (menuLink) {
+                            menuLink.parentElement.style.display = 'none';
+                        }
+                    });
+                }
+
+                // 관리자 이메일 표시
+                document.getElementById('adminEmail').value = userData.email || '';
+
+                // 관리자 목록 로드
+                await loadAdminList();
+
+                console.log('Settings page loaded');
+            } catch (error) {
+                console.error('페이지 로드 에러:', error);
+                alert('데이터를 불러오는 중 오류가 발생했습니다.');
+            }
+        })();
+
+        // 관리자 목록 로드
+        async function loadAdminList() {
+            try {
+                const adminRoles = ['master', 'admin', 'general_manager', 'lawyer'];
+                const response = await users.getAll();
+                const allUsers = response.users || [];
+
+                // 관리자 권한 사용자만 필터링
+                const adminUsers = allUsers.filter(u => adminRoles.includes(u.role));
+
+                const tbody = document.getElementById('adminListBody');
+                if (adminUsers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; text-align:center; color:#888;">등록된 관리자가 없습니다.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = adminUsers.map(u => {
+                    let roleBadge = '';
+                    if (u.role === 'master' || u.role === 'admin') {
+                        roleBadge = '<span class="badge-role role-admin">👑 최고 관리자</span>';
+                    } else if (u.role === 'general_manager') {
+                        roleBadge = '<span class="badge-role role-gm">💼 일반 관리자</span>';
+                    } else if (u.role === 'lawyer') {
+                        roleBadge = '<span class="badge-role role-lawyer">⚖️ 변호사</span>';
+                    }
+
+                    const date = u.createdAt ? new Date(u.createdAt).toLocaleDateString('ko-KR') : '-';
+
+                    return `
+                        <tr>
+                            <td>${u.managerName || u.representativeName || '-'}</td>
+                            <td>${u.email}</td>
+                            <td>${roleBadge}</td>
+                            <td>${date}</td>
+                            <td>
+                                <button class="btn-delete" onclick="removeAdmin('${u.uid}', '${u.email}')">권한 회수</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('관리자 목록 로드 실패:', error);
+                document.getElementById('adminListBody').innerHTML =
+                    '<tr><td colspan="5" style="padding:20px; text-align:center; color:red;">데이터 로드 실패</td></tr>';
+            }
+        }
+
+        // 모달 열기
+        window.openAdminModal = function() {
+            document.getElementById('adminInviteModal').style.display = 'block';
+            document.getElementById('targetEmail').value = '';
+        };
+
+        // 모달 닫기
+        window.closeAdminModal = function() {
+            document.getElementById('adminInviteModal').style.display = 'none';
+        };
+
+        // 권한 부여
+        window.promoteUser = async function() {
+            const email = document.getElementById('targetEmail').value.trim();
+            const role = document.getElementById('targetRole').value;
+
+            if (!email) {
+                alert('이메일을 입력해주세요.');
+                return;
+            }
+
+            if (!confirm(`${email}에게 ${role} 권한을 부여하시겠습니까?`)) {
+                return;
+            }
+
+            try {
+                // 이메일로 사용자 찾기
+                const response = await users.getAll();
+                const allUsers = response.users || [];
+                const targetUser = allUsers.find(u => u.email === email);
+
+                if (!targetUser) {
+                    alert('해당 이메일의 사용자를 찾을 수 없습니다.');
+                    return;
+                }
+
+                // 권한 변경
+                await users.update(targetUser.uid, { role: role });
+
+                alert('권한이 부여되었습니다.');
+                closeAdminModal();
+                await loadAdminList();
+
+            } catch (error) {
+                console.error('권한 부여 실패:', error);
+                alert('권한 부여 중 오류가 발생했습니다: ' + error.message);
+            }
+        };
+
+        // 관리자 권한 회수
+        window.removeAdmin = async function(uid, email) {
+            if (!confirm(`${email}의 관리자 권한을 회수하시겠습니까?\n(일반 회원으로 변경됩니다)`)) {
+                return;
+            }
+
+            try {
+                // owner 역할로 변경 (일반 회원)
+                await users.update(uid, { role: 'owner' });
+
+                alert('권한이 회수되었습니다.');
+                await loadAdminList();
+
+            } catch (error) {
+                console.error('권한 회수 실패:', error);
+                alert('권한 회수 중 오류가 발생했습니다: ' + error.message);
+            }
+        };
+
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('로그아웃 에러:', error);
+            }
+        };
+    </script>
+
+</body>
+</html>

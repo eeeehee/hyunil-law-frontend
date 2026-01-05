@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기업자문 통합 관리 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [기본 스타일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; overflow-x:hidden; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        textarea { font-family: inherit; resize: vertical; }
+
+        /* 사이드바 스타일 */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 20px; padding-left: 10px; color: #fff; letter-spacing: 1px; }
+
+        /* 사용자 프로필 영역 */
+        .user-profile-area { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.15); }
+        .user-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .user-email { font-size: 11px; color: #b0b0b0; margin-bottom: 8px; word-break: break-all; }
+        .user-role { display: inline-block; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+        .badge-master { background: #722ed1; color: #fff; }
+        .badge-admin { background: #2c5bf2; color: #fff; }
+        .badge-general_manager { background: #52c41a; color: #fff; }
+        .badge-lawyer { background: #fa8c16; color: #fff; }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: 0.2s;
+        }
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.4);
+        }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 14px; transition: 0.2s; }
+        .menu-link:hover { background-color: #2c2c45; color: #fff; }
+
+        /* 메인 컨텐츠 */
+        .main-content { flex: 1; margin-left: 260px; margin-right: 320px; padding: 40px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+
+        /* 검색창 */
+        .search-box { background: #fff; border: 1px solid #ddd; padding: 10px 15px; border-radius: 8px; width: 100%; margin-bottom: 20px; display:flex; align-items:center; }
+        .search-input { border: none; outline: none; width: 100%; font-size: 14px; margin-left: 10px; }
+
+        /* 회사 그룹 박스 */
+        .company-group { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; overflow: hidden; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .company-group.highlight { border: 2px solid #ff4d4f; box-shadow: 0 4px 15px rgba(255, 77, 79, 0.15); }
+
+        .company-header {
+            background: #fff; padding: 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid transparent; transition: 0.2s;
+        }
+        .company-header:hover { background-color: #f9f9f9; }
+        .company-header.active { background-color: #f0f7ff; border-bottom: 1px solid #cce5ff; }
+
+        .comp-left { display: flex; flex-direction: column; gap: 5px; }
+        .comp-row-1 { display: flex; align-items: center; gap: 8px; }
+        .comp-name { font-size: 18px; font-weight: 800; color: #1a1a1a; }
+        .comp-biz { font-size: 12px; color: #888; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+
+        /* 요금제 셀렉트 */
+        .plan-select {
+            font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 700; border: 1px solid #ddd;
+            appearance: none; cursor: pointer; outline: none; text-align: center;
+        }
+        .plan-select:hover { opacity: 0.8; }
+        .plan-basic { background: #f6ffed; color: #389e0d; border-color: #b7eb8f; }
+        .plan-std { background: #e6f7ff; color: #096dd9; border-color: #91d5ff; }
+        .plan-pro { background: #f9f0ff; color: #722ed1; border-color: #d3adf7; }
+        .plan-prem { background: #fff0f6; color: #c41d7f; border-color: #ffadd2; }
+        .plan-ent { background: #391085; color: #fff; border-color: #391085; }
+        .plan-none { background: #f5f5f5; color: #999; border-color: #ddd; }
+
+        /* 사용량 게이지 */
+        .quota-row { display: flex; gap: 10px; margin-top: 8px; align-items: center;}
+        .quota-box { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #555; background: #fafafa; padding: 4px 10px; border-radius: 6px; border: 1px solid #eee; }
+        .quota-val { font-weight: 800; color: #1a1a1a; }
+        .q-label { font-weight: 700; color: #888; }
+
+        .btn-deduct { background: #fff; border: 1px solid #ddd; color: #555; font-size: 11px; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-weight: 700; transition:0.2s; }
+        .btn-deduct:hover { background: #f0f0f0; }
+        .btn-phone-log { background: #1a1a2e; border: 1px solid #1a1a2e; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 3px; }
+
+        .comp-right { display: flex; gap: 8px; align-items: center; }
+        .count-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .cb-waiting { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; animation: pulse 2s infinite; }
+        .cb-analyzing { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; animation: pulse 2s infinite; }
+        .cb-progress { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; animation: pulse 2s infinite; }
+        .cb-done { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; opacity: 0.8; }
+
+        .dept-container { display: none; padding: 20px; background-color: #fff; border-top: 1px solid #eee; }
+        .dept-group { margin-bottom: 20px; border-left: 3px solid #eee; padding-left: 15px; }
+        .dept-title { font-size: 15px; font-weight: 700; color: #555; margin-bottom: 10px; }
+
+        .case-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .case-table th { text-align: left; padding: 10px; color: #888; border-bottom: 1px solid #eee; background: #fafafa; }
+        .case-table td { padding: 12px 10px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+        .case-table tr:hover { background-color: #f8f9fa; cursor: pointer; }
+
+        /* 버튼 스타일 */
+        .btn-start-work { background: #722ed1; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .btn-start-work:hover { background: #531dab; }
+        .btn-write-ans { background: #096dd9; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        /* 모달 공통 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center; }
+        .modal-card { background: #fff; width: 600px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+        .modal-header { font-size: 18px; font-weight: 800; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; display: flex; justify-content: space-between; }
+        .close-btn { font-size: 24px; cursor: pointer; margin-top: -5px; }
+
+        .q-view { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; border: 1px solid #eee; }
+        .a-view { background: #e6f7ff; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; border: 1px solid #91d5ff; }
+        .q-label { font-weight: bold; color: #2c5bf2; margin-bottom: 5px; display: block; padding: 5px 10px; background: #fff; border-radius: 4px; display: inline-block; }
+        .a-input { width: 100%; height: 200px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; resize: vertical; font-size: 14px; outline: none; margin-bottom: 10px; }
+        .btn-reply-save { width: 100%; height: 50px; background: #2c5bf2; color: #fff; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+
+        /* 우측 패널 */
+        .right-panel {
+            width: 320px; background-color: #fff; border-left: 1px solid #eee;
+            position: fixed; right: 0; top: 0; height: 100vh; padding: 30px 20px;
+            z-index: 90; overflow-y: auto; box-shadow: -4px 0 20px rgba(0,0,0,0.02);
+        }
+        .rp-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; display:flex; align-items:center; gap:5px; }
+        .task-card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #ccc; cursor:pointer; transition:0.2s; }
+        .task-card:hover { transform:translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .task-urgent { border-left-color: #ff4d4f; background-color: #fff1f0; }
+        .task-warning { border-left-color: #fa8c16; background-color: #fff7e6; }
+
+        .t-header { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 5px; }
+        .t-dday { font-weight: 800; color: #ff4d4f; }
+        .t-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 5px; line-height: 1.4; }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 77, 79, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 77, 79, 0); } }
+    
+        .post-title-link { color: inherit; text-decoration: none; }
+        .post-title-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+
+    <!-- 사용자 프로필 영역 -->
+    <div class="user-profile-area">
+        <div class="user-name" id="adminUserName">로딩중...</div>
+        <div class="user-email" id="adminUserEmail">...</div>
+        <div class="user-role badge-admin" id="adminUserRole">...</div>
+    </div>
+
+    <!-- 로그아웃 버튼 -->
+    <div class="logout-btn" id="adminLogoutBtn">🚪 로그아웃</div>
+
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category open active" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">🏢</span> 기업자문센터</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupCorp" class="submenu" style="display:block;">
+                <li><a href="admin.html" class="active">📝 자문 관리 (전체)</a></li>
+                <li><a href="admin_requests.html">📩 요청 관리함</a></li>
+                <li><a href="admin_report.html">📊 리포트 발송</a></li>
+                <li><a href="admin_corpbilling.html">💸 자문료 청구/발송</a></li>
+                <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
+                <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
+                <div><span class="menu-icon">⚖️</span> 전자소송/사건</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupLitigation" class="submenu">
+                <li><a href="admin_litigation.html">🔎 전자소송 데이터 확인</a></li>
+                <li><a href="admin_clients.html">📇 당사자(고객) 관리</a></li>
+            </ul>
+        </li>
+
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupSpecial', this)">
+                <div><span class="menu-icon">📞</span> 파산/추심 센터</div>
+                <span class="menu-arrow">▼</span>
+            </div>
+            <ul id="groupSpecial" class="submenu">
+                <li><a href="admin_collection_consult.html">💰 채권 추심 상담</a></li>
+                <li><a href="admin_collection.html">💰 채권 추심 사건</a></li>
+                <li><a href="admin_pasan_consult.html">📉 파산/회생 상담</a></li>
+                <li><a href="admin_pasan.html">📉 파산/회생 사건</a></li>
+            </ul>
+        </li>
+
+        <li class="menu-divider"></li>
+
+        <li><a href="admin_settings.html" class="menu-link">⚙️ 환경 설정</a></li>
+        <li class="menu-divider"></li>
+        <li><a href="/" class="menu-link">🏢 기업자문 홈페이지</a></li>
+        <li><a href="../user/dashboard.html" class="menu-link" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return;
+        if (submenu.style.display === "block") { submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active"); }
+        else { submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active"); }
+    }
+</script>
+
+<main class="main-content">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">📝 기업자문 통합 관리</h2>
+            <div style="font-size:13px; color:#666; margin-top:5px;">
+                사업자번호 기준 자동 그룹핑 & 요금제별 횟수 관리
+            </div>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="회사명, 사업자번호로 검색..." onkeyup="filterCompanies()">
+    </div>
+
+    <div id="companyListContainer">
+        <div style="text-align:center; padding:50px; color:#999;">데이터를 불러오는 중...</div>
+    </div>
+</main>
+
+<aside class="right-panel">
+    <div class="rp-title">⏳ 마감 임박 (D-Day) <span id="urgentCount">0</span></div>
+    <div id="urgentList"></div>
+</aside>
+
+<div id="replyModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>자문 답변 작성</span>
+            <span class="close-btn" onclick="closeReplyModal()">✕</span>
+        </div>
+
+        <input type="hidden" id="replyDocId">
+        <input type="hidden" id="replyOwnerUid">
+
+        <div class="q-view">
+            <span class="q-label" id="qaLabel">Q. 질문 내용</span>
+            <div id="q_content_view"></div>
+            <div id="q_meta_line" style="margin-top:8px; font-size:12px; color:#666;"></div>
+            <div id="q_files_view" style="margin-top:15px; padding-top:15px; border-top:1px solid #ddd; display:none;">
+                <div style="font-weight:700; color:#555; margin-bottom:8px; font-size:13px;">📎 첨부파일</div>
+                <div id="q_files_list"></div>
+            </div>
+        </div>
+
+        <div class="a-view" id="a_content_view_box" style="display:none;">
+            <span class="q-label" style="background:#2c5bf2; color:#fff;">A. 답변 내용</span>
+            <div id="a_content_view"></div>
+            <div id="a_meta_line" style="margin-top:8px; font-size:12px; color:#666; display:none;"></div>
+        </div>
+
+        <textarea id="a_content_input" class="a-input" placeholder="답변 내용을 작성해주세요. (저장 시 자동으로 의뢰인에게 알림 메일이 발송됩니다)"></textarea>
+
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-size:13px;">
+                <input type="checkbox" id="deductCheck" checked> 📝 서면 자문 횟수 1회 차감
+            </label>
+        </div>
+
+        <button class="btn-reply-save" onclick="saveReply()">답변 저장 및 알림 발송</button>
+    </div>
+</div>
+
+<div id="phoneLogModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <span>📞 전화/대면 상담 기록</span>
+            <span class="close-btn" onclick="closeLogModal()">✕</span>
+        </div>
+        <input type="hidden" id="logOwnerUid">
+        <input type="hidden" id="logCompanyName">
+
+        <textarea id="logContent" class="a-input" style="height:150px;" placeholder="상담 내용을 기록해주세요.&#13;&#10;(내용은 해당 회사의 자문 이력에 자동 저장됩니다)"></textarea>
+
+        <div style="font-size:12px; color:#d32f2f; margin-bottom:15px;">
+            ⚠️ 저장 시 전화상담 횟수가 1회 차감됩니다.
+        </div>
+
+        <button class="btn-reply-save" onclick="savePhoneLog()">저장 및 차감</button>
+    </div>
+</div>
+
+<script type="module">
+    import { auth, users, posts, admin } from '/js/api.js';
+
+    const PLAN_SPECS = {
+        'none': { qa: 0, phone: 0, label: '미가입' },
+        'Basic': { qa: 1, phone: 0, label: '🌱 Basic' },
+        'Standard': { qa: 3, phone: 1, label: '⭐ Standard' },
+        'Pro': { qa: 5, phone: 2, label: '💎 Pro' },
+        'Premium': { qa: 8, phone: 5, label: '👑 Premium' },
+        'Enterprise': { qa: 999, phone: 999, label: '🏢 Enterprise' }
+    };
+
+    let allGroups = [];
+    let companyMeta = {};
+    let allPostsMap = {}; // docId -> post 데이터 매핑
+
+    // 로그인 확인
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        location.href = '../public/login.html';
+    }
+
+    // ============================================
+    // 사용자 정보 표시 함수
+    // ============================================
+    function displayAdminUserInfo(user) {
+        // 사용자 정보 표시
+        document.getElementById('adminUserName').textContent = user.managerName || user.manager_name || user.email || '관리자';
+        document.getElementById('adminUserEmail').textContent = user.email || '';
+
+        // 역할 배지
+        const roleElement = document.getElementById('adminUserRole');
+        const roleMap = {
+            'master': { label: 'MASTER', class: 'badge-master' },
+            'admin': { label: 'ADMIN', class: 'badge-admin' },
+            'general_manager': { label: 'GENERAL', class: 'badge-general_manager' },
+            'lawyer': { label: 'LAWYER', class: 'badge-lawyer' }
+        };
+
+        const roleInfo = roleMap[user.role] || { label: user.role?.toUpperCase() || 'USER', class: 'badge-admin' };
+        roleElement.textContent = roleInfo.label;
+        roleElement.className = `user-role ${roleInfo.class}`;
+    }
+
+    // 로그아웃 기능
+    document.getElementById('adminLogoutBtn')?.addEventListener('click', async function() {
+        if (confirm('로그아웃 하시겠습니까?')) {
+            await auth.logout();
+            location.href = '/pages/public/login.html';
+        }
+    });
+
+    // 권한 확인 및 데이터 로드
+    (async () => {
+        try {
+            const userData = await users.getMe();
+            console.log('🔍 [관리자 페이지] 사용자 정보:', userData);
+
+            // ✅ 사용자 정보 표시
+            displayAdminUserInfo(userData);
+
+            const adminRoles = ['master', 'admin', 'general_manager', 'lawyer'];
+            if (!adminRoles.includes(userData.role)) {
+                alert('관리자 권한이 없습니다. 현재 권한: ' + userData.role);
+                location.href = '../user/dashboard.html';
+                return;
+            }
+
+            // ✅ 변호사 권한일 경우 특정 메뉴 숨김
+            if (userData.role === 'lawyer') {
+                const hideMenus = [
+                    'admin_report.html',
+                    'admin_corpbilling.html',
+                    'admin_members.html',
+                    'admin_payments.html'
+                ];
+
+                hideMenus.forEach(menuFile => {
+                    const menuLink = document.querySelector(`a[href="${menuFile}"]`);
+                    if (menuLink) {
+                        menuLink.parentElement.style.display = 'none';
+                    }
+                });
+            }
+
+            await loadData();
+        } catch (error) {
+            console.error('권한 확인 에러:', error);
+            alert('로그인 정보를 확인할 수 없습니다.');
+            location.href = '../public/login.html';
+        }
+    })();
+
+    async function loadData() {
+        try {
+            // 1. 회사(owner) 목록 조회
+            const companiesData = await admin.getCompanies();
+            const companies = companiesData.companies || [];
+
+            // 회사 메타 정보 저장
+            companies.forEach(comp => {
+                if (comp.bizNum) {
+                    companyMeta[comp.bizNum] = {
+                        plan: comp.plan || 'none',
+                        qaUsedCount: comp.qaUsedCount || 0,
+                        phoneUsedCount: comp.phoneUsedCount || 0,
+                        customQaLimit: comp.customQaLimit || 0,
+                        customPhoneLimit: comp.customPhoneLimit || 0,
+                        ownerUid: comp.uid,
+                        companyName: comp.companyName || comp.company_name
+                    };
+                    console.log('📊 [회사 메타 저장]', comp.bizNum, '→', {
+                        plan: comp.plan,
+                        ownerUid: comp.uid,
+                        companyName: comp.companyName || comp.company_name
+                    });
+                }
+            });
+
+            // 2. 전체 posts 조회
+            const postsData = await posts.getAll({ limit: 1000 });
+            // 결제수단/요금제 변경/추가이용문의 건 제외, archived 상태도 제외
+            const allPosts = (postsData.posts || []).filter(p => {
+                return p.category !== 'payment_method' && p.category !== 'plan_change' && p.category !== 'extra_usage_quote' && p.status !== 'archived';
+            });
+
+            // 사업자번호별 그룹핑
+            const groupedData = {};
+            const urgentTasks = [];
+            const now = new Date();
+
+            allPosts.forEach(p => {
+                // 게시글 맵에 저장 (모달에서 사용)
+                allPostsMap[p.docId] = p;
+
+                // 사업자번호 우선순위: authorBizNum > users.biz_num(JWT토큰)
+                const bizNum = p.authorBizNum || p.companyBizNum || "NO_BIZ";
+                const companyName = p.companyName || p.userCompanyName || "기타(미분류)";
+                const dept = (p.category === "phone_log") ? "관리자등록" : (p.userDepartment || p.authorDepartment || p.department || "부서 미지정");
+
+                // 디버깅: 첫 5개 게시글의 bizNum 확인
+                if (allPosts.indexOf(p) < 5) {
+                    console.log(`📋 [게시글 #${allPosts.indexOf(p)} bizNum 확인]`, {
+                        docId: p.docId,
+                        title: p.title?.substring(0, 20),
+                        authorBizNum: p.authorBizNum,
+                        companyBizNum: p.companyBizNum,
+                        '최종선택': bizNum,
+                        '회사명': companyName,
+                        'companyMeta에있나?': !!companyMeta[bizNum],
+                        'plan': companyMeta[bizNum]?.plan
+                    });
+                }
+
+                if (!groupedData[bizNum]) {
+                    groupedData[bizNum] = {
+                        name: companyName,
+                        bizNum: bizNum,
+                        total: 0,
+                        waiting: 0,
+                        analyzing: 0,
+                        progress: 0,
+                        done: 0,
+                        departments: {},
+                        lastAction: new Date(p.createdAt)
+                    };
+                }
+
+                groupedData[bizNum].total++;
+
+                // ✅ 추가질문 여부 확인
+                const hasFollowup = p.content && p.content.includes('[FOLLOWUP_SEPARATOR]');
+                let isFollowupWaiting = false;
+
+                if (hasFollowup) {
+                    const questions = p.content.split('[FOLLOWUP_SEPARATOR]');
+                    const followupCount = questions.length - 1;
+
+                    let answerCount = 0;
+                    if (p.answer && p.answer.includes('[FOLLOWUP_ANSWER_SEPARATOR]')) {
+                        answerCount = p.answer.split('[FOLLOWUP_ANSWER_SEPARATOR]').length;
+                    } else if (p.answer) {
+                        answerCount = 1;
+                    }
+
+                    isFollowupWaiting = followupCount > (answerCount - 1);
+                }
+
+                // 상태별 카운트
+                if(p.status === 'pending' || p.status === 'waiting') {
+                    groupedData[bizNum].waiting++;
+                } else if(isFollowupWaiting) {
+                    // 추가질문이 있고 답변 대기중
+                    groupedData[bizNum].progress++;
+                } else if(p.status === 'analyzing' || p.status === 'processing' || p.status === 'InProgress' || p.status === 'progress') {
+                    groupedData[bizNum].analyzing++;
+                } else if(p.status === 'done' || p.status === 'completed' || p.status === 'answered' || p.status === 'resolved' || p.status === 'Completed') {
+                    groupedData[bizNum].done++;
+                }
+
+                if (!groupedData[bizNum].departments[dept]) groupedData[bizNum].departments[dept] = [];
+                groupedData[bizNum].departments[dept].push(p);
+
+                // 마감 임박 체크 (답변 대기중인 건들만)
+                if (p.status === 'pending' || p.status === 'waiting' || p.status === 'analyzing' || p.status === 'processing' || p.status === 'InProgress' || p.status === 'progress') {
+                    const created = new Date(p.createdAt);
+                    const deadline = new Date(created);
+                    deadline.setDate(deadline.getDate() + 7);
+                    const diffDays = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+                    if (diffDays <= 4) {
+                        urgentTasks.push({
+                            id: p.docId,
+                            title: p.title,
+                            client: companyName,
+                            dDay: diffDays,
+                            date: deadline,
+                            status: p.status,
+                            content: p.content,
+                            answer: p.answer
+                        });
+                    }
+                }
+            });
+
+            allGroups = Object.values(groupedData);
+
+            // 정렬: 긴급 건 우선
+            allGroups.sort((a, b) => {
+                const aUrgent = a.analyzing + a.progress;
+                const bUrgent = b.analyzing + b.progress;
+
+                if (aUrgent > 0 && bUrgent === 0) return -1;
+                if (aUrgent === 0 && bUrgent > 0) return 1;
+
+                if (a.waiting > 0 && b.waiting === 0) return -1;
+                if (a.waiting === 0 && b.waiting > 0) return 1;
+
+                return b.lastAction - a.lastAction;
+            });
+
+            renderTree(allGroups);
+
+            urgentTasks.sort((a, b) => a.dDay - b.dDay);
+            renderUrgentPanel(urgentTasks);
+
+        } catch (error) {
+            console.error('데이터 로드 에러:', error);
+            document.getElementById('companyListContainer').innerHTML =
+                '<div style="text-align:center; padding:50px; color:#ff4d4f;">데이터를 불러오는 중 오류가 발생했습니다.</div>';
+        }
+    }
+
+    // 요금제 수동 변경
+    window.changePlan = async function(bizNum, newPlan) {
+        event.stopPropagation();
+        const meta = companyMeta[bizNum];
+        if(!meta || !meta.ownerUid) return alert("대표자 정보를 찾을 수 없습니다.");
+
+        if(!confirm(`[${bizNum}] 기업의 요금제를 [${newPlan}]으로 변경하시겠습니까?`)) {
+            location.reload();
+            return;
+        }
+
+        try {
+            await admin.updateCompanyPlan(meta.ownerUid, newPlan);
+            alert("요금제가 변경되었습니다.");
+            location.reload();
+        } catch(e) {
+            console.error(e);
+            alert("변경 실패: " + (e.message || '알 수 없는 오류'));
+        }
+    }
+
+    function renderTree(groups) {
+        const container = document.getElementById('companyListContainer');
+        container.innerHTML = "";
+
+        if (groups.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:50px; color:#999;">내역 없음</div>`;
+            return;
+        }
+
+        groups.forEach((comp, idx) => {
+            const meta = companyMeta[comp.bizNum] || { plan: 'none', qaUsedCount: 0, phoneUsedCount: 0, ownerUid: null };
+            let planSpec = PLAN_SPECS[meta.plan] || { qa: 0, phone: 0, label: '미가입' };
+
+            // 디버깅: 첫 3개 회사 로그
+            if (idx < 3) {
+                console.log(`🏢 [렌더링 회사 #${idx}]`, {
+                    '회사명': comp.name,
+                    'bizNum': comp.bizNum,
+                    'companyMeta[bizNum]': companyMeta[comp.bizNum],
+                    '찾은 plan': meta.plan,
+                    'planSpec label': planSpec.label,
+                    '전체 companyMeta 키들': Object.keys(companyMeta).join(', ')
+                });
+            }
+            const planClass = meta.plan === 'none' ? 'plan-none' : (meta.plan === 'Basic' ? 'plan-basic' : (meta.plan === 'Standard' ? 'plan-std' : (meta.plan === 'Pro' ? 'plan-pro' : (meta.plan === 'Premium' ? 'plan-prem' : 'plan-ent'))));
+
+            let qaLimit = planSpec.qa;
+            let phoneLimit = planSpec.phone;
+
+            if (meta.plan === 'Enterprise') {
+                qaLimit = meta.customQaLimit || 999;
+                phoneLimit = meta.customPhoneLimit || 999;
+            }
+
+            const planSelectHtml = `
+                <select onchange="changePlan('${comp.bizNum}', this.value)" class="plan-select ${planClass}" onclick="event.stopPropagation()">
+                    <option value="none" ${meta.plan=='none'?'selected':''}>미가입</option>
+                    <option value="Basic" ${meta.plan=='Basic'?'selected':''}>🌱 Basic</option>
+                    <option value="Standard" ${meta.plan=='Standard'?'selected':''}>⭐ Standard</option>
+                    <option value="Pro" ${meta.plan=='Pro'?'selected':''}>💎 Pro</option>
+                    <option value="Premium" ${meta.plan=='Premium'?'selected':''}>👑 Premium</option>
+                    <option value="Enterprise" ${meta.plan=='Enterprise'?'selected':''}>🏢 Enterprise</option>
+                </select>
+            `;
+
+            let quotaHtml = "";
+            if (meta.plan !== 'none') {
+                let entEditBtn = "";
+                if(meta.plan === 'Enterprise') {
+                    entEditBtn = `<button class="btn-deduct" onclick="editEnterpriseLimit('${comp.bizNum}', ${qaLimit}, ${phoneLimit})" style="margin-left:5px; background:#1a1a2e; color:white; border:none;">⚙️ 한도설정</button>`;
+                }
+
+                quotaHtml = `
+                    <div class="quota-row">
+                        <div class="quota-box">
+                            <span class="q-label">📝 서면</span> <span class="quota-val">${meta.qaUsedCount}</span> / ${qaLimit}
+                            <button class="btn-deduct" onclick="adjustQuota('${comp.bizNum}', 'qa')">➖</button>
+                        </div>
+                        <div class="quota-box">
+                            <span class="q-label">📞 전화</span> <span class="quota-val">${meta.phoneUsedCount}</span> / ${phoneLimit}
+                            <button class="btn-phone-log" onclick="openLogModal('${comp.bizNum}', '${comp.name}')">📞 기록+차감</button>
+                        </div>
+                        ${entEditBtn}
+                    </div>
+                `;
+            }
+
+            let badges = "";
+            let alertClass = "";
+            if(comp.progress > 0) { badges += `<span class="count-badge cb-progress">💬 추가질문 ${comp.progress}</span>`; alertClass = "highlight"; }
+            if(comp.analyzing > 0) { badges += `<span class="count-badge cb-analyzing">⏳ 답변대기 ${comp.analyzing}</span>`; alertClass = "highlight"; }
+            if(comp.waiting > 0) { badges += `<span class="count-badge cb-waiting">🔥 접수대기 ${comp.waiting}</span>`; }
+
+            const html = `
+                <div class="company-group ${alertClass}">
+                    <div class="company-header" onclick="toggleGroup(this)">
+                        <div class="comp-left">
+                            <div class="comp-row-1">
+                                <span class="comp-name">${comp.name}</span>
+                                ${planSelectHtml}
+                            </div>
+                            <div class="comp-row-2">
+                                <span class="comp-biz">${comp.bizNum}</span>
+                                ${quotaHtml}
+                            </div>
+                        </div>
+                        <div class="comp-right">
+                            ${badges}
+                            <span class="count-badge cb-done">완료 ${comp.done}</span>
+                        </div>
+                    </div>
+                    <div class="dept-container">
+                        ${renderDepartments(comp.departments, comp.bizNum)}
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    window.editEnterpriseLimit = async function(bizNum, currentQa, currentPhone) {
+        event.stopPropagation();
+        const meta = companyMeta[bizNum];
+
+        const newQa = prompt("📝 서면 자문 한도를 입력하세요:", currentQa);
+        if(newQa === null) return;
+        const newPhone = prompt("📞 전화 상담 한도를 입력하세요:", currentPhone);
+        if(newPhone === null) return;
+
+        try {
+            await admin.updateCompanyLimits(meta.ownerUid, {
+                customQaLimit: Number(newQa),
+                customPhoneLimit: Number(newPhone)
+            });
+            alert("한도가 수정되었습니다.");
+            location.reload();
+        } catch(e) { alert("오류 발생: " + e.message); }
+    }
+
+    window.adjustQuota = async function(bizNum, type) {
+        event.stopPropagation();
+        const meta = companyMeta[bizNum];
+        if(!meta || !meta.ownerUid) return alert("정보 오류");
+        if(!confirm("서면 자문 횟수를 1회 차감하시겠습니까?")) return;
+
+        try {
+            await admin.incrementUsage(meta.ownerUid, type);
+            alert("차감되었습니다.");
+            location.reload();
+        } catch(e) { alert("오류: " + e.message); }
+    }
+
+    window.openLogModal = function(bizNum, compName) {
+        event.stopPropagation();
+        const meta = companyMeta[bizNum];
+        if(!meta || !meta.ownerUid) return alert("정보 오류");
+
+        document.getElementById('logOwnerUid').value = meta.ownerUid;
+        document.getElementById('logCompanyName').value = compName;
+        document.getElementById('logContent').value = "";
+        document.getElementById('phoneLogModal').style.display = 'flex';
+    }
+
+    window.closeLogModal = function() { document.getElementById('phoneLogModal').style.display = 'none'; }
+
+    window.savePhoneLog = async function() {
+        const ownerUid = document.getElementById('logOwnerUid').value;
+        const compName = document.getElementById('logCompanyName').value;
+        const content = document.getElementById('logContent').value;
+
+        if(!content) return alert("상담 내용을 입력해주세요.");
+
+        try {
+            // posts에 전화상담 기록 저장
+            await posts.create({
+                title: "[전화상담] 상담 기록",
+                content: content,
+                companyName: compName,
+                category: "phone_log",
+                status: "done"
+            });
+
+            // 전화상담 횟수 차감
+            await admin.incrementUsage(ownerUid, 'phone');
+
+            alert("저장 및 차감되었습니다.");
+            closeLogModal();
+            loadData();
+        } catch(e) {
+            console.error(e);
+            alert("오류 발생: " + e.message);
+        }
+    }
+
+    function renderDepartments(depts, bizNum) {
+        let html = "";
+        for (const [deptName, postList] of Object.entries(depts)) {
+            let rows = "";
+            postList.forEach(p => {
+                const date = new Date(p.createdAt).toLocaleDateString();
+                // ✅ 작성자/답변자 표시 규칙
+                // - phone_log: 항상 관리자(로그인) 기록자 = answeredBy
+                // - 일반 자문: 답변 완료 시 answeredBy(관리자) 표시, 그 외는 기존 작성자 표시
+                let writerDisplay = '-';
+                if (p.category === 'phone_log') {
+                    writerDisplay = p.answeredBy || p.answererName || p.adminName || '-';
+                } else if (p.answeredBy) {
+                    writerDisplay = p.answeredBy;
+                } else {
+                    writerDisplay = p.userManagerName || p.authorManager || '-';
+                }
+
+                let statusText = "";
+                let actionBtn = "";
+
+                if (p.category === 'phone_log') {
+                    statusText = `<span style="color:#666; font-weight:bold; background:#eee; padding:2px 6px; border-radius:4px;">📞 전화기록</span>`;
+                    actionBtn = `<button class="btn-write-ans" style="background:#888; cursor:default;">기록됨</button>`;
+                } else {
+                    // ✅ 추가질문 여부 확인
+                    const hasFollowup = p.content && p.content.includes('[FOLLOWUP_SEPARATOR]');
+                    let isFollowupWaiting = false;
+
+                    if (hasFollowup) {
+                        const questions = p.content.split('[FOLLOWUP_SEPARATOR]');
+                        const followupCount = questions.length - 1;
+
+                        let answerCount = 0;
+                        if (p.answer && p.answer.includes('[FOLLOWUP_ANSWER_SEPARATOR]')) {
+                            answerCount = p.answer.split('[FOLLOWUP_ANSWER_SEPARATOR]').length;
+                        } else if (p.answer) {
+                            answerCount = 1;
+                        }
+
+                        isFollowupWaiting = followupCount > (answerCount - 1);
+                    }
+
+                    // 답변 대기중 상태들: pending, waiting, analyzing, processing, InProgress
+                    if(p.status === 'pending' || p.status === 'waiting') {
+                        statusText = `<span style="color:#ff4d4f; font-weight:bold;">접수대기</span>`;
+                        actionBtn = `<button class="btn-start-work" onclick="changeStatus('${p.docId}', 'analyzing', event)">접수확인(작성시작)</button>`;
+                    }
+                    else if(isFollowupWaiting) {
+                        // 추가질문이 있고 답변 대기중
+                        statusText = `<span style="color:#722ed1; font-weight:bold;">추가질문</span>`;
+                        actionBtn = `<button class="btn-write-ans" onclick="openReplyModal('${p.docId}', '${bizNum}')">답변작성</button>`;
+                    }
+                    else if(p.status === 'analyzing' || p.status === 'processing' || p.status === 'InProgress' || p.status === 'progress') {
+                        statusText = `<span style="color:#096dd9; font-weight:bold;">답변대기</span>`;
+                        actionBtn = `<button class="btn-write-ans" onclick="openReplyModal('${p.docId}', '${bizNum}')">답변작성</button>`;
+                    }
+                    // 답변 완료 상태들: done, completed, answered, resolved, Completed
+                    else if(p.status === 'done' || p.status === 'completed' || p.status === 'answered' || p.status === 'resolved' || p.status === 'Completed') {
+                        statusText = `<span style="color:#52c41a; font-weight:bold;">완료</span>`;
+                        actionBtn = `
+                            <button class="btn-write-ans" style="background:#fff; color:#555; border:1px solid #ddd;" onclick="openReplyModal('${p.docId}', '${bizNum}')">내용보기</button>
+                            <button class="btn-write-ans" style="background:#fff; color:#999; border:1px solid #ddd; margin-left:3px;" onclick="archivePost('${p.docId}')">숨기기</button>
+                        `;
+                    }
+                    else {
+                        // 알 수 없는 상태
+                        statusText = `<span style="color:#999; font-weight:bold;">${p.status || '미확인'}</span>`;
+                        actionBtn = `<button class="btn-write-ans" onclick="openReplyModal('${p.docId}', '${bizNum}')">확인</button>`;
+                    }
+                }
+
+                rows += `
+                    <tr>
+                        <td width="10%">${statusText}</td>
+                        <td width="10%">${p.category || "일반"}</td>
+                        <td><a href="javascript:void(0)" class="post-title-link" onclick="openPostPopup('${p.docId}', '${bizNum}')"><strong>${p.title}</strong></a></td>
+                        <td width="15%" class="writer-info">${writerDisplay}</td>
+                        <td width="15%" class="time-info">${date}</td>
+                        <td width="15%">${actionBtn}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                <div class="dept-group">
+                    <div class="dept-title">📂 ${deptName}</div>
+                    <table class="case-table">
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+        return html;
+    }
+
+    window.changeStatus = async function(docId, newStatus, e) {
+        if(e) e.stopPropagation();
+        if(!confirm("접수를 확인하고 답변 작성을 시작하시겠습니까?\n(고객은 취소가 불가능해집니다)")) return;
+
+        try {
+            await posts.update(docId, { status: newStatus });
+            loadData();
+        } catch(e) { alert("오류: " + e.message); }
+    }
+
+    window.openPostPopup = function(docId, bizNum) {
+        // ✅ 제목 클릭 시 무조건 팝업 오픈 (요청/답변대기/완료/전화기록 모두)
+        openReplyModal(docId, bizNum);
+    };
+
+window.openReplyModal = function(docId, bizNum) {
+        event?.stopPropagation();
+
+        // allPostsMap에서 게시글 데이터 가져오기
+        const post = allPostsMap[docId];
+        // ✅ phone_log(전화 상담 기록)도 제목 클릭 시 팝업이 열려야 함
+        // - 답변 작성 UI 대신 "기록 보기" 형태로 전환
+        const replyModal = document.getElementById('replyModal');
+        const headerSpan = replyModal?.querySelector('.modal-header span');
+        const aInput = document.getElementById('a_content_input');
+        const saveBtn = replyModal?.querySelector('.btn-reply-save');
+        const deductWrap = document.getElementById('deductWrap');
+        const writtenDeductWrap = document.getElementById('writtenDeductWrap');
+        const aViewBox = document.getElementById('a_content_view_box');
+
+        if (!post) {
+            alert('게시글 데이터를 찾을 수 없습니다.');
+            return;
+        }
+
+        if (post?.category === 'phone_log') {
+            if (headerSpan) headerSpan.textContent = '전화 상담 기록';
+            const qaLabel = document.getElementById('qaLabel');
+            if (qaLabel) qaLabel.textContent = 'A. 상담 기록';
+            if (aViewBox) aViewBox.style.display = 'none';
+            if (aInput) { aInput.style.display = 'none'; aInput.value = ''; }
+            if (saveBtn) saveBtn.style.display = 'none';
+            if (deductWrap) deductWrap.style.display = 'none';
+            if (writtenDeductWrap) writtenDeductWrap.style.display = 'none';
+        } else {
+            if (headerSpan) headerSpan.textContent = '자문 답변 작성';
+            const qaLabel = document.getElementById('qaLabel');
+            if (qaLabel) qaLabel.textContent = 'Q. 질문 내용';
+            if (aInput) aInput.style.display = '';
+            if (saveBtn) saveBtn.style.display = '';
+            if (deductWrap) deductWrap.style.display = '';
+            if (writtenDeductWrap) writtenDeductWrap.style.display = '';
+        }
+
+        document.getElementById('replyDocId').value = docId;
+
+        // ✅ 추가질문 처리: 질문과 답변을 대화 형식으로 표시
+        let originalContent = post.content || '';
+        let originalAnswer = post.answer || '';
+        let followupQuestions = [];
+        let followupAnswers = [];
+
+        // 질문 파싱
+        if (originalContent.includes('[FOLLOWUP_SEPARATOR]')) {
+            const parts = originalContent.split('[FOLLOWUP_SEPARATOR]');
+            originalContent = parts[0].trim();
+            followupQuestions = parts.slice(1).filter(q => q.trim());
+        }
+
+        // 답변 파싱
+        if (originalAnswer && originalAnswer.includes('[FOLLOWUP_ANSWER_SEPARATOR]')) {
+            const answerParts = originalAnswer.split('[FOLLOWUP_ANSWER_SEPARATOR]');
+            originalAnswer = answerParts[0].trim();
+            followupAnswers = answerParts.slice(1).filter(a => a.trim());
+        }
+
+        // 질문 영역은 원래 질문만 표시
+        document.getElementById('q_content_view').innerHTML = originalContent;
+        // ✅ 질문/답변 메타 표시
+        // 질문: 작성자 + 작성일시
+        const qMetaLine = document.getElementById('q_meta_line');
+        if (qMetaLine) {
+            const qWriter =
+                post.userManagerName ||
+                post.authorManager ||
+                post.authorName ||
+                post.managerName ||
+                post.manager_name ||
+                '-';
+            const qAt = post.createdAt ? new Date(post.createdAt).toLocaleString() : '';
+            const qAtText = qAt ? (' · ' + qAt) : '';
+            qMetaLine.innerText = `작성자: ${qWriter}${qAtText}`;
+        }
+
+        // 답변: 답변자 + 답변일시 (답변이 있는 경우만 표시)
+        const aMetaLine = document.getElementById('a_meta_line');
+        if (aMetaLine) {
+            const aWriter = post.answeredBy || post.answererName || post.adminName || '';
+            const aAt = post.answeredAt ? new Date(post.answeredAt).toLocaleString() : '';
+            if (aWriter) {
+                const aAtText = aAt ? (' · ' + aAt) : '';
+                aMetaLine.innerText = `답변자: ${aWriter}${aAtText}`;
+                aMetaLine.style.display = 'block';
+            } else {
+                aMetaLine.innerText = '';
+                aMetaLine.style.display = 'none';
+            }
+        }
+// 첨부파일 표시
+        let fileUrls = [];
+        if (post.fileUrls) {
+            try {
+                fileUrls = typeof post.fileUrls === 'string' ? JSON.parse(post.fileUrls) : post.fileUrls;
+                if (!Array.isArray(fileUrls)) fileUrls = [];
+            } catch (e) {
+                fileUrls = [];
+            }
+        }
+
+        const filesView = document.getElementById('q_files_view');
+        const filesList = document.getElementById('q_files_list');
+
+        if (fileUrls.length > 0) {
+            filesList.innerHTML = fileUrls.map(url => {
+                const fileName = url.split('/').pop();
+                return `<div style="margin-bottom:5px;">
+                    <a href="http://localhost:3000${url}" target="_blank" style="color:#2c5bf2; text-decoration:none; font-size:13px;">
+                        📄 ${decodeURIComponent(fileName)}
+                    </a>
+                </div>`;
+            }).join('');
+            filesView.style.display = 'block';
+        } else {
+            filesView.style.display = 'none';
+        }
+
+        const answerViewBox = document.getElementById('a_content_view_box');
+        const answerView = document.getElementById('a_content_view');
+        const answerInput = document.getElementById('a_content_input');
+
+        // ✅ 원래 답변이 있으면 표시
+        if (originalAnswer && originalAnswer !== '' && originalAnswer !== 'undefined') {
+            answerView.innerText = originalAnswer;
+            answerViewBox.style.display = 'block';
+
+            // 답변 메타 표시
+            const aMetaLine2 = document.getElementById('a_meta_line');
+            if (aMetaLine2) {
+                const aWriter2 = post.answeredBy || post.answererName || post.adminName || '';
+                const aAt2 = post.answeredAt ? new Date(post.answeredAt).toLocaleString() : '';
+                if (aWriter2) {
+                    const aAtText2 = aAt2 ? (' · ' + aAt2) : '';
+                    aMetaLine2.innerText = `답변자: ${aWriter2}${aAtText2}`;
+                    aMetaLine2.style.display = 'block';
+                } else {
+                    aMetaLine2.style.display = 'none';
+                }
+            }
+        } else {
+            answerViewBox.style.display = 'none';
+            const aMetaLine3 = document.getElementById('a_meta_line');
+            if (aMetaLine3) { aMetaLine3.style.display = 'none'; aMetaLine3.innerText=''; }
+        }
+
+        // ✅ 추가질문과 추가답변을 원래 답변 아래에 표시
+        let followupContainer = document.getElementById('followup-qa-container');
+        if (!followupContainer) {
+            followupContainer = document.createElement('div');
+            followupContainer.id = 'followup-qa-container';
+            // a_content_view_box 다음에 삽입
+            answerViewBox.parentElement.insertBefore(followupContainer, answerInput);
+        }
+
+        let followupHTML = '';
+        if (followupQuestions.length > 0) {
+            followupQuestions.forEach((followup, index) => {
+                // 추가 질문 타임스탬프 파싱
+                const followupTimeMatch = followup.match(/\((\d{4}\.\s*\d{1,2}\.\s*\d{1,2}\.\s*오[전후]\s*\d{1,2}:\d{2}:\d{2})\)/);
+                const followupTime = followupTimeMatch ? followupTimeMatch[1] : '';
+                const followupText = followup.replace(/\[추가문의 \d+\]\s*\([\d\.\s오전후:]+\)\s*/, '').trim();
+
+                followupHTML += `
+                    <div style="margin-top:20px; padding:15px; background:#fff7e6; border-left:4px solid #fa8c16; border-radius:6px;">
+                        <div style="font-weight:700; color:#fa8c16; margin-bottom:8px;">Q ${index + 2}. 추가 질문 ${index + 1}</div>
+                        <div style="color:#333; white-space:pre-wrap;">${followupText}</div>
+                        <div style="margin-top:8px; font-size:12px; color:#888; text-align:right;">
+                            작성자: ${post.userManagerName || post.managerName || '-'}${followupTime ? ' · ' + followupTime : ''}
+                        </div>
+                    </div>
+                `;
+
+                // 해당 추가질문에 대한 답변이 있으면 표시
+                if (followupAnswers[index]) {
+                    followupHTML += `
+                        <div style="margin-top:10px; padding:15px; background:#e6f7ff; border-left:4px solid #1890ff; border-radius:6px; margin-bottom:10px;">
+                            <div style="font-weight:700; color:#1890ff; margin-bottom:8px;">A ${index + 2}. 답변</div>
+                            <div style="color:#333; white-space:pre-wrap;">${followupAnswers[index].trim()}</div>
+                            <div style="margin-top:8px; font-size:12px; color:#888; text-align:right;">
+                                답변자: ${post.answeredBy || post.answererName || '-'}${post.answeredAt ? ' · ' + new Date(post.answeredAt).toLocaleString('ko-KR') : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+        followupContainer.innerHTML = followupHTML;
+
+        // ✅ 추가질문 답변 입력창 처리
+        const unansweredFollowupIndex = followupQuestions.length - followupAnswers.length;
+
+        if (unansweredFollowupIndex > 0) {
+            // 답변되지 않은 추가질문이 있는 경우
+            const followupNumber = followupAnswers.length + 1;
+            answerInput.placeholder = `추가 질문 ${followupNumber}에 대한 답변을 작성해주세요.`;
+            answerInput.value = "";
+            answerInput.disabled = false;
+            answerInput.style.display = 'block';
+
+            // 추가질문 답변 가이드 표시
+            let guideEl = document.getElementById('followup-answer-guide');
+            if (!guideEl) {
+                guideEl = document.createElement('div');
+                guideEl.id = 'followup-answer-guide';
+                answerInput.parentElement.insertBefore(guideEl, answerInput);
+            }
+            guideEl.innerHTML = `
+                <div style="background:#fff7e6; border:1px solid #ffa940; border-radius:6px; padding:12px; margin-bottom:10px;">
+                    <div style="font-weight:700; color:#fa8c16; margin-bottom:5px;">📝 추가 질문 ${followupNumber}에 대한 답변 작성</div>
+                    <div style="font-size:13px; color:#666;">위에 표시된 추가 질문에 대한 답변을 아래에 작성해주세요.</div>
+                </div>
+            `;
+        } else if (originalAnswer && originalAnswer !== '' && originalAnswer !== 'undefined') {
+            // 모든 질문에 답변이 완료된 경우
+            answerInput.style.display = 'none';
+
+            let guideEl = document.getElementById('followup-answer-guide');
+            if (guideEl) guideEl.remove();
+        } else {
+            // 최초 답변 작성
+            answerInput.placeholder = "답변 내용을 작성해주세요. (저장 시 자동으로 의뢰인에게 알림 메일이 발송됩니다)";
+            answerInput.value = "";
+            answerInput.disabled = false;
+            answerInput.style.display = 'block';
+
+            let guideEl = document.getElementById('followup-answer-guide');
+            if (guideEl) guideEl.remove();
+        }
+
+        const meta = companyMeta[bizNum];
+        if (meta) document.getElementById('replyOwnerUid').value = meta.ownerUid;
+
+        document.getElementById('replyModal').style.display = 'flex';
+    }
+
+    window.closeReplyModal = function() { document.getElementById('replyModal').style.display = 'none'; }
+
+    // 게시글 숨기기 (아카이브)
+    window.archivePost = async function(docId) {
+        if (!confirm("이 자문 내역을 숨기시겠습니까?")) return;
+
+        try {
+            // 현재 게시글 정보 조회하여 현재 상태 저장
+            const post = await posts.getById(docId);
+            const currentStatus = post.status;
+
+            // 현재 상태를 previousStatus에 저장하고 archived로 변경
+            await posts.update(docId, {
+                previousStatus: currentStatus,
+                status: 'archived'
+            });
+            alert("숨김 처리되었습니다.");
+            loadData(); // 데이터 다시 로드
+        } catch (error) {
+            console.error('숨김 처리 실패:', error);
+            alert("오류가 발생했습니다.");
+        }
+    }
+
+    window.saveReply = async function() {
+        const docId = document.getElementById('replyDocId').value;
+        const newAnswer = document.getElementById('a_content_input').value;
+        const ownerUid = document.getElementById('replyOwnerUid').value;
+        const deduct = document.getElementById('deductCheck').checked;
+
+        if (!newAnswer) return alert("답변 내용을 입력해주세요.");
+
+        try {
+            // 현재 게시글 데이터 가져오기
+            const post = allPostsMap[docId];
+            if (!post) {
+                alert('게시글 데이터를 찾을 수 없습니다.');
+                return;
+            }
+
+            let finalAnswer = newAnswer;
+
+            // ✅ 추가질문이 있는 경우 답변 처리
+            if (post.content && post.content.includes('[FOLLOWUP_SEPARATOR]')) {
+                // 기존 답변이 있으면 추가답변으로 저장
+                if (post.answer && post.answer.trim()) {
+                    finalAnswer = post.answer + '\n[FOLLOWUP_ANSWER_SEPARATOR]\n' + newAnswer;
+                }
+                // 기존 답변이 없으면 최초 답변
+            }
+
+            // 답변 저장
+            await posts.update(docId, {
+                answer: finalAnswer,
+                status: 'completed',
+                answeredAt: new Date().toISOString()
+            });
+
+            // 횟수 차감
+            if (deduct && ownerUid) {
+                await admin.incrementUsage(ownerUid, 'qa');
+            }
+
+            alert("✅ 답변이 등록되었습니다.\n(고객에게 알림 메일이 발송되었습니다)");
+            closeReplyModal();
+            loadData();
+        } catch(e) {
+            console.error(e);
+            alert("저장 실패: " + e.message);
+        }
+    }
+
+    function renderUrgentPanel(tasks) {
+        const container = document.getElementById('urgentList');
+        document.getElementById('urgentCount').innerText = tasks.length;
+        container.innerHTML = "";
+
+        tasks.forEach(t => {
+            let dDayText = `D-${t.dDay}`;
+            let cardClass = "task-warning";
+            if (t.dDay <= 0) {
+                dDayText = t.dDay === 0 ? "D-Day" : `지연 ${Math.abs(t.dDay)}일`;
+                cardClass = "task-urgent";
+            }
+
+            // ✅ 추가질문 여부 확인
+            const hasFollowup = t.content && t.content.includes('[FOLLOWUP_SEPARATOR]');
+            let isFollowupWaiting = false;
+
+            if (hasFollowup) {
+                const questions = t.content.split('[FOLLOWUP_SEPARATOR]');
+                const followupCount = questions.length - 1;
+
+                let answerCount = 0;
+                if (t.answer && t.answer.includes('[FOLLOWUP_ANSWER_SEPARATOR]')) {
+                    answerCount = t.answer.split('[FOLLOWUP_ANSWER_SEPARATOR]').length;
+                } else if (t.answer) {
+                    answerCount = 1;
+                }
+
+                isFollowupWaiting = followupCount > (answerCount - 1);
+            }
+
+            let stBadge = "";
+            if(t.status === 'pending' || t.status === 'waiting') {
+                stBadge = `<span style="font-size:10px; background:#fff1f0; color:#ff4d4f; padding:2px 4px; border-radius:3px;">접수대기</span>`;
+            } else if(isFollowupWaiting) {
+                stBadge = `<span style="font-size:10px; background:#f9f0ff; color:#722ed1; padding:2px 4px; border-radius:3px;">추가질문</span>`;
+            } else if(t.status === 'analyzing' || t.status === 'processing' || t.status === 'InProgress' || t.status === 'progress') {
+                stBadge = `<span style="font-size:10px; background:#e6f7ff; color:#096dd9; padding:2px 4px; border-radius:3px;">답변대기</span>`;
+            }
+
+            const html = `
+                <div class="task-card ${cardClass}">
+                    <div class="t-header">
+                        <span class="t-dday">${dDayText} ${stBadge}</span>
+                        <span>~ ${new Date(t.date).toLocaleDateString()}</span>
+                    </div>
+                    <div class="t-title">${t.title}</div>
+                    <div class="t-info">${t.client}</div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    window.filterCompanies = function() {
+        const val = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allGroups.filter(g => g.name.toLowerCase().includes(val) || g.bizNum.includes(val));
+        renderTree(filtered);
+    }
+
+    window.toggleGroup = function(header) {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        content.style.display = content.style.display === "block" ? "none" : "block";
+    }
+</script>
+
+</body>
+</html>

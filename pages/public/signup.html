@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - 기업자문센터</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [스타일 유지] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .register-container { background-color: #fff; padding: 50px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 100%; max-width: 550px; }
+        .register-title { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 40px; color: #1a1a1a; }
+        
+        .form-group { margin-bottom: 20px; }
+        .label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 14px; color: #333; }
+        .label span { color: #ff4d4f; margin-left: 2px; }
+        .input-box { width: 100%; height: 48px; padding: 0 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; transition: 0.2s; }
+        .input-box:focus { border-color: #1a1a1a; }
+        
+        .helper-text { font-size: 12px; color: #888; margin-top: 6px; line-height: 1.4; }
+        .helper-text strong { color: #2c5bf2; } 
+        
+        .agreement-box { border: 1px solid #eee; background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 30px; margin-bottom: 20px; }
+        .agree-row { display: flex; align-items: center; margin-bottom: 10px; font-size: 14px; }
+        .agree-row:last-child { margin-bottom: 0; }
+        .agree-row input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; cursor: pointer; accent-color: #1a1a1a; }
+        .agree-row label { cursor: pointer; flex: 1; }
+        .agree-all { border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 10px; font-weight: 700; }
+        .btn-link { font-size: 12px; color: #888; text-decoration: underline; cursor: pointer; margin-left: 10px; }
+
+        .btn-submit { width: 100%; height: 52px; background-color: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .btn-submit:hover { background-color: #333; }
+        
+        .login-link { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
+        .login-link a { color: #2c5bf2; text-decoration: none; font-weight: 700; }
+        .login-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="register-container">
+        <h1 class="register-title">회원가입</h1>
+        
+        <div class="form-group">
+            <label class="label">이메일 (아이디) <span>*</span></label>
+            <input type="email" id="email" class="input-box" placeholder="example@company.com">
+        </div>
+
+        <div class="form-group">
+            <label class="label">비밀번호 <span>*</span></label>
+            <input type="password" id="password" class="input-box" placeholder="6자리 이상 입력해주세요">
+        </div>
+
+        <div class="form-group">
+            <label class="label">회사명 <span>*</span></label>
+            <input type="text" id="companyName" class="input-box" placeholder="법인명 또는 상호">
+        </div>
+
+        <div class="form-group">
+            <label class="label">대표자 성함 <span>*</span></label>
+            <input type="text" id="representativeName" class="input-box" placeholder="사업자등록증 상 대표자명">
+        </div>
+
+        <div class="form-group">
+            <label class="label">사업자등록번호 <span>*</span></label>
+            <input type="text" id="bizNum" class="input-box" placeholder="숫자만 입력하세요 (자동 하이픈)" maxlength="12" oninput="autoHyphenBiz(this)">
+        </div>
+
+        <div class="form-group">
+            <label class="label">회사 대표 전화번호 <span>*</span></label>
+            <input type="text" id="companyPhone" class="input-box" placeholder="예: 02-1234-5678">
+        </div>
+
+        <div class="form-group">
+            <label class="label">담당자 성함 <span>*</span></label>
+            <input type="text" id="managerName" class="input-box" placeholder="본인 성함 (가입자)">
+        </div>
+
+        <div class="form-group">
+            <label class="label">담당자 연락처 (휴대폰) <span>*</span></label>
+            <input type="text" id="managerPhone" class="input-box" placeholder="예: 010-1234-5678">
+        </div>
+
+        <div class="form-group">
+            <label class="label">소속 부서</label>
+            <input type="text" id="department" class="input-box" placeholder="예: 인사팀 (부서 구분이 없으면 비워두세요)">
+            <p class="helper-text">
+                ※ 부서장(Manager)은 해당 부서의 글만 볼 수 있습니다.<br>
+                ※ 입력하지 않으면 자동으로 <strong>'전사' 소속으로 간주</strong>됩니다.
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label class="label">직책 및 권한 <span>*</span></label>
+            <select id="roleSelect" class="input-box">
+                <option value="user">직원 (Staff) - 본인 내역만 조회</option>
+                <option value="manager">부서장 (Manager) - 소속 부서 내역 조회</option>
+                <option value="owner">총괄관리자 (CEO) - 전체 열람 및 결제 관리</option>
+            </select>
+        </div>
+
+        <div class="agreement-box">
+            <div class="agree-row agree-all">
+                <input type="checkbox" id="agreeAll" onchange="toggleAllAgree()">
+                <label for="agreeAll">전체 약관에 동의합니다.</label>
+            </div>
+            <div class="agree-row">
+                <input type="checkbox" id="agreeAge" class="essential-agree">
+                <label for="agreeAge">[필수] 만 14세 이상입니다.</label>
+            </div>
+            <div class="agree-row">
+                <input type="checkbox" id="agreeTerms" class="essential-agree">
+                <label for="agreeTerms">[필수] 서비스 이용약관 동의</label>
+                <span class="btn-link" onclick="window.open('terms.html', 'terms', 'width=600,height=700,scrollbars=yes')">보기</span>
+            </div>
+            <div class="agree-row">
+                <input type="checkbox" id="agreePrivacy" class="essential-agree">
+                <label for="agreePrivacy">[필수] 개인정보 수집 및 이용 동의</label>
+                <span class="btn-link" onclick="window.open('consentPop.html', 'privacy', 'width=600,height=700,scrollbars=yes')">보기</span>
+            </div>
+        </div>
+
+        <button class="btn-submit" onclick="handleRegister()">가입하기</button>
+        
+        <div class="login-link">
+            이미 계정이 있으신가요? <a href="/pages/public/login.html">로그인하기</a>
+        </div>
+    </div>
+
+  <script type="module">
+        import { auth } from "/js/api.js";
+
+        // 사업자번호 자동 하이픈
+        window.autoHyphenBiz = function(target) {
+            target.value = target.value
+                .replace(/[^0-9]/g, '')
+                .replace(/^(\d{3})(\d{2})(\d{5})$/, `$1-$2-$3`);
+        }
+
+        window.toggleAllAgree = function() {
+            const isChecked = document.getElementById('agreeAll').checked;
+            document.getElementById('agreeAge').checked = isChecked;
+            document.getElementById('agreeTerms').checked = isChecked;
+            document.getElementById('agreePrivacy').checked = isChecked;
+        }
+
+        window.handleRegister = async function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // 데이터 가져오기
+            const companyName = document.getElementById('companyName').value;
+            const representativeName = document.getElementById('representativeName').value;
+            const bizNum = document.getElementById('bizNum').value;
+            const companyPhone = document.getElementById('companyPhone').value;
+            const managerName = document.getElementById('managerName').value;
+            const managerPhone = document.getElementById('managerPhone').value;
+            let department = document.getElementById('department').value;
+
+            // 1. 필수값 체크
+            if (!email || !password || !companyName || !representativeName || !bizNum || !companyPhone || !managerName || !managerPhone) {
+                alert("모든 필수 항목을 입력해주세요.");
+                return;
+            }
+            if (password.length < 6) {
+                alert("비밀번호는 6자리 이상이어야 합니다.");
+                return;
+            }
+
+            // 2. 사업자번호 길이 체크
+            const cleanBizNum = bizNum.replace(/-/g, '');
+            if (cleanBizNum.length !== 10) {
+                alert("🚨 유효하지 않은 사업자등록번호입니다.\n(숫자 10자리를 정확히 입력해주세요)");
+                return;
+            }
+
+            // 3. 약관 동의 체크
+            const agreeAge = document.getElementById('agreeAge').checked;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            const agreePrivacy = document.getElementById('agreePrivacy').checked;
+
+            if (!agreeAge || !agreeTerms || !agreePrivacy) {
+                alert("필수 약관에 모두 동의해주셔야 가입이 가능합니다.");
+                return;
+            }
+
+            if (!department.trim()) {
+                department = "전사"; 
+            }
+
+            const btn = document.querySelector('.btn-submit');
+            btn.innerText = "가입 처리 중...";
+            btn.disabled = true;
+
+            try {
+                // API로 회원가입 요청
+                await auth.signup({
+                    email: email,
+                    password: password,
+                    companyName: companyName,
+                    representativeName: representativeName,
+                    bizNum: bizNum,
+                    companyPhone: companyPhone,
+                    managerName: managerName,
+                    phone: managerPhone,
+                    department: department
+                });
+
+                alert(`가입을 환영합니다!\n로그인 페이지로 이동합니다.`);
+                location.href = "/pages/public/login.html";
+
+            } catch (error) {
+                console.error("가입 에러:", error);
+                let msg = error.message || "가입 중 오류가 발생했습니다.";
+                alert(msg);
+                btn.innerText = "가입하기";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직원 관리 (CEO) - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [기본 스타일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+
+        .sidebar { width: 260px; background-color: #fff; border-right: 1px solid #eee; padding: 40px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
+        .sidebar-logo { margin-bottom: 30px; padding-left: 10px; }
+        .sidebar-logo img { height: 32px; }
+
+        .user-profile-area { background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #eee; }
+        .user-name { font-size: 16px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+        .user-email { font-size: 12px; color: #888; margin-bottom: 10px; word-break: break-all; }
+        .user-role { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+        .badge-owner { background: #1a1a2e; color: #fff; }
+        .badge-manager { background: #e6f7ff; color: #096dd9; }
+        .badge-staff { background: #f0f0f0; color: #555; }
+
+        .menu-list li { margin-bottom: 8px; }
+        .menu-link { display: block; padding: 14px 15px; border-radius: 8px; color: #555; font-weight: 500; transition: 0.2s; font-size: 15px; }
+        .menu-link:hover { background-color: #f0f0f0; color: #1a1a1a; }
+        .menu-link.active { background-color: #1a1a1a; color: #fff; font-weight: 700; }
+        .logout-btn { margin-top: auto; padding: 15px 20px; color: #999; font-size: 14px; cursor: pointer; }
+
+        .main-content { flex: 1; margin-left: 260px; padding: 60px 50px; }
+        .page-header { margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 20px; display:flex; justify-content:space-between; align-items:center; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+
+        /* [NEW] 승인 요청 박스 스타일 */
+        .approval-box { background-color: #fffbe6; border: 1px solid #ffe58f; padding: 25px; border-radius: 12px; margin-bottom: 40px; display: none; /* 요청 없으면 숨김 */ }
+        .approval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #faad14; padding-bottom: 10px; }
+        .approval-title { font-size: 18px; font-weight: 700; color: #d48806; display: flex; align-items: center; gap: 8px; }
+        .btn-approve-all { background-color: #d48806; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; }
+        .btn-approve-all:hover { background-color: #ad6800; }
+
+        .req-table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; }
+        .req-table th { text-align: left; padding: 10px; background-color: #fff1b8; font-weight: 700; color: #d46b08; }
+        .req-table td { padding: 12px 10px; border-bottom: 1px solid #fff1b8; }
+        .req-highlight { color: #2c5bf2; font-weight: 700; }
+
+        .btn-act { padding: 4px 10px; border-radius: 4px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .btn-act.ok { border-color: #2c5bf2; color: #2c5bf2; }
+        .btn-act.ok:hover { background: #f0f5ff; }
+        .btn-act.no { border-color: #ff4d4f; color: #ff4d4f; margin-left: 5px; }
+        .btn-act.no:hover { background: #fff1f0; }
+
+        /* 부서 설정 박스 */
+        .dept-settings-box { background-color: #f0f5ff; border: 1px solid #adc6ff; padding: 25px; border-radius: 12px; margin-bottom: 30px; }
+        .dept-settings-title { font-size: 16px; font-weight: 700; color: #1d39c4; margin-bottom: 15px; }
+        .dept-input-area { display: flex; gap: 10px; align-items: flex-start; }
+        .dept-input { flex: 1; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; }
+        .dept-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+        .dept-tag { background: #1890ff; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .dept-tag-remove { cursor: pointer; font-weight: 700; }
+        .btn-add-dept { padding: 10px 20px; background: #1890ff; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+        .btn-add-dept:hover { background: #096dd9; }
+
+        /* 직원 리스트 테이블 */
+        .member-table-container { background: #fff; border-radius: 12px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+        .member-table { width: 100%; border-collapse: collapse; }
+        .member-table th, .member-table td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
+        .member-table th { background-color: #fafafa; font-weight: 600; color: #555; }
+        
+        .role-select { padding: 5px; border-radius: 4px; border: 1px solid #ddd; font-size: 13px; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    
+    <!-- Sidebar Skeleton (깜빡임 방지) -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <a href="/"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a>
+        </div>
+        <div class="user-profile-area">
+            <div class="user-name">로딩중...</div>
+            <div class="user-email">...</div>
+            <div class="user-role badge-staff">...</div>
+        </div>
+        <ul class="menu-list">
+            <li><a href="/pages/user/dashboard.html" class="menu-link">대시보드</a></li>
+            <li><a href="/pages/user/board_list.html" class="menu-link">나의 자문 내역</a></li>
+            <li><a href="/pages/user/payment.html" class="menu-link">결제/구독 관리</a></li>
+            <li><a href="/pages/user/member_info.html" class="menu-link">회원 정보 수정</a></li>
+            <li><a href="/pages/public/user_guide.html" class="menu-link">📘 이용 가이드 (FAQ)</a></li>
+        </ul>
+        <div class="logout-btn" id="logoutBtn">로그아웃</div>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h2 class="page-title">직원 관리 (CEO 전용)</h2>
+        </div>
+
+        <div class="dept-settings-box">
+            <div class="dept-settings-title">🏢 회사 부서 목록 설정</div>
+            <div style="font-size:13px; color:#666; margin-bottom:15px;">
+                회사의 모든 부서를 등록하세요. 직원에게 "전사 권한"을 부여하면 자문 신청 시 모든 부서를 선택할 수 있습니다.
+            </div>
+            <div class="dept-input-area">
+                <input type="text" id="newDeptInput" class="dept-input" placeholder="부서명 입력 (예: 인사팀, 마케팅팀)" onkeypress="if(event.key==='Enter') addDepartment()">
+                <button class="btn-add-dept" onclick="addDepartment()">부서 추가</button>
+            </div>
+            <div class="dept-list" id="deptList">
+                <!-- 부서 태그들이 여기에 표시됩니다 -->
+            </div>
+        </div>
+
+        <div id="approvalSection" class="approval-box">
+            <div class="approval-header">
+                <span class="approval-title">🔔 승인 대기 중인 요청이 <span id="reqCount">0</span>건 있습니다.</span>
+                <button class="btn-approve-all" onclick="approveAll()">⚡ 전체 일괄 승인</button>
+            </div>
+            <table class="req-table">
+                <thead>
+                    <tr>
+                        <th>요청자</th>
+                        <th>현재 부서</th>
+                        <th>변경 요청 (새 부서)</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody id="reqListBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="member-table-container">
+            <table class="member-table">
+                <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>부서</th>
+                        <th>이메일 (ID)</th>
+                        <th>연락처</th>
+                        <th>권한(직급) 관리</th>
+                        <th>전사 권한</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody id="memberListBody">
+                    <tr><td colspan="7" style="text-align:center; padding:30px;">직원 목록을 불러오는 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, users, requireAuth } from "/js/api.js";
+        import { renderClientSidebar } from "/js/client_ui.js";
+
+        let gCompanyDepartments = []; // 회사 부서 목록
+        let gOwnerData = null; // 대표 정보
+
+        (async () => {
+            if (!requireAuth()) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+
+                // master, admin, owner만 접근 가능
+                if (!['master', 'admin', 'owner'].includes(userData.role)) {
+                    alert('대표(CEO) 또는 관리자만 접근 가능합니다.');
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+
+                gOwnerData = userData;
+                renderClientSidebar('company_members', userData);
+
+                // 회사 부서 목록 로드
+                await loadCompanyDepartments();
+
+                // 직원 목록 로드
+                await loadMembers();
+
+            } catch (error) {
+                console.error('직원 관리 로드 에러:', error);
+                alert('직원 목록을 불러오는데 실패했습니다.');
+            }
+        })();
+
+        // 회사 부서 목록 로드
+        async function loadCompanyDepartments() {
+            try {
+                const userData = await users.getMe();
+
+                // departments 파싱
+                if (userData.departments) {
+                    if (typeof userData.departments === 'string') {
+                        try {
+                            gCompanyDepartments = JSON.parse(userData.departments);
+                        } catch (e) {
+                            gCompanyDepartments = [];
+                        }
+                    } else if (Array.isArray(userData.departments)) {
+                        gCompanyDepartments = userData.departments;
+                    }
+                }
+
+                // 부서 목록 표시
+                renderDepartmentList();
+            } catch (error) {
+                console.error('부서 목록 로드 실패:', error);
+            }
+        }
+
+        // 부서 목록 렌더링
+        function renderDepartmentList() {
+            const deptList = document.getElementById('deptList');
+            if (!deptList) return;
+
+            if (gCompanyDepartments.length === 0) {
+                deptList.innerHTML = '<div style="color:#999; font-size:13px; padding:10px;">등록된 부서가 없습니다. 부서를 추가해주세요.</div>';
+                return;
+            }
+
+            deptList.innerHTML = gCompanyDepartments.map(dept => `
+                <div class="dept-tag">
+                    ${dept}
+                    <span class="dept-tag-remove" onclick="removeDepartment('${dept}')">✕</span>
+                </div>
+            `).join('');
+        }
+
+        // 부서 추가
+        window.addDepartment = async function() {
+            const input = document.getElementById('newDeptInput');
+            const deptName = input.value.trim();
+
+            if (!deptName) {
+                alert('부서명을 입력해주세요.');
+                return;
+            }
+
+            if (gCompanyDepartments.includes(deptName)) {
+                alert('이미 등록된 부서입니다.');
+                return;
+            }
+
+            gCompanyDepartments.push(deptName);
+            console.log('부서 추가 시도:', deptName);
+            console.log('현재 부서 목록:', gCompanyDepartments);
+
+            try {
+                // 대표의 departments 업데이트
+                const updateData = { departments: gCompanyDepartments };
+                console.log('전송할 데이터:', updateData);
+
+                const result = await users.updateMe(updateData);
+                console.log('업데이트 결과:', result);
+
+                input.value = '';
+                renderDepartmentList();
+                alert(`"${deptName}" 부서가 추가되었습니다.`);
+            } catch (error) {
+                console.error('부서 추가 실패 - 전체 에러:', error);
+                console.error('에러 메시지:', error.message);
+                alert('부서 추가에 실패했습니다: ' + error.message);
+                gCompanyDepartments.pop(); // 실패 시 롤백
+            }
+        };
+
+        // 부서 삭제
+        window.removeDepartment = async function(deptName) {
+            if (!confirm(`"${deptName}" 부서를 삭제하시겠습니까?`)) {
+                return;
+            }
+
+            const index = gCompanyDepartments.indexOf(deptName);
+            if (index > -1) {
+                gCompanyDepartments.splice(index, 1);
+            }
+
+            try {
+                await users.updateMe({ departments: gCompanyDepartments });
+                renderDepartmentList();
+                alert(`"${deptName}" 부서가 삭제되었습니다.`);
+            } catch (error) {
+                console.error('부서 삭제 실패:', error);
+                alert('부서 삭제에 실패했습니다.');
+                gCompanyDepartments.push(deptName); // 실패 시 롤백
+            }
+        };
+
+        // 직원 목록 로드 함수
+        async function loadMembers() {
+            try {
+                const response = await users.getAll();
+                const allUsers = response.users || [];
+
+                console.log('직원 목록:', allUsers);
+
+                const tbody = document.getElementById('memberListBody');
+
+                if (allUsers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">등록된 직원이 없습니다.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = allUsers.map(member => {
+                    console.log('직원 정보:', member.managerName, 'role:', member.role, 'email:', member.email);
+                    const roleKorean = getRoleKorean(member.role);
+
+                    // 전사 권한 확인
+                    let hasAllDeptAccess = false;
+                    if (member.departments) {
+                        if (typeof member.departments === 'string') {
+                            try {
+                                const depts = JSON.parse(member.departments);
+                                hasAllDeptAccess = Array.isArray(depts) && depts.length > 0;
+                            } catch (e) {
+                                hasAllDeptAccess = false;
+                            }
+                        } else if (Array.isArray(member.departments)) {
+                            hasAllDeptAccess = member.departments.length > 0;
+                        }
+                    }
+
+                    const checkboxChecked = hasAllDeptAccess ? 'checked' : '';
+                    const accessBadge = hasAllDeptAccess ? '<span style="color:#52c41a; font-size:12px;">✓ 전사 권한</span>' : '<span style="color:#999; font-size:12px;">부서 제한</span>';
+
+                    return `
+                        <tr>
+                            <td>${member.managerName || '-'}</td>
+                            <td>${member.department || '-'}</td>
+                            <td>${member.email}</td>
+                            <td>${member.phone || '-'}</td>
+                            <td>
+                                <select class="role-select" data-uid="${member.uid}" data-current-role="${member.role}">
+                                    <option value="owner" ${member.role === 'owner' ? 'selected' : ''}>대표 (CEO)</option>
+                                    <option value="manager" ${member.role === 'manager' ? 'selected' : ''}>부서장 (Manager)</option>
+                                    <option value="user" ${member.role === 'user' || member.role === 'staff' || member.role === 'employee' ? 'selected' : ''}>일반 직원</option>
+                                </select>
+                                <button class="btn-act ok" onclick="changeRole('${member.uid}', this.previousElementSibling.value)">변경</button>
+                            </td>
+                            <td>
+                                <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
+                                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                        <input type="checkbox" ${checkboxChecked} onchange="toggleAllDeptAccess('${member.uid}', this.checked)" style="cursor:pointer;">
+                                        ${accessBadge}
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn-act no" onclick="deleteMember('${member.uid}', '${member.managerName}')">삭제</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('직원 목록 로드 실패:', error);
+                const tbody = document.getElementById('memberListBody');
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:red;">직원 목록을 불러오는데 실패했습니다.</td></tr>';
+            }
+        }
+
+        // 역할 한글 변환
+        function getRoleKorean(role) {
+            const roleMap = {
+                'master': '최고 관리자',
+                'admin': '시스템 관리자',
+                'owner': '대표 (CEO)',
+                'manager': '부서장',
+                'user': '일반 직원',
+                'staff': '일반 직원',
+                'employee': '일반 직원'
+            };
+            return roleMap[role] || role;
+        }
+
+        // 전사 권한 토글
+        window.toggleAllDeptAccess = async function(uid, isChecked) {
+            if (gCompanyDepartments.length === 0) {
+                alert('먼저 회사 부서 목록을 등록해주세요.');
+                await loadMembers(); // 체크박스 복원
+                return;
+            }
+
+            const action = isChecked ? '부여' : '해제';
+            if (!confirm(`전사 권한을 ${action}하시겠습니까?\n${isChecked ? '이 직원은 자문 신청 시 모든 부서를 선택할 수 있습니다.' : '이 직원은 자신의 부서만 선택할 수 있습니다.'}`)) {
+                await loadMembers(); // 체크박스 복원
+                return;
+            }
+
+            try {
+                const updateData = {
+                    departments: isChecked ? gCompanyDepartments : null
+                };
+
+                await users.update(uid, updateData);
+                alert(`전사 권한이 ${action}되었습니다.`);
+                await loadMembers();
+            } catch (error) {
+                console.error('전사 권한 변경 실패:', error);
+                alert('전사 권한 변경에 실패했습니다.');
+                await loadMembers(); // 체크박스 복원
+            }
+        };
+
+        // 역할 변경
+        window.changeRole = async function(uid, newRole) {
+            if (!confirm('이 직원의 권한을 변경하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                await users.update(uid, { role: newRole });
+                alert('권한이 변경되었습니다.');
+                await loadMembers();
+            } catch (error) {
+                console.error('권한 변경 실패:', error);
+                alert('권한 변경에 실패했습니다.');
+            }
+        };
+
+        // 직원 삭제
+        window.deleteMember = async function(uid, name) {
+            if (!confirm(`정말 "${name}" 직원을 삭제하시겠습니까?`)) {
+                return;
+            }
+
+            try {
+                await users.delete(uid);
+                alert('직원이 삭제되었습니다.');
+                await loadMembers();
+            } catch (error) {
+                console.error('직원 삭제 실패:', error);
+                alert('직원 삭제에 실패했습니다.');
+            }
+        };
+
+        window.handleLogout = async () => {
+            await auth.logout();
+            location.href = "/";
+        };
+    </script>
+</body>
+</html>

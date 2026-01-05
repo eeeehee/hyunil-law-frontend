@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Í≥†Í∞ù ?ïÎ≥¥ Í¥ÄÎ¶?- Î≤ïÎ¨¥Í∑∏Î£π ?ÑÏùº</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [Í¥ÄÎ¶¨Ïûê Í≥µÌÜµ ?§Ì??? */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+        input, select, textarea { font-family: inherit; }
+
+        /* ?¨Ïù¥?úÎ∞î */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 50px; padding-left: 10px; color: #fff; }
+        .menu-link { display: block; padding: 12px 15px; border-radius: 8px; color: #a6a6b5; font-size: 15px; transition: 0.2s; margin-bottom: 5px; }
+        .menu-link:hover, .menu-link.active { background-color: #2c2c45; color: #fff; font-weight: 600; }
+
+        /* Î©îÏù∏ Ïª®ÌÖêÏ∏?*/
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+
+        /* Í≤Ä??Î∞?Î≤ÑÌäº */
+        .filter-box { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        .search-input { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; flex: 1; outline: none; }
+        .btn-search { background: #1a1a1a; color: #fff; border: none; padding: 0 20px; height: 40px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+        .btn-add { background-color: #2c5bf2; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .btn-add:hover { background-color: #1b42c4; }
+
+        /* ?åÏù¥Î∏?*/
+        .table-container { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .client-table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        .client-table th, .client-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+        .client-table th { background-color: #f9f9f9; color: #555; font-weight: 700; }
+        .client-table tr:hover { background-color: #f0f7ff; cursor: pointer; }
+
+        /* Î±ÉÏ? */
+        .case-count-badge { background: #e6f7ff; color: #1890ff; padding: 4px 8px; border-radius: 12px; font-weight: 700; font-size: 12px; }
+        .badge-corp { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 5px; font-weight: 700; }
+        
+        /* [NEW] ?êÎ¨∏ ?åÏõê Î±ÉÏ? & Î≤ÑÌäº */
+        .badge-member { background: #1a1a1a; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 5px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+        .btn-link-member { background: #fff; border: 1px solid #333; color: #333; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 700; margin-left: 5px; }
+        .btn-link-member:hover { background: #333; color: #fff; }
+
+        .btn-edit { background: #fff; border: 1px solid #ddd; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #555; }
+        .btn-edit:hover { background: #f0f0f0; border-color: #bbb; }
+
+        /* Î™®Îã¨ ?§Ì???*/
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; background: #fff; padding: 30px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+        .modal-title { font-size: 20px; font-weight: 800; }
+        .close-btn { cursor: pointer; font-size: 24px; color: #999; }
+
+        .client-profile { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 30px; }
+        .profile-item label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
+        .profile-item div { font-size: 16px; font-weight: 700; color: #333; }
+
+        .contact-list-box { margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; padding: 15px; background: #fff; }
+        .contact-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+        .contact-item:last-child { border-bottom: none; }
+        .c-phone { font-weight: 700; color: #333; }
+        .c-email { color: #666; }
+
+        .history-list { border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+        .history-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .history-item:last-child { border-bottom: none; }
+        .h-title { font-weight: 700; margin-bottom: 4px; color: #1a1a1a; }
+        .h-sub { color: #666; font-size: 13px; }
+        .h-date { font-size: 12px; color: #999; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 13px; color: #555; }
+        .input-box { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 4px; padding: 0 10px; font-size: 14px; outline: none; }
+        .btn-save { width: 100%; height: 45px; background: #2c5bf2; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li><a href="/pages/admin/admin.html" class="menu-link">?ìù ?êÎ¨∏ Í¥ÄÎ¶?/a></li>
+        <li><a href="/pages/admin/admin_requests.html" class="menu-link">?ì© ?îÏ≤≠ Í¥ÄÎ¶¨Ìï®</a></li>
+        <li><a href="/pages/admin/admin_litigation.html" class="menu-link">?îé ?ÑÏûê?åÏÜ° Í¥ÄÎ¶?/a></li>
+        <li><a href="/pages/admin/admin_clients.html" class="menu-link active">?ìá ?πÏÇ¨??Í≥†Í∞ù) Í¥ÄÎ¶?/a></li>
+        <li><a href="/pages/admin/admin_members.html" class="menu-link">?ë• ?åÏõê/Í∏∞ÏóÖ Í¥ÄÎ¶?/a></li>
+        <li><a href="/pages/admin/admin_payments.html" class="menu-link">?í≥ Îß§Ï∂ú/Í≤∞Ï†ú Í¥ÄÎ¶?/a></li>
+        <li><a href="/pages/admin/admin_settings.html" class="menu-link">?ôÔ∏è ?òÍ≤Ω ?§Ï†ï</a></li>
+        <li style="margin-top: 20px; border-top: 1px solid #2c2c45; padding-top: 20px;">
+            <a href="/index.html" class="menu-link">?è† Î©îÏù∏ ?àÌéò?¥Ï?</a>
+        </li>
+    </ul>
+</nav>
+
+<main class="main-content">
+    <div class="page-header">
+        <h2 class="page-title">?πÏÇ¨??Í≥†Í∞ù) ?ïÎ≥¥ Í¥ÄÎ¶?/h2>
+        <button class="btn-add" onclick="openEditModal('new')">+ ?†Í∑ú Í≥†Í∞ù ?±Î°ù</button>
+    </div>
+
+    <div class="filter-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="?¥Î¶Ñ, ?ÑÌôîÎ≤àÌò∏Î°?Í≤Ä??.." onkeyup="filterClients()">
+        <button class="btn-search">Í≤Ä??/button>
+    </div>
+
+    <div class="table-container">
+        <table class="client-table">
+            <thead>
+                <tr>
+                    <th style="width:20%">Í≥†Í∞ùÎ™?/th>
+                    <th style="width:20%">?∞ÎùΩÏ≤?/th>
+                    <th style="width:10%">?¨Í±¥ ??/th>
+                    <th style="width:20%">?êÎ¨∏ ?åÏõê ?¨Î?</th> <th style="width:15%">ÏµúÍ∑º ?òÎ¢∞??/th>
+                    <th style="width:15%">Í¥ÄÎ¶?/th>
+                </tr>
+            </thead>
+            <tbody id="clientListBody">
+                <tr><td colspan="6" style="text-align:center; padding:40px;">?∞Ïù¥??Î∂ÑÏÑù Î∞??åÏõê ?ÄÏ°?Ï§?..</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div id="clientModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">?ë§ Í≥†Í∞ù ?ÅÏÑ∏ ?ïÎ≥¥</div>
+            <div class="close-btn" onclick="closeModal('clientModal')">??/div>
+        </div>
+
+        <div class="client-profile">
+            <div class="profile-item">
+                <label>Í≥†Í∞ùÎ™?/label>
+                <div id="m_name" style="font-size:18px;">-</div>
+            </div>
+            <div class="profile-item">
+                <label>?åÏõê ?¨Î?</label>
+                <div id="m_member_status">-</div>
+            </div>
+            <div class="profile-item">
+                <label>Ï¥??¨Í±¥ ÏßÑÌñâ</label>
+                <div id="m_count" style="color:#2c5bf2;">-</div>
+            </div>
+        </div>
+
+        <h4 style="margin-bottom:10px; font-size:15px;">?ìû ?±Î°ù???∞ÎùΩÏ≤?(?ÑÏßÅ??</h4>
+        <div class="contact-list-box" id="m_contacts"></div>
+
+        <h4 style="margin-bottom:10px; font-size:15px;">?ìÇ ?¨Í±¥/?êÎ¨∏ ?¥Î†•</h4>
+        <div class="history-list" id="m_history"></div>
+    </div>
+</div>
+
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content" style="width:500px;">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">?†Í∑ú Í≥†Í∞ù ?±Î°ù</div>
+            <div class="close-btn" onclick="closeModal('editModal')">??/div>
+        </div>
+        <input type="hidden" id="editDocId">
+        <div class="form-group">
+            <label class="form-label">Í≥†Í∞ùÎ™?(Î≤ïÏù∏Î™??±Ìï®)</label>
+            <input type="text" id="inputName" class="input-box" placeholder="?? ?ºÏÑ±?ÑÏûê or ?çÍ∏∏??>
+        </div>
+        <div class="form-group">
+            <label class="form-label">?Ä???∞ÎùΩÏ≤?/label>
+            <input type="text" id="inputPhone" class="input-box" placeholder="010-0000-0000">
+        </div>
+        <div class="form-group">
+            <label class="form-label">?¥Î©î??/label>
+            <input type="text" id="inputEmail" class="input-box" placeholder="example@email.com">
+        </div>
+        <button class="btn-save" onclick="saveClient()">?Ä?•ÌïòÍ∏?/button>
+    </div>
+</div>
+
+    <script type="module">
+        import { auth, users, requireAuth, checkRole } from '/js/api.js';
+        import { renderAdminSidebar } from '/js/admin_ui.js';
+
+        const PAGE_MAP = {
+            'admin_litigation.html': 'litigation',
+            'admin_collection.html': 'collection',
+            'admin_pasan.html': 'pasan',
+            'admin_report.html': 'report',
+            'admin_payments.html': 'payments',
+            'admin_clients.html': 'clients'
+        };
+        
+        const currentPage = Object.keys(PAGE_MAP).find(p => location.pathname.includes(p));
+        const pageKey = PAGE_MAP[currentPage] || 'dashboard';
+
+        (async () => {
+            if (!requireAuth()) {
+                location.href = '/pages/public/login.html';
+                return;
+            }
+
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = '/pages/public/login.html';
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                
+                if (!checkRole(['master', 'admin', 'general_manager', 'lawyer'])) {
+                    alert('Í¥ÄÎ¶¨Ïûê Í∂åÌïú???ÑÏöî?©Îãà??');
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+
+                renderAdminSidebar(pageKey, userData);
+                console.log('?òÏù¥ÏßÄ Î°úÎìú:', pageKey, userData);
+
+            } catch (error) {
+                console.error('?òÏù¥ÏßÄ Î°úÎìú ?êÎü¨:', error);
+            }
+        })();
+
+        window.handleLogout = async () => {
+            await auth.logout();
+            location.href = '/';
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전화상담 예약 - 법무그룹 현일</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size: 15px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+
+        /* [사이드바 공통 스타일] */
+        .sidebar { width: 260px; background-color: #fff; border-right: 1px solid #eee; padding: 40px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
+        .sidebar-logo { margin-bottom: 30px; padding-left: 10px; }
+        .sidebar-logo img { height: 32px; }
+
+        .user-profile-area { background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #eee; }
+        .user-name { font-size: 16px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+        .user-email { font-size: 12px; color: #888; margin-bottom: 10px; word-break: break-all; }
+        .user-role { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+        .badge-owner { background: #1a1a2e; color: #fff; }
+        .badge-manager { background: #e6f7ff; color: #096dd9; }
+        .badge-staff { background: #f0f0f0; color: #555; }
+
+        .menu-list li { margin-bottom: 8px; }
+        .menu-link { display: block; padding: 14px 15px; border-radius: 8px; color: #555; font-weight: 500; transition: 0.2s; font-size: 15px; }
+        .menu-link:hover { background-color: #f0f0f0; color: #1a1a1a; }
+        .menu-link.active { background-color: #1a1a1a; color: #fff; font-weight: 700; }
+        .logout-btn { margin-top: auto; padding: 15px 20px; color: #999; font-size: 14px; cursor: pointer; }
+        
+        .main-content { flex: 1; margin-left: 260px; padding: 60px 50px; }
+        .page-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        .page-subtitle { font-size: 14px; color: #666; margin-bottom: 30px; }
+        .form-box { background: #fff; padding: 40px; border-radius: 12px; max-width: 800px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 24px; }
+        .label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 15px; }
+        .input-box { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; }
+        .input-box:focus { border-color: #1a1a1a; outline: none; }
+        .textarea-box { height: 150px; resize: none; }
+        .btn-submit { background: #1a1a1a; color: #fff; border: none; padding: 15px; border-radius: 6px; font-weight: 700; cursor: pointer; width: 100%; font-size: 16px; }
+        .btn-submit:hover { background: #333; }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 사이드바는 JavaScript로 생성됩니다 -->
+
+    <main class="main-content">
+        <h2 class="page-title">📞 전화상담 예약 신청</h2>
+        <p class="page-subtitle">Standard 등급 이상 회원 전용 서비스입니다.</p>
+
+        <div class="form-box">
+            <div class="form-group">
+                <label class="label">상담 분야</label>
+                <select id="category" class="input-box">
+                    <option>계약 검토</option>
+                    <option>노무/인사</option>
+                    <option>채권/미수금</option>
+                    <option>지식재산권</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="label">희망 상담 일시 (3개 필수)</label>
+                <input type="datetime-local" id="slot1" class="input-box" style="margin-bottom:10px;">
+                <input type="datetime-local" id="slot2" class="input-box" style="margin-bottom:10px;">
+                <input type="datetime-local" id="slot3" class="input-box">
+            </div>
+
+            <div class="form-group">
+                <label class="label">수신 연락처</label>
+                <input type="tel" id="phone" class="input-box" placeholder="010-1234-5678">
+            </div>
+
+            <div class="form-group">
+                <label class="label">상담 요약</label>
+                <textarea id="content" class="input-box textarea-box" placeholder="상담 내용을 간략히 적어주세요."></textarea>
+            </div>
+
+            <button class="btn-submit" onclick="submitRequest()">예약 신청하기 (1회 차감)</button>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, users, posts } from '/js/api.js';
+        import { renderClientSidebar } from '/js/client_ui.js';
+
+        let currentUserData = null;
+
+        (async () => {
+            const user = auth.getCurrentUser();
+            
+            if (user) {
+                try {
+                    currentUserData = await users.getMe();
+                    renderClientSidebar('phone_consult', currentUserData);
+                    
+                    // 전화번호 자동 입력
+                    if (currentUserData.phone) {
+                        document.getElementById('phone').value = currentUserData.phone;
+                    }
+                    
+                    console.log('전화상담 페이지 로드:', currentUserData);
+                } catch (error) {
+                    console.error('사용자 정보 로드 실패:', error);
+                }
+            } else {
+                alert('로그인이 필요합니다.');
+                location.href = '/pages/public/login.html';
+            }
+        })();
+
+        window.submitRequest = async function() {
+            if (!currentUserData) {
+                alert('사용자 정보를 불러오는 중입니다.');
+                return;
+            }
+
+            const category = document.getElementById('category').value;
+            const slot1 = document.getElementById('slot1').value;
+            const slot2 = document.getElementById('slot2').value;
+            const slot3 = document.getElementById('slot3').value;
+            const phone = document.getElementById('phone').value;
+            const content = document.getElementById('content').value;
+
+            if (!slot1 || !slot2 || !slot3) {
+                alert('희망 상담 일시 3개를 모두 입력해주세요.');
+                return;
+            }
+
+            if (!phone || !content) {
+                alert('연락처와 상담 내용을 입력해주세요.');
+                return;
+            }
+
+            if (!confirm('전화상담을 신청하시겠습니까?\n(전화상담 1회가 차감됩니다)')) {
+                return;
+            }
+
+            const btn = document.querySelector('.btn-submit');
+            btn.innerText = '신청 중...';
+            btn.disabled = true;
+
+            try {
+                // 전화상담 요청 데이터 구성
+                const slots = [slot1, slot2, slot3].filter(s => s).join(', ');
+                const title = `[전화상담 요청] ${category} - ${currentUserData.managerName || ''}`;
+                const requestContent = `
+[상담 분야] ${category}
+[희망 시간대] ${slots}
+[연락처] ${phone}
+[상담 내용]
+${content}
+                `.trim();
+
+                // posts 테이블에 전화상담 요청 저장
+                await posts.create({
+                    category: 'phone_request',
+                    title: title,
+                    content: requestContent,
+                    status: 'pending'
+                });
+
+                alert('전화상담 신청이 완료되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
+                location.href = '/pages/user/dashboard.html';
+
+            } catch (error) {
+                console.error('신청 에러:', error);
+                alert('신청 중 오류가 발생했습니다.');
+                btn.innerText = '예약 신청하기 (1회 차감)';
+                btn.disabled = false;
+            }
+        };
+
+        window.handleLogout = async () => {
+            await auth.logout();
+            location.href = '/';
+        };
+    </script>
+</body>
+</html>

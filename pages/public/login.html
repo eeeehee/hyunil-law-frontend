@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        * { box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f7fa;
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px; /* 둥글게 수정 */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            width: 360px; /* 너비 약간 조정 */
+        }
+        /* [추가] 로고 스타일 */
+        .logo-area { text-align: center; margin-bottom: 20px; }
+        .logo-area img { height: 36px; cursor: pointer; }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+            font-size: 24px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .input-group input:focus {
+            border-color: #1a1a1a;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background-color: #1a1a1a; /* 브랜드 컬러(검정)로 변경 */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+        button:hover {
+            background-color: #333;
+        }
+
+        .links {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .links a {
+            color: #666;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+        .links a:hover {
+            color: #1a1a1a;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+        .divider {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-area">
+            <a href="/index.html"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a>
+        </div>
+        
+        <h2>로그인</h2>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="userid">아이디 (이메일)</label>
+                <input type="text" id="userid" name="userid" placeholder="이메일을 입력하세요" required>
+            </div>
+            <div class="input-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            
+            <button type="submit">로그인</button>
+        </form>
+
+        <div class="links">
+            <a href="/pages/public/find_account.html">아이디/비번 찾기</a>
+            <span class="divider">|</span>
+            <a href="/pages/public/signup.html">회원가입</a>
+        </div>
+    </div>
+
+    <script type="module">
+        // API 클라이언트 불러오기
+        import { auth } from "/js/api.js";
+
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.querySelector('button');
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); // 화면 새로고침 방지
+
+            const email = document.getElementById('userid').value;
+            const password = document.getElementById('password').value;
+
+            // 버튼 비활성화 (중복 클릭 방지)
+            loginBtn.innerText = "로그인 중...";
+            loginBtn.disabled = true;
+
+            try {
+                // API 로그인 시도
+                const response = await auth.login(email, password);
+                
+                console.log('로그인 성공:', response);
+                
+                // 성공 시 대시보드로 이동
+                location.href = "/index.html"; 
+
+            } catch (error) {
+                console.error('로그인 오류:', error);
+                let msg = error.message || "로그인에 실패했습니다.";
+
+                alert(msg);
+                
+                // 버튼 원상복구
+                loginBtn.innerText = "로그인";
+                loginBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+// admin_sidebar.js - Firebase 버전 기반으로 재작성
+// MariaDB API 연동 버전
+
+function renderAdminSidebar() {
+    // 스타일 주입
+    const sidebarStyles = `
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 1000; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        .sidebar a { text-decoration: none; color: inherit; display: block; }
+        .sidebar ul, .sidebar li { list-style: none; padding: 0; margin: 0; }
+        .sidebar-brand { font-size: 20px; font-weight: 800; padding: 25px 20px 10px 20px; color: #fff; letter-spacing: 1px; }
+        .sidebar-profile { padding: 20px; border-bottom: 1px solid #2c2c45; margin-bottom: 10px; background: rgba(0,0,0,0.1); }
+        .profile-info { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .profile-avatar { width: 38px; height: 38px; background: #2c5bf2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .profile-text { display: flex; flex-direction: column; overflow: hidden; }
+        .profile-name { color: #fff; font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-email { color: #888; font-size: 11px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-role { font-size: 10px; color: #4dabf7; margin-top: 2px; font-weight: 600; }
+        .btn-logout-mini { width: 100%; padding: 8px 0; background: #2c2c45; color: #ccc; border: 1px solid #3a3a5e; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; }
+        .btn-logout-mini:hover { background: #ff4d4f; color: #fff; border-color: #ff4d4f; }
+        .sidebar-menu { padding: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 8px; margin-bottom: 4px; transition: 0.2s; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-icon { margin-right: 8px; width: 20px; text-align: center; display: inline-block; }
+        .submenu { display: none; background-color: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+        .submenu li a { padding: 10px 15px 10px 48px; font-size: 13px; color: #888; transition: 0.2s; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 10px; }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: #1a1a2e; }
+        .sidebar::-webkit-scrollbar-thumb { background: #2c2c45; border-radius: 3px; }
+    `;
+
+    if (!document.getElementById('admin-sidebar-css')) {
+        const styleEl = document.createElement('style');
+        styleEl.id = 'admin-sidebar-css';
+        styleEl.innerHTML = sidebarStyles;
+        document.head.appendChild(styleEl);
+    }
+
+    // 사이드바 HTML
+    const sidebarHTML = `
+    <nav class="sidebar">
+        <div class="sidebar-brand">ADMINISTRATOR</div>
+        
+        <div class="sidebar-profile">
+            <div class="profile-info">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-text">
+                    <span class="profile-name" id="sb_userName">Guest</span>
+                    <span class="profile-email" id="sb_userEmail">로그인 필요</span>
+                    <span class="profile-role" id="sb_userRole"></span>
+                </div>
+            </div>
+            <button class="btn-logout-mini" onclick="adminLogout()">로그아웃</button>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li>
+                <div class="menu-category" id="cat_groupCorp" onclick="toggleAdminMenu('groupCorp', this)">
+                    <div><span class="menu-icon">🏢</span> 기업자문센터</div>
+                    <span style="font-size:10px;">▼</span>
+                </div>
+                <ul id="groupCorp" class="submenu" style="display:block;">
+                    <li><a href="/pages/admin/admin_members.html">👥 회원/기업 관리</a></li>
+                    <li><a href="/pages/admin/admin_payments.html">💳 매출/CMS 관리</a></li>
+                    <li><a href="/pages/admin/admin.html">📝 자문 관리 (전체)</a></li>
+                    <li><a href="/pages/admin/admin_requests.html">📩 요청 관리함</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <div class="menu-category" id="cat_groupLitigation" onclick="toggleAdminMenu('groupLitigation', this)">
+                    <div><span class="menu-icon">⚖️</span> 종합소송센터</div>
+                    <span style="font-size:10px;">▼</span>
+                </div>
+                <ul id="groupLitigation" class="submenu">
+                    <li><a href="/pages/admin/admin_litigation.html">🔎 소송 관리</a></li>
+                    <li><a href="/pages/admin/admin_clients.html">📇 당사자(고객) 관리</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <div class="menu-category" id="cat_groupBill" onclick="toggleAdminMenu('groupBill', this)">
+                    <div><span class="menu-icon">💰</span> 채권추심센터</div>
+                    <span style="font-size:10px;">▼</span>
+                </div>
+                <ul id="groupBill" class="submenu">
+                    <li><a href="/pages/admin/admin_collection.html">💰 채권 관리</a></li>
+                    <li><a href="/pages/admin/admin_pasan.html">📋 파산 관리</a></li>
+                </ul>
+            </li>
+
+            <li><div class="menu-divider"></div></li>
+
+            <li><a href="/pages/user/dashboard.html" class="menu-category" style="color:#52c41a; font-weight:bold;">← 사용자 화면으로</a></li>
+        </ul>
+    </nav>
+    `;
+
+    // 기존 사이드바 제거 후 삽입
+    const existingSidebar = document.querySelector('.sidebar');
+    if (existingSidebar) {
+        existingSidebar.remove();
+    }
+    document.body.insertAdjacentHTML('afterbegin', sidebarHTML);
+
+    // 사용자 정보 로드 및 표시
+    loadAdminUserInfo();
+}
+
+// 카테고리 토글 함수
+window.toggleAdminMenu = function(menuId, catElement) {
+    const submenu = document.getElementById(menuId);
+    if (submenu) {
+        const isVisible = submenu.style.display === 'block';
+        submenu.style.display = isVisible ? 'none' : 'block';
+        
+        // active 클래스 토글
+        if (catElement) {
+            if (isVisible) {
+                catElement.classList.remove('active');
+            } else {
+                catElement.classList.add('active');
+            }
+        }
+    }
+};
+
+// 관리자 정보 로드
+async function loadAdminUserInfo() {
+    try {
+        // 토큰 확인 (token으로 통일)
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.log('관리자 토큰 없음');
+            return;
+        }
+
+        // API 호출
+        const response = await fetch('http://localhost:3000/api/users/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            // 프로필 업데이트
+            const nameEl = document.getElementById('sb_userName');
+            const emailEl = document.getElementById('sb_userEmail');
+            const roleEl = document.getElementById('sb_userRole');
+
+            if (nameEl) nameEl.innerText = data.managerName || data.name || 'Admin';
+            if (emailEl) emailEl.innerText = data.email || '';
+
+            if (roleEl) {
+                let roleText = '관리자';
+                if (data.role === 'master') roleText = '최고 관리자';
+                else if (data.role === 'admin') roleText = '시스템 관리자';
+                else if (data.role === 'general_manager') roleText = '총괄 관리자';
+                else if (data.role === 'lawyer') roleText = '변호사';
+
+                roleEl.innerText = roleText;
+            }
+        }
+    } catch (error) {
+        console.error('관리자 정보 로드 실패:', error);
+    }
+}
+
+// 로그아웃 함수
+window.adminLogout = function() {
+    if (confirm('로그아웃 하시겠습니까?')) {
+        localStorage.removeItem('token');
+        location.href = '/pages/public/login.html';
+    }
+};

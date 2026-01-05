@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ë¶„ìŸ/?‘ìƒ ê´€ë¦?- ë²•ë¬´ê·¸ë£¹ ?„ì¼</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [ê´€ë¦¬ì ê³µí†µ ?¤í??? */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size:14px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+
+        /* ?¬ì´?œë°” */
+        .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; padding: 30px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; margin-bottom: 30px; padding-left: 10px; color: #fff; }
+        .sidebar-menu { list-style: none; padding: 0; margin-top: 10px; }
+        .menu-category { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; color: #a6a6b5; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; border-radius: 6px; margin-bottom: 2px; }
+        .menu-category:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+        .menu-category.active { color: #fff; background-color: #2c2c45; }
+        .menu-arrow { font-size: 10px; transition: 0.3s; color: #666; }
+        .menu-category.open .menu-arrow { transform: rotate(180deg); color: #fff; }
+        .submenu { display: none; padding-left: 10px; margin-bottom: 10px; background-color: rgba(0,0,0,0.1); border-radius: 6px; }
+        .submenu li a { display: block; padding: 8px 15px 8px 32px; font-size: 13px; color: #888; border-radius: 4px; transition: 0.2s; position: relative; }
+        .submenu li a:hover { color: #fff; background-color: rgba(255,255,255,0.05); }
+        .submenu li a.active { color: #fff; font-weight: 700; background-color: #2c5bf2; }
+        .menu-divider { border-top: 1px solid #2c2c45; margin: 15px 0; }
+
+        /* ë©”ì¸ ì»¨í…ì¸?*/
+        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; display: flex; align-items: center; gap: 10px; }
+        
+        /* ?µê³„ ì¹´ë“œ */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5; display: flex; flex-direction: column; justify-content: center; }
+        .stat-label { font-size: 12px; color: #888; font-weight: 600; margin-bottom: 5px; }
+        .stat-value { font-size: 24px; font-weight: 800; color: #1a1a1a; }
+
+        /* ?„í„° ë°??Œì´ë¸?*/
+        .filter-box { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        .search-input { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; flex: 1; outline: none; }
+        .filter-select { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; outline: none; }
+        
+        .table-container { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .conf-table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        .conf-table th, .conf-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; white-space: nowrap; vertical-align: middle; }
+        .conf-table th { background-color: #f9f9f9; color: #555; font-weight: 700; position: sticky; top: 0; }
+        .conf-table tr:hover { background-color: #f0f7ff; cursor: pointer; }
+
+        /* ë¶„ìŸ ?„ìš© ë±ƒì? */
+        .type-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; margin-right: 5px; }
+        .type-cert { background: #fff2e8; color: #d4380d; border: 1px solid #ffbb96; } /* ?´ìš©ì¦ëª… */
+        .type-coop { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; } /* ?…ë¬´?‘ì¡° */
+        .type-nego { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; } /* ?‘ìƒ/?©ì˜ */
+        
+        .status-pill { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-block; }
+        .st-ing { background: #e6fffb; color: #08979c; border: 1px solid #87e8de; } 
+        .st-done { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; } 
+        .st-fail { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; } 
+
+        .btn-add { background-color: #fa8c16; color: #fff; border: none; padding: 0 20px; height: 40px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+        .btn-add:hover { background-color: #d46b08; }
+
+        /* ëª¨ë‹¬ */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; background: #fff; padding: 30px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { font-size: 20px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; display: flex; justify-content: space-between; }
+        .close-btn { cursor: pointer; font-size: 24px; color: #999; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-weight: 700; margin-bottom: 5px; font-size: 13px; color: #555; }
+        .input-box { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 4px; padding: 0 10px; outline: none; }
+        .btn-save { width: 100%; height: 50px; background: #fa8c16; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        
+        .transfer-area { margin-top: 20px; padding: 15px; background: #f0f5ff; border: 1px dashed #2c5bf2; border-radius: 6px; text-align: right; }
+        .btn-litigation { background: #2c5bf2; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 700; font-size: 12px; cursor: pointer; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar">
+    <div class="sidebar-brand">ADMINISTRATOR</div>
+    <ul class="sidebar-menu">
+        <li>
+            <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
+                <div><span class="menu-icon">?¢</span> ê¸°ì—…?ë¬¸?¼í„°</div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupCorp" class="submenu">
+                <li><a href="/pages/admin/admin.html">?“ ?ë¬¸ ê´€ë¦?/a></li>
+                <li><a href="/pages/admin/admin_requests.html">?“© ?”ì²­ ê´€ë¦¬í•¨</a></li>
+                <li><a href="/pages/admin/admin_report.html">?“Š ë¦¬í¬??ë°œì†¡</a></li>
+                <li><a href="/pages/admin/admin_members.html">?‘¥ ?Œì›/ê¸°ì—… ê´€ë¦?/a></li>
+            </ul>
+        </li>
+        <li>
+            <div class="menu-category open active" onclick="toggleAdminMenu('groupConsult', this)">
+                <div><span class="menu-icon">?–ï¸</span> ?¬ê±´ ê´€ë¦?/div>
+                <span class="menu-arrow">??/span>
+            </div>
+            <ul id="groupConsult" class="submenu" style="display:block;">
+                <li><a href="/pages/admin/admin_litigation.html">?” ?„ì?Œì†¡ ê´€ë¦?/a></li>
+                <li><a href="/pages/admin/admin_pasan.html">?“‰ ?Œì‚°/?Œìƒ ?¼í„°</a></li>
+                <li><a href="/pages/admin/admin_collection.html">?’° ì±„ê¶Œ ì¶”ì‹¬?¼í„°</a></li>
+                <li><a href="/pages/admin/admin_conflict.html" class="active" style="color:#fa8c16; font-weight:700;">?”ï¸ ë¶„ìŸ/?‘ìƒ ê´€ë¦?/a></li>
+            </ul>
+        </li>
+        <li class="menu-divider"></li>
+        <li><a href="/index.html" class="menu-link">?  ë©”ì¸ ?ˆí˜?´ì?</a></li>
+    </ul>
+</nav>
+
+<script>
+    function toggleAdminMenu(id, header) {
+        const submenu = document.getElementById(id);
+        if(!submenu) return; 
+        if (submenu.style.display === "block") { submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active"); } 
+        else { submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active"); }
+    }
+</script>
+
+<main class="main-content">
+    <div class="page-header">
+        <h2 class="page-title">?”ï¸ ë¶„ìŸ ë°??‘ìƒ ê´€ë¦?/h2>
+        <button class="btn-add" onclick="openModal('new')">+ ë¶„ìŸ ?¬ê±´ ?±ë¡</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">ì§„í–‰ ì¤‘ì¸ ë¶„ìŸ</div>
+            <div class="stat-value" id="st_total">- ê±?/div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">?´ìš©ì¦ëª…/?µì?</div>
+            <div class="stat-value" style="color:#d4380d;" id="st_cert">- ê±?/div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">?‘ìƒ/?©ì˜ ì§„í–‰</div>
+            <div class="stat-value" style="color:#722ed1;" id="st_nego">- ê±?/div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">?´ê²°(ì¢…ê²°) ?„ë£Œ</div>
+            <div class="stat-value" style="color:#389e0d;" id="st_done">- ê±?/div>
+        </div>
+    </div>
+
+    <div class="filter-box">
+        <select id="filterType" class="filter-select" onchange="filterTable()">
+            <option value="all">?„ì²´ êµ¬ë¶„</option>
+            <option value="?´ìš©ì¦ëª…">?´ìš©ì¦ëª…</option>
+            <option value="?…ë¬´?‘ì¡°">?…ë¬´?‘ì¡°?”ì²­</option>
+            <option value="?‘ìƒ">?‘ìƒ/?©ì˜</option>
+            <option value="ê³„ì•½?´ì?">ê³„ì•½?´ì? ?µë³´</option>
+        </select>
+        <input type="text" id="searchInput" class="search-input" placeholder="?˜ë¢°?? ?ë?ë°? ?ˆê±´ ê²€??.." onkeyup="filterTable()">
+        <button class="btn-add" style="background:#333; padding:0 15px;" onclick="filterTable()">ê²€??/button>
+    </div>
+
+    <div class="table-container">
+        <table class="conf-table">
+            <thead>
+                <tr>
+                    <th style="width:12%">êµ¬ë¶„</th>
+                    <th>?ˆê±´ (?œëª©)</th>
+                    <th>?˜ë¢°??/th>
+                    <th>?ë?ë°?(Counterparty)</th>
+                    <th>ì§„í–‰?íƒœ</th>
+                    <th>?´ë‹¹??/th>
+                    <th style="width:10%">?‘ìˆ˜??/th>
+                </tr>
+            </thead>
+            <tbody id="confListBody">
+                <tr><td colspan="7" style="text-align:center; padding:40px;">?°ì´??ë¡œë”© ì¤?..</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div id="confModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalTitle">ë¶„ìŸ ?¬ê±´ ?±ë¡</span>
+            <span class="close-btn" onclick="closeModal()">??/span>
+        </div>
+        <input type="hidden" id="editDocId">
+        
+        <div class="info-grid">
+            <div class="form-group">
+                <label class="form-label">ë¶„ìŸ ? í˜• *</label>
+                <select id="c_type" class="input-box">
+                    <option value="">? íƒ?˜ì„¸??/option>
+                    <option value="?´ìš©ì¦ëª…">?´ìš©ì¦ëª… (?…ì´‰/?µì?)</option>
+                    <option value="?…ë¬´?‘ì¡°">?…ë¬´?‘ì¡°?”ì²­??/option>
+                    <option value="?‘ìƒ">?‘ìƒ/?©ì˜ ?€ë¦?/option>
+                    <option value="ê³„ì•½?´ì?">ê³„ì•½?´ì? ?µë³´</option>
+                    <option value="ê¸°í?ë¶„ìŸ">ê¸°í? ë¶„ìŸ</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">ì§„í–‰ ?íƒœ</label>
+                <select id="c_status" class="input-box">
+                    <option value="?‘ì„±ì¤?>ë¬¸ì•ˆ ?‘ì„± ì¤?/option>
+                    <option value="ë°œì†¡?„ë£Œ">ë°œì†¡/?„ë‹¬ ?„ë£Œ</option>
+                    <option value="?‘ìƒì¤?>?‘ìƒ ì§„í–‰ ì¤?/option>
+                    <option value="?©ì˜?„ë£Œ">?©ì˜/?´ê²° ?„ë£Œ</option>
+                    <option value="ê²°ë ¬">ê²°ë ¬ (?Œì†¡ ?ˆì •)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">?ˆê±´ (?œëª©) *</label>
+            <input type="text" id="c_title" class="input-box" placeholder="?? ë¯¸ì?ê¸??©ì—­ë¹??…ì´‰??ê±?>
+        </div>
+
+        <div class="info-grid">
+            <div class="form-group">
+                <label class="form-label">?˜ë¢°??(?°ë¦¬ì¸? *</label>
+                <input type="text" id="c_client" class="input-box" placeholder="ê³ ê°ëª?>
+            </div>
+            <div class="form-group">
+                <label class="form-label">?ë?ë°?(Counterparty) *</label>
+                <input type="text" id="c_opponent" class="input-box" placeholder="?ë?ë°??´ë¦„/?í˜¸">
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="form-group">
+                <label class="form-label">ê´€??ê¸ˆì•¡ (? íƒ)</label>
+                <input type="text" id="c_amount" class="input-box" placeholder="ë¶„ìŸ ê¸ˆì•¡" oninput="formatNumber(this)">
+            </div>
+            <div class="form-group">
+                <label class="form-label">?´ë‹¹??/label>
+                <input type="text" id="c_staff" class="input-box" placeholder="?? ?ˆë‚˜??>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">ì§„í–‰ ë©”ëª¨ / ?ì </label>
+            <input type="text" id="c_note" class="input-box" placeholder="ì£¼ìš” ?ì  ?¬í•­ ë©”ëª¨">
+        </div>
+
+        <button class="btn-save" onclick="saveConflict()">?€?¥í•˜ê¸?/button>
+
+        <div class="transfer-area">
+            <span style="font-size:12px; color:#666; font-weight:700;">?‘ìƒ ê²°ë ¬ ???‘‰ </span>
+            <button class="btn-litigation" onclick="transferToLitigation()">?›ï¸?ë¯¼ì‚¬?Œì†¡?¼ë¡œ ?„í™˜ (?´ê?)</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '/js/api.js';
+        
+        (async () => {
+            if (!requireAuth()) return;
+            const user = auth.getCurrentUser();
+            if (!user) {
+                location.href = "/pages/public/login.html";
+                return;
+            }
+
+            try {
+                const userData = await users.getMe();
+                
+                if (!checkRole(['master', 'admin', 'general_manager', 'lawyer'])) {
+                    location.href = '/pages/user/dashboard.html';
+                    return;
+                }
+                console.log('Conflict management page loaded');
+            } catch (error) {
+                console.error('?˜ì´ì§€ ë¡œë“œ ?ëŸ¬:', error);
+                alert('?°ì´?°ë? ë¶ˆëŸ¬?¤ëŠ” ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆìŠµ?ˆë‹¤.');
+            }
+        })();
+        
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('ë¡œê·¸?„ì›ƒ ?ëŸ¬:', error);
+            }
+        };
+    </script>
+
+</body>
+</html>

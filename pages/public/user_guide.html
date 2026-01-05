@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이용 가이드 - 법무그룹 현일</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        /* [공통 스타일] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; font-size: 15px; }
+        a { text-decoration: none; color: inherit; }
+        ul, li { list-style: none; }
+
+        /* [사이드바 공통 스타일] */
+        .sidebar { width: 260px; background-color: #fff; border-right: 1px solid #eee; padding: 40px 20px; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100; }
+        .sidebar-logo { margin-bottom: 30px; padding-left: 10px; }
+        .sidebar-logo img { height: 32px; }
+
+        .user-profile-area { background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #eee; }
+        .user-name { font-size: 16px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+        .user-email { font-size: 12px; color: #888; margin-bottom: 10px; word-break: break-all; }
+        .user-role { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+        .badge-owner { background: #1a1a2e; color: #fff; }
+        .badge-manager { background: #e6f7ff; color: #096dd9; }
+        .badge-staff { background: #f0f0f0; color: #555; }
+
+        .menu-list li { margin-bottom: 8px; }
+        .menu-link { display: block; padding: 14px 15px; border-radius: 8px; color: #555; font-weight: 500; transition: 0.2s; font-size: 15px; }
+        .menu-link:hover { background-color: #f0f0f0; color: #1a1a1a; }
+        .menu-link.active { background-color: #1a1a1a; color: #fff; font-weight: 700; }
+        .logout-btn { margin-top: auto; padding: 15px 20px; color: #999; font-size: 14px; cursor: pointer; }
+
+        /* 메인 컨텐츠 */
+        .main-content { flex: 1; margin-left: 260px; padding: 60px 50px; max-width: 1000px; }
+        .page-header { margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px; }
+        .page-desc { font-size: 14px; color: #666; }
+
+        /* 탭 메뉴 */
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; }
+        .tab-btn { padding: 12px 24px; background: #fff; border: 1px solid #ddd; border-radius: 30px; cursor: pointer; font-weight: 700; color: #555; transition: 0.2s; }
+        .tab-btn:hover { background: #f9f9f9; }
+        .tab-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+        /* FAQ 아코디언 */
+        .faq-section { display: none; } /* 기본 숨김 */
+        .faq-section.active { display: block; animation: fadeIn 0.3s; }
+
+        details { background: #fff; border: 1px solid #eee; margin-bottom: 10px; border-radius: 8px; overflow: hidden; transition: 0.2s; }
+        details[open] { border-color: #2c5bf2; box-shadow: 0 4px 12px rgba(44, 91, 242, 0.1); }
+        
+        summary { padding: 20px; font-weight: 700; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        summary::after { content: '+'; font-size: 20px; color: #999; font-weight: 400; }
+        details[open] summary::after { content: '-'; color: #2c5bf2; }
+        details[open] summary { color: #2c5bf2; border-bottom: 1px solid #f0f0f0; }
+
+        .answer { padding: 20px; background-color: #fcfcfc; color: #555; line-height: 1.6; font-size: 14px; white-space: pre-line; }
+        .answer strong { color: #333; }
+        .highlight { background: #e6f7ff; color: #096dd9; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 12px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 문의하기 박스 */
+        .contact-box { margin-top: 50px; background: #eef4ff; padding: 30px; border-radius: 12px; text-align: center; }
+        .contact-title { font-weight: 700; font-size: 18px; margin-bottom: 10px; color: #096dd9; }
+        .btn-inquiry { display: inline-block; background: #2c5bf2; color: #fff; padding: 12px 30px; border-radius: 6px; font-weight: 700; margin-top: 15px; cursor: pointer; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 30px 20px; }
+            .tabs { overflow-x: auto; padding-bottom: 5px; }
+            .tab-btn { white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 사이드바는 JavaScript로 렌더링됩니다 -->
+    <nav class="sidebar"></nav>
+
+
+    <main class="main-content">
+        <div class="page-header">
+            <h2 class="page-title">📘 이용 가이드 & 자주 묻는 질문</h2>
+            <p class="page-desc">서비스 이용 중 궁금하신 점을 빠르게 해결해 드립니다.</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('basic')">기본 이용 / 계정</button>
+            <button class="tab-btn" onclick="showTab('advisory')">자문 신청 / 진행</button>
+            <button class="tab-btn" onclick="showTab('payment')">결제 / 영수증</button>
+            <button class="tab-btn" onclick="showTab('ceo')">CEO / 관리자 전용</button>
+        </div>
+
+        <div id="tab-basic" class="faq-section active">
+            <details>
+                <summary>Q. 비밀번호를 잊어버렸어요.</summary>
+                <div class="answer">로그인 화면 하단의 <strong>[아이디/비번 찾기]</strong>를 통해 비밀번호를 재설정할 수 있습니다.
+                가입하신 이메일로 재설정 링크가 발송되니 메일함을 확인해주세요.</div>
+            </details>
+            <details>
+                <summary>Q. 소속 부서나 직급을 변경하고 싶어요.</summary>
+                <div class="answer"><strong>[회원 정보 수정]</strong> 메뉴에서 변경 신청이 가능합니다.
+                1. 사내 변경: 대표자(CEO)에게 승인 요청이 전송되며, 대표 승인 시 즉시 반영됩니다.
+                2. 사이트 관리자 변경: 재직증명서 등을 첨부하여 관리자에게 요청할 수 있습니다.</div>
+            </details>
+            <details>
+                <summary>Q. 직원 초대는 어떻게 하나요?</summary>
+                <div class="answer">별도의 초대 기능 없이, 직원이 직접 <strong>[회원가입]</strong>을 진행하면 됩니다.
+                가입 시 <strong>'회사명'과 '사업자번호'</strong>를 정확히 입력하면 자동으로 귀사의 직원으로 등록됩니다.
+                이후 대표자(CEO)가 <strong>[직원 관리]</strong> 메뉴에서 해당 직원을 확인하고 권한을 부여할 수 있습니다.</div>
+            </details>
+        </div>
+
+        <div id="tab-advisory" class="faq-section">
+            <details open>
+                <summary>Q. 자문 신청은 어떻게 하나요?</summary>
+                <div class="answer">1. 왼쪽 메뉴의 <strong>[나의 자문 내역]</strong>을 클릭합니다.
+                2. 우측 상단의 <strong>[✏️ 자문 신청하기]</strong> 버튼을 누릅니다.
+                3. 분야, 제목, 내용을 작성하고 필요한 경우 파일을 첨부하여 제출합니다.
+                
+                ※ 자문 신청 시 월 제공 횟수 1회가 차감됩니다.</div>
+            </details>
+            <details>
+                <summary>Q. 자문 결과는 언제 받을 수 있나요?</summary>
+                <div class="answer">보통 영업일 기준 <span class="highlight">3~5일 이내</span>에 1차 답변을 드립니다.
+                사안이 복잡하거나 추가 검토가 필요한 경우 시간이 더 소요될 수 있으며, 이 경우 담당 변호사가 별도로 안내해 드립니다.</div>
+            </details>
+            <details>
+                <summary>Q. 답변을 받았는데 추가 질문이 있어요.</summary>
+                <div class="answer">답변 완료된 자문 내역 상세 페이지 하단에 <strong>[💬 추가 문의하기]</strong> 기능이 있습니다.
+                간단한 질의응답은 추가 횟수 차감 없이 진행하실 수 있습니다. (건당 최대 2회)</div>
+            </details>
+            <details>
+                <summary>Q. 전화 상담을 하고 싶어요.</summary>
+                <div class="answer">Standard 등급 이상부터 전화 상담이 가능합니다.
+                <strong>[나의 자문 내역] > [📞 전화상담 예약]</strong> 버튼을 눌러 희망하는 시간을 예약해 주세요. 담당 변호사가 일정을 확인 후 확정 연락을 드립니다.</div>
+            </details>
+        </div>
+
+        <div id="tab-payment" class="faq-section">
+            <details open>
+                <summary>Q. 세금계산서나 영수증은 어디서 확인하나요?</summary>
+                <div class="answer"><strong>[결제/구독 관리]</strong> 메뉴 하단의 <strong>[결제 내역]</strong> 테이블을 확인하세요.
+                '결제완료' 상태인 건에 대해 거래명세서 및 영수증 출력이 가능합니다.
+                세금계산서는 매월 말일, 가입 시 입력한 사업자 정보로 이메일 발행됩니다.</div>
+            </details>
+            <details>
+                <summary>Q. 결제 수단을 변경하고 싶어요.</summary>
+                <div class="answer"><strong>[결제/구독 관리]</strong> 메뉴에서 <strong>[결제 수단 정보 등록]</strong> 섹션을 통해 변경 가능합니다.
+                CMS 계좌이체 또는 신용카드 중 선택하여 정보를 수정하고 저장하시면 다음 결제일부터 적용됩니다. (CEO 권한 필요)</div>
+            </details>
+            <details>
+                <summary>Q. 요금제를 변경하면 언제 적용되나요?</summary>
+                <div class="answer">- <strong>업그레이드:</strong> 신청 즉시 적용되며, 차액이 결제됩니다.
+                - <strong>다운그레이드:</strong> 현재 이용 기간이 종료된 후 다음 결제일부터 적용됩니다.</div>
+            </details>
+        </div>
+
+        <div id="tab-ceo" class="faq-section">
+            <details open>
+                <summary>Q. [CEO] 직원의 권한(Manager)은 무엇인가요?</summary>
+                <div class="answer">직원에게 <strong>'부서장(Manager)'</strong> 권한을 부여하면, 해당 직원은 본인의 자문 내역뿐만 아니라 <strong>자신이 속한 부서 팀원들의 모든 자문 내역</strong>을 열람하고 관리할 수 있습니다.
+                <strong>[직원 관리]</strong> 메뉴에서 설정 가능합니다.</div>
+            </details>
+            <details>
+                <summary>Q. [CEO] 직원이 퇴사했습니다. 어떻게 처리하나요?</summary>
+                <div class="answer"><strong>[직원 관리]</strong> 메뉴에서 해당 직원을 찾아 <strong>[퇴사처리]</strong> 버튼을 눌러주세요.
+                퇴사 처리된 직원은 더 이상 회사 계정으로 로그인할 수 없으며, 기업 정보에 접근할 수 없게 됩니다.</div>
+            </details>
+            <details>
+                <summary>Q. [CEO] 부서별 자문 이용 현황을 보고 싶어요.</summary>
+                <div class="answer"><strong>[대시보드]</strong> 하단의 차트를 확인하세요.
+                전사 대비 우리 부서의 이용 비중, 부서별 자문 랭킹(가장 많이 이용한 부서) 등의 통계를 실시간으로 확인하실 수 있습니다.</div>
+            </details>
+        </div>
+
+        <div class="contact-box">
+            <div class="contact-title">원하시는 답변을 찾지 못하셨나요?</div>
+            <p>1:1 문의를 남겨주시면 담당자가 신속하게 답변드리겠습니다.</p>
+            <div class="btn-inquiry" onclick="ChannelIO('show')">채널톡 1:1 문의하기</div>
+        </div>
+
+    </main>
+
+    <script src="/js/channel-service.js"></script>
+    <script src="/js/channel-service.js"></script>
+
+    <script type="module">
+        import { auth, users } from '/js/api.js';
+        import { renderClientSidebar } from '/js/client_ui.js';
+
+        let currentUserData = null;
+
+        (async () => {
+            const user = auth.getCurrentUser();
+            
+            if (user) {
+                // 로그인한 사용자
+                try {
+                    currentUserData = await users.getMe();
+                    
+                    // 사이드바 렌더링
+                    renderClientSidebar('user_guide', currentUserData);
+                    
+                    // CEO 메뉴 권한 체크 - owner만 표시
+                    const ceoMenu = document.getElementById('menuCeoOnly');
+                    if (ceoMenu && currentUserData.role !== 'owner') {
+                        ceoMenu.style.display = 'none';
+                    }
+                    
+                    // CEO 탭 권한 체크 - owner 아니면 숨김
+                    const ceoTabSection = document.getElementById('tab-ceo');
+                    const ceoTabBtn = document.querySelector('.tab-btn[onclick*="ceo"]');
+                    
+                    if (currentUserData.role !== 'owner') {
+                        if (ceoTabSection) ceoTabSection.style.display = 'none';
+                        if (ceoTabBtn) ceoTabBtn.style.display = 'none';
+                    }
+                    
+                    console.log('이용 가이드 로드:', currentUserData);
+                    
+                } catch (error) {
+                    console.log('사용자 정보 로드 실패:', error);
+                }
+            }
+        })();
+
+        // 탭 전환 함수
+        window.showTab = function(tabId) {
+            // 모든 섹션 숨김
+            document.querySelectorAll('.faq-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 모든 탭 버튼 비활성화
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 선택한 섹션 표시
+            const targetSection = document.getElementById('tab-' + tabId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // 클릭한 버튼 활성화
+            event.target.classList.add('active');
+        };
+
+        // 로그아웃
+        window.handleLogout = async function() {
+            try {
+                await auth.logout();
+                location.href = "/";
+            } catch (error) {
+                console.error('로그아웃 에러:', error);
+            }
+        };
+    </script>
+
+</body>
+</html>
