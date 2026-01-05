@@ -2,6 +2,15 @@
 // MariaDB API 연동 버전
 
 function renderAdminSidebar() {
+    // 토큰 체크 - 토큰이 없으면 로그인 페이지로 리다이렉트
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+        console.warn('⚠️ 관리자 토큰이 없습니다. 로그인 페이지로 이동합니다.');
+        alert('로그인이 필요합니다.');
+        location.href = '../public/login.html';
+        return;
+    }
+
     // 스타일 주입
     const sidebarStyles = `
         .sidebar { width: 260px; background-color: #1a1a2e; color: #fff; display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 1000; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); font-family: "Pretendard Variable", Pretendard, sans-serif; }
