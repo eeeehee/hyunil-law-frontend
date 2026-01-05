@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <base href="/hyunil-law-frontend/">
     <title>통합 요청 관리함 - ADMIN</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
@@ -163,7 +162,7 @@
 
             <li><a href="admin_settings.html" class="menu-link">⚙️ 환경 설정</a></li>
             <li class="menu-divider"></li>
-            <li><a href="/" class="menu-link">🏢 기업자문 홈페이지</a></li>
+            <li><a href="../../index.html" class="menu-link">🏢 기업자문 홈페이지</a></li>
             <li><a href="../user/dashboard.html" class="menu-link" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
         </ul>
     </nav>
@@ -262,7 +261,7 @@
     </main>
 
     <script type="module">
-        import { auth, users, posts } from "/js/api.js";
+        import { auth, users, posts } from "../../js/api.js";
 
         // ✅ 숨긴 내역 보기 상태 관리
         let showArchivedMode = false;

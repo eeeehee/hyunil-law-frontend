@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <base href="/hyunil-law-frontend/">
     <title>연차 및 휴가 신청 - 법무그룹 현일 (사용자)</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
@@ -77,10 +76,10 @@
 <nav class="sidebar">
     <div class="sidebar-brand">법무그룹 현일</div>
     <ul class="sidebar-menu">
-        <li><a href="/pages/user/dashboard.html" class="menu-item"><span class="menu-icon">🏠</span> 홈 / 대시보드</a></li>
+        <li><a href="../../pages/user/dashboard.html" class="menu-item"><span class="menu-icon">🏠</span> 홈 / 대시보드</a></li>
         <li><a href="dashboard_request.html" class="menu-item"><span class="menu-icon">📝</span> 자문 요청하기</a></li>
         <li><a href="dashboard_cases.html" class="menu-item"><span class="menu-icon">📂</span> 내 사건 현황</a></li>
-        <li><a href="/pages/user/dashboard_leave.html" class="menu-item active"><span class="menu-icon">🏖️</span> 연차/휴가 신청</a></li> <li><a href="dashboard_settings.html" class="menu-item"><span class="menu-icon">⚙️</span> 내 정보 설정</a></li>
+        <li><a href="../../pages/user/dashboard_leave.html" class="menu-item active"><span class="menu-icon">🏖️</span> 연차/휴가 신청</a></li> <li><a href="dashboard_settings.html" class="menu-item"><span class="menu-icon">⚙️</span> 내 정보 설정</a></li>
     </ul>
 </nav>
 
@@ -153,8 +152,8 @@
 </main>
 
     <script type="module">
-        import { auth, users, requireAuth, leaveRequests } from "/js/api.js";
-        import { renderClientSidebar } from "/js/client_ui.js";
+        import { auth, users, requireAuth, leaveRequests } from "../../js/api.js";
+        import { renderClientSidebar } from "../../js/client_ui.js";
 
         (async () => {
             if (!requireAuth()) {

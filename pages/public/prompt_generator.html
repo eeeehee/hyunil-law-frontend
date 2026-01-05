@@ -2,7 +2,6 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <base href="/hyunil-law-frontend/">
     <title>AI 프롬프트 매니저 Pro (v4.0)</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
@@ -68,7 +67,7 @@
 <body>
 
     <script type="module">
-        import { auth, users, requireAuth } from "/js/api.js";
+        import { auth, users, requireAuth } from "../../js/api.js";
         import { renderRehabSidebar } from './corp_rehab_sidebar.js';
         renderRehabSidebar('ov_prompt'); 
     </script>

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <base href="/hyunil-law-frontend/">
     <title>로그인 - 법무그룹 현일</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
@@ -96,7 +95,7 @@
 
     <div class="login-card">
         <div class="logo-area">
-            <a href="/"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a>
+            <a href="/"><img src="../../assets/img/logo.png" alt="법무그룹 현일"></a>
         </div>
         
         <h2>로그인</h2>
@@ -115,15 +114,15 @@
         </form>
 
         <div class="links">
-            <a href="/pages/public/find_account.html">아이디/비번 찾기</a>
+            <a href="../../pages/public/find_account.html">아이디/비번 찾기</a>
             <span class="divider">|</span>
-            <a href="/pages/public/signup.html">회원가입</a>
+            <a href="../../pages/public/signup.html">회원가입</a>
         </div>
     </div>
 
     <script type="module">
         // API 클라이언트 불러오기
-        import { auth } from "/js/api.js";
+        import { auth } from "../../js/api.js";
 
         const loginForm = document.getElementById('loginForm');
         const loginBtn = document.querySelector('button');
