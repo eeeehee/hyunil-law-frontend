@@ -23,9 +23,28 @@ export function renderClientSidebar(currentPage, userData) {
         roleBadgeClass = "badge-manager";
     }
 
+    // 현재 페이지 위치 확인 (pages/user vs pages/public)
+    const currentPath = window.location.pathname;
+    const isInPublic = currentPath.includes('/pages/public/');
+    const isInUser = currentPath.includes('/pages/user/');
+
+    // 경로 prefix 설정
+    let menuPrefix = '';
+    let userGuideLink = '../public/user_guide.html';
+
+    if (isInPublic) {
+        // public 폴더에서는 ../user/로 이동
+        menuPrefix = '../user/';
+        userGuideLink = 'user_guide.html';
+    } else if (isInUser) {
+        // user 폴더에서는 같은 폴더
+        menuPrefix = '';
+        userGuideLink = '../public/user_guide.html';
+    }
+
     // 2) 직원 관리 메뉴 노출 (두번째 로직 유지)
     const ceoMenu = ['master', 'admin', 'owner'].includes(userData.role)
-        ? `<li><a href="company_members.html" class="menu-link ${currentPage === 'company_members' ? 'active' : ''}" style="color:#d46b08; font-weight:bold;">👥 직원 관리 (CEO)</a></li>`
+        ? `<li><a href="${menuPrefix}company_members.html" class="menu-link ${currentPage === 'company_members' ? 'active' : ''}" style="color:#d46b08; font-weight:bold;">👥 직원 관리 (CEO)</a></li>`
         : '';
 
     // 3) 사이드바 HTML 생성 (첫번째 UI 구조/클래스 유지)
@@ -42,11 +61,11 @@ export function renderClientSidebar(currentPage, userData) {
         </div>
 
         <ul class="menu-list">
-            <li><a href="dashboard.html" class="menu-link ${currentPage === 'dashboard' ? 'active' : ''}">대시보드</a></li>
-            <li><a href="board_list.html" class="menu-link ${currentPage === 'board_list' ? 'active' : ''}">나의 자문 내역</a></li>
-            <li><a href="payment.html" class="menu-link ${currentPage === 'payment' ? 'active' : ''}">결제/구독 관리</a></li>
-            <li><a href="member_info.html" class="menu-link ${currentPage === 'member_info' ? 'active' : ''}">회원 정보 수정</a></li>
-            <li><a href="../public/user_guide.html" class="menu-link ${currentPage === 'user_guide' ? 'active' : ''}">📘 이용 가이드 (FAQ)</a></li>
+            <li><a href="${menuPrefix}dashboard.html" class="menu-link ${currentPage === 'dashboard' ? 'active' : ''}">대시보드</a></li>
+            <li><a href="${menuPrefix}board_list.html" class="menu-link ${currentPage === 'board_list' ? 'active' : ''}">나의 자문 내역</a></li>
+            <li><a href="${menuPrefix}payment.html" class="menu-link ${currentPage === 'payment' ? 'active' : ''}">결제/구독 관리</a></li>
+            <li><a href="${menuPrefix}member_info.html" class="menu-link ${currentPage === 'member_info' ? 'active' : ''}">회원 정보 수정</a></li>
+            <li><a href="${userGuideLink}" class="menu-link ${currentPage === 'user_guide' ? 'active' : ''}">📘 이용 가이드 (FAQ)</a></li>
             ${ceoMenu}
         </ul>
 
