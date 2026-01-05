@@ -71,65 +71,7 @@
 </head>
 <body>
 
-<nav class="sidebar">
-    <div class="sidebar-brand">ADMINISTRATOR</div>
-    <ul class="sidebar-menu">
-        <li>
-            <div class="menu-category open active" onclick="toggleAdminMenu('groupCorp', this)">
-                <div><span class="menu-icon">🏢</span> 기업자문센터</div>
-                <span class="menu-arrow">▼</span>
-            </div>
-            <ul id="groupCorp" class="submenu" style="display:block;">
-                <li><a href="admin.html">📝 자문 관리 (전체)</a></li>
-                <li><a href="admin_requests.html">📩 요청 관리함</a></li>
-                <li><a href="admin_report.html">📊 리포트 발송</a></li>
-                <li><a href="admin_corpbilling.html" class="active">💸 자문료 청구/발송</a></li>
-                <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
-                <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
-            </ul>
-        </li>
-
-        <li>
-            <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
-                <div><span class="menu-icon">⚖️</span> 전자소송/사건</div>
-                <span class="menu-arrow">▼</span>
-            </div>
-            <ul id="groupLitigation" class="submenu">
-                <li><a href="admin_litigation.html">🔎 전자소송 데이터 확인</a></li>
-                <li><a href="admin_clients.html">📇 당사자(고객) 관리</a></li>
-            </ul>
-        </li>
-
-        <li>
-            <div class="menu-category" onclick="toggleAdminMenu('groupSpecial', this)">
-                <div><span class="menu-icon">📞</span> 파산/추심 센터</div>
-                <span class="menu-arrow">▼</span>
-            </div>
-            <ul id="groupSpecial" class="submenu">
-                <li><a href="admin_collection_consult.html">💰 채권 추심 상담</a></li>
-                <li><a href="admin_collection.html">💰 채권 추심 사건</a></li>
-                <li><a href="admin_pasan_consult.html">📉 파산/회생 상담</a></li>
-                <li><a href="admin_pasan.html">📉 파산/회생 사건</a></li>
-            </ul>
-        </li>
-
-        <li class="menu-divider"></li>
-
-        <li><a href="admin_settings.html" class="menu-link">⚙️ 환경 설정</a></li>
-        <li class="menu-divider"></li>
-        <li><a href="../../index.html" class="menu-link">🏢 기업자문 홈페이지</a></li>
-        <li><a href="../user/dashboard.html" class="menu-link" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
-    </ul>
-</nav>
-
-<script>
-    function toggleAdminMenu(id, header) {
-        const submenu = document.getElementById(id);
-        if(!submenu) return;
-        if (submenu.style.display === "block") { submenu.style.display = "none"; header.classList.remove("open"); header.classList.remove("active"); }
-        else { submenu.style.display = "block"; header.classList.add("open"); header.classList.add("active"); }
-    }
-</script>
+<!-- 사이드바는 JavaScript로 동적 생성됩니다 -->
 
 <main class="main-content">
     <h2 class="page-title">청구서 및 영수증 자동화 센터</h2>
@@ -240,11 +182,12 @@
     </div>
 </div>
 
+<script src="../../js/admin_sidebar.js"></script>
 <script type="module">
     import { users, billing, admin } from '../../js/api.js';
 
     // 로그인 확인
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('token');
     if (!token) {
         location.href = '../public/login.html';
     }
@@ -253,11 +196,16 @@
     (async () => {
         try {
             const userData = await users.getMe();
-            const adminRoles = ['master', 'admin'];
+            const adminRoles = ['master', 'admin', 'general_manager', 'lawyer'];
             if (!adminRoles.includes(userData.role)) {
                 alert('관리자 권한이 없습니다.');
                 location.href = '../user/dashboard.html';
                 return;
+            }
+
+            // 사이드바 렌더링
+            if (typeof renderAdminSidebar === 'function') {
+                renderAdminSidebar();
             }
 
             initDateFilter();

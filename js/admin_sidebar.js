@@ -137,8 +137,13 @@ async function loadAdminUserInfo() {
             return;
         }
 
+        // 환경별 API URL 설정
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000/api'
+            : 'https://hyunil-law-backend.onrender.com/api';
+
         // API 호출
-        const response = await fetch('http://localhost:3000/api/users/me', {
+        const response = await fetch(`${API_BASE_URL}/users/me`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
