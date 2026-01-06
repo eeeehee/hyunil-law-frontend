@@ -265,9 +265,13 @@
                     limit: 100
                 });
 
-                // 결제수단/요금제 변경 관련 게시글 제외
+                // 결제수단/요금제 변경/부서변경 관련 게시글 제외 (자문내역에서만)
                 let postsData = (response.posts || []).filter(post => {
-                    return post.category !== 'payment_method' && post.category !== 'plan_change' && post.category !== 'extra_usage_quote';
+                    return post.category !== 'payment_method'
+                        && post.category !== 'plan_change'
+                        && post.category !== 'extra_usage_quote'
+                        && post.category !== 'member_req_internal'
+                        && post.category !== 'member_req_admin';
                 });
 
                 // ✅ 부서 권한 필터: 일반 직원은 본인 부서 자문만 열람 가능
@@ -404,7 +408,11 @@
 
                 const response = await posts.getAll(params);
                 let postsData = (response.posts || []).filter(post => {
-                    return post.category !== 'payment_method' && post.category !== 'plan_change' && post.category !== 'extra_usage_quote';
+                    return post.category !== 'payment_method'
+                        && post.category !== 'plan_change'
+                        && post.category !== 'extra_usage_quote'
+                        && post.category !== 'member_req_internal'
+                        && post.category !== 'member_req_admin';
                 });
 
                 // ✅ 부서 권한 필터: 일반 직원은 본인 부서 자문만 열람 가능

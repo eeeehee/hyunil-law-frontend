@@ -529,8 +529,8 @@
                 const result = await posts.getAll({ limit: 200 });
                 let list = result.posts || [];
 
-                // 결제/요금제 관련 카테고리 제외 (전화상담 요청은 포함)
-                const excludeCategories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote', 'member_req'];
+                // 결제/요금제/부서변경 관련 카테고리 제외 (전화상담 요청은 포함)
+                const excludeCategories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote', 'member_req', 'member_req_internal', 'member_req_admin'];
                 list = list.filter(d => !excludeCategories.includes(d.category));
 
                 // ✅ 숨긴 내역 모드에 따라 필터링

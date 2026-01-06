@@ -167,7 +167,7 @@
     </div>
 
     <script type="module">
-        import { auth, users, posts } from "../../js/api.js";
+        import { auth, users, posts, approvalRequests } from "../../js/api.js";
         import { renderClientSidebar } from "../../js/client_ui.js";
 
         let gUserData = null;
@@ -261,20 +261,17 @@
             if (!confirm("대표님께 승인 요청을 보내시겠습니까?")) return;
 
             try {
-                // 부서 변경 요청 게시글 생성
-                const postData = {
-                    category: "member_req_internal",
-                    title: `부서 변경 요청 - ${gUserData.managerName}`,
-                    content: `${gUserData.department || '미지정'} → ${newDept}`,
-                    requestType: "change_dept",
-                    requestValue: newDept,
-                    targetUid: gUserData.uid,
-                    targetName: gUserData.managerName,
-                    status: 'pending'
+                // 부서 변경 승인 요청 생성 (새로운 approvalRequests API 사용)
+                const requestData = {
+                    requestType: '부서변경',
+                    requestData: {
+                        fromDepartment: gUserData.department || '미지정',
+                        toDepartment: newDept
+                    }
                 };
 
-                await posts.create(postData);
-                alert("대표자에게 승인 요청이 전송되었습니다.");
+                await approvalRequests.createRequest(requestData);
+                alert("✅ 대표자에게 승인 요청이 전송되었습니다.\n승인 완료 시 부서가 자동으로 변경됩니다.");
                 closeChangeModal();
             } catch (error) {
                 console.error('승인 요청 오류:', error);
