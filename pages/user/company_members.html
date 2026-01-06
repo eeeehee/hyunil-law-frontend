@@ -128,8 +128,8 @@
                 <thead>
                     <tr>
                         <th>요청자</th>
-                        <th>현재 부서</th>
-                        <th>변경 요청 (새 부서)</th>
+                        <th>승인요청</th>
+                        <th>요청 내용</th>
                         <th>관리</th>
                     </tr>
                 </thead>
@@ -458,9 +458,14 @@
 
         // 승인 요청 로드
         async function loadApprovalRequests() {
-            console.log('🔔 승인 요청 로드 시작...');
             try {
-                const response = await approvalRequests.getRequests({ status: 'Pending' });
+                // 현재 로그인한 사용자의 bizNum을 필터로 추가
+                const filters = { status: 'Pending' };
+                if (gOwnerData && gOwnerData.bizNum) {
+                    filters.bizNum = gOwnerData.bizNum;
+                }
+
+                const response = await approvalRequests.getRequests(filters);
                 console.log('📡 API 응답:', response);
 
                 const requests = response.requests || [];
