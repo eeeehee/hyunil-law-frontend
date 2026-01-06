@@ -501,6 +501,8 @@
                     let requestContentHtml = '';
                     if (req.requestType === '부서변경') {
                         requestContentHtml = `${requestData.fromDepartment || '미지정'} → <span class="req-highlight">${requestData.toDepartment || '미지정'}</span>`;
+                    } else if (req.requestType === '자문요청') {
+                        requestContentHtml = `[${requestData.category}] ${requestData.title}`;
                     } else {
                         // 향후 다른 요청 유형을 위한 확장 지점
                         requestContentHtml = JSON.stringify(requestData);

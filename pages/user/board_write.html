@@ -148,7 +148,7 @@
     </main>
 
     <script type="module">
-        import { auth, users, requireAuth, posts } from "../../js/api.js";
+        import { auth, users, requireAuth, posts, approvalRequests } from "../../js/api.js";
         import { renderClientSidebar } from "../../js/client_ui.js";
 
         const PLAN_SPECS = {
@@ -373,26 +373,45 @@
             }
 
             try {
-                // 업로드된 파일 URL을 배열로 전달
+                const userRole = gUserData.role;
                 const fileUrls = uploadedFileUrl ? [uploadedFileUrl] : [];
-
-                await posts.create({
+                
+                const postData = {
                     category,
                     title,
                     content,
                     department,
-                    fileUrls: fileUrls
-                });
+                    fileUrls
+                };
 
-                alert('자문 신청이 완료되었습니다.\n사용 가능 횟수가 1회 차감되었습니다.');
-                location.href = '../../pages/user/board_list.html';
+                // 'user' 또는 'manager' 역할은 승인 요청 생성
+                if (userRole === 'user' || userRole === 'manager') {
+                    await approvalRequests.createRequest({
+                        requestType: '자문요청',
+                        requestData: postData
+                    });
+                    alert('자문 신청이 대표(CEO)에게 승인 요청되었습니다.\n승인 시 자동으로 등록되며, 사용 가능 횟수가 차감됩니다.');
+                    location.href = '../../pages/user/board_list.html';
+                } else {
+                    // 'owner', 'admin' 등 다른 역할은 즉시 생성
+                    await posts.create(postData);
+                    alert('자문 신청이 완료되었습니다.\n사용 가능 횟수가 1회 차감되었습니다.');
+                    location.href = '../../pages/user/board_list.html';
+                }
 
             } catch (error) {
                 console.error('등록 에러:', error);
                 alert('등록 중 오류가 발생했습니다.');
                 if (btn) {
-                    btn.innerText = '신청하기 (1회 차감)';
-                    btn.disabled = false;
+                    // 원래 버튼 텍스트로 복원
+                    const qaRemaining = Math.max(0, qaLimit - qaUsed);
+                     if (qaRemaining > 0) {
+                        btn.innerText = '신청하기 (1회 차감)';
+                        btn.disabled = false;
+                    } else {
+                        btn.innerText = '사용 가능 횟수 초과';
+                        btn.disabled = true;
+                    }
                 }
             }
         };
