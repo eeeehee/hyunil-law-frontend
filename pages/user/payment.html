@@ -338,8 +338,11 @@
     </main>
 <script src="../../js/channel-service.js"></script>
 <script type="module">
-        import { auth, users, requireAuth, payments, posts, billing } from '../../js/api.js';
+        import { auth, users, requireAuth, payments, posts, billing, approvalRequests } from '../../js/api.js';
         import { renderClientSidebar } from '../../js/client_ui.js';
+
+        // 전역 변수로 사용자 데이터 선언
+        window.gUserData = null;
 
         // ✅ expose imported modules for non-module onclick handlers
         window.posts = posts;
@@ -348,6 +351,7 @@
         window.auth = auth;
         window.users = users;
         window.requireAuth = requireAuth;
+        window.approvalRequests = approvalRequests;
 
         const PLANS = {
             'none': { name: '미가입', price: 0 },
@@ -732,6 +736,7 @@ function renderPaymentHistory(items) {
 
             try {
                 const userData = await users.getMe();
+                window.gUserData = userData; // 전역 변수에 할당
                 renderClientSidebar('payment', userData);
                 setOwnerPaymentSectionVisible(userData);
                 renderUsageBadges(userData);
@@ -1087,7 +1092,7 @@ window.handleLogout = async function() {
             document.getElementById('extraPayModal').classList.remove('active');
         };
 
-                window.submitExtraPay = async function() {
+        window.submitExtraPay = async function() {
             const type = document.getElementById('extraType')?.value || 'custom';
             const content = (document.getElementById('extraContent')?.value || document.getElementById('extraPayReason')?.value || '').trim();
             const phone = (document.getElementById('extraPhone')?.value || '').trim();
@@ -1102,9 +1107,12 @@ window.handleLogout = async function() {
             }
 
             try {
-                if (!window.posts || !window.posts.create) {
-                    throw new Error('posts API가 로드되지 않았습니다.');
+                if (!window.gUserData || !window.posts || !window.approvalRequests) {
+                    throw new Error('API가 로드되지 않았습니다.');
                 }
+
+                const useApprovalFlow = window.gUserData.useApproval === 1;
+                const isStaff = window.gUserData.role === 'user' || window.gUserData.role === 'manager';
 
                 const typeLabelMap = {
                     qa_extra: '서면 자문 추가',
@@ -1116,21 +1124,29 @@ window.handleLogout = async function() {
                 const title = `[${typeLabel}] ${phone ? `(${phone})` : ''}`.trim();
                 const body = phone ? `연락처: ${phone}\n\n${content}` : content;
 
-                // ✅ posts 테이블에 저장 (추가 이용/견적 요청 내역 + 관리자 화면에서 확인 가능)
-                await await window.posts.create({
-                    category: 'extra_usage_quote',
-                status: 'pending',
-                    title,
-                    content: body,
-                    fileUrls: []
-                });
+                if (useApprovalFlow && isStaff) {
+                    // 승인 요청 생성
+                    await window.approvalRequests.createRequest({
+                        requestType: '추가이용문의',
+                        requestData: { type, content, phone, title }
+                    });
+                    alert('문의가 접수되어 대표에게 승인 요청되었습니다.');
 
-                alert('문의가 접수되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
+                } else {
+                    // 직접 생성
+                    await window.posts.create({
+                        category: 'extra_usage_quote',
+                        status: 'pending',
+                        title,
+                        content: body,
+                        fileUrls: []
+                    });
+                    alert('문의가 접수되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
+                }
+                
                 closeExtraPayModal();
-
-                // ✅ 리스트 즉시 반영: 가장 안전하게 새로고침
-                // (페이지 내 렌더 함수가 module scope인 경우가 있어 reload 방식이 안정적)
                 location.reload();
+
             } catch (err) {
                 console.error('추가 이용 문의 저장 실패:', err);
                 alert('문의 접수에 실패했습니다.\n잠시 후 다시 시도해주세요.');
@@ -1157,19 +1173,34 @@ window.handleLogout = async function() {
             }
 
             try {
-                if (!window.posts || !window.posts.create) {
-                    throw new Error('posts API가 로드되지 않았습니다.');
+                if (!window.gUserData || !window.posts || !window.approvalRequests) {
+                    throw new Error('API가 로드되지 않았습니다.');
                 }
 
-                // posts API를 통해 plan_change 카테고리로 요청 생성
-                await window.posts.create({
-                    category: 'plan_change',
-                    title: `요금제 변경 신청 (${newPlan})`,
-                    content: `현재 요금제를 ${newPlan}으로 변경 신청합니다.\n변경 사유: ${reason || '없음'}`,
-                    status: 'pending'
-                });
+                const useApprovalFlow = window.gUserData.useApproval === 1;
+                const isStaff = window.gUserData.role === 'user' || window.gUserData.role === 'manager';
+                
+                const title = `요금제 변경 신청 (${newPlan})`;
+                const content = `현재 요금제를 ${newPlan}으로 변경 신청합니다.\n변경 사유: ${reason || '없음'}`;
 
-                alert('요금제 변경 신청이 완료되었습니다.\n관리자 승인 후 적용됩니다.');
+                if (useApprovalFlow && isStaff) {
+                    // 승인 요청 생성
+                    await window.approvalRequests.createRequest({
+                        requestType: '요금제변경신청',
+                        requestData: { newPlan, reason, title, content }
+                    });
+                    alert('요금제 변경 신청이 대표에게 승인 요청되었습니다.');
+                } else {
+                    // 직접 생성
+                    await window.posts.create({
+                        category: 'plan_change',
+                        title: title,
+                        content: content,
+                        status: 'pending'
+                    });
+                    alert('요금제 변경 신청이 완료되었습니다.\n관리자 승인 후 적용됩니다.');
+                }
+
                 closePlanModal();
             } catch (error) {
                 console.error('요금제 변경 신청 오류:', error);

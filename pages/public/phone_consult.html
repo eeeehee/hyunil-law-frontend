@@ -89,7 +89,7 @@
     </main>
 
     <script type="module">
-        import { auth, users, posts } from '../../js/api.js';
+        import { auth, users, posts, approvalRequests } from '../../js/api.js';
         import { renderClientSidebar } from '../../js/client_ui.js';
 
         let currentUserData = null;
@@ -140,7 +140,13 @@
                 return;
             }
 
-            if (!confirm('전화상담을 신청하시겠습니까?\n(전화상담 1회가 차감됩니다)')) {
+            const useApprovalFlow = currentUserData.useApproval === 1;
+            const isStaff = currentUserData.role === 'user' || currentUserData.role === 'manager';
+            const confirmationMessage = (useApprovalFlow && isStaff)
+                ? '전화상담을 신청하시겠습니까?\n대표 승인 후 예약이 확정되며, 상담 횟수가 차감됩니다.'
+                : '전화상담을 신청하시겠습니까?\n(전화상담 1회가 차감됩니다)';
+
+            if (!confirm(confirmationMessage)) {
                 return;
             }
 
@@ -149,26 +155,32 @@
             btn.disabled = true;
 
             try {
-                // 전화상담 요청 데이터 구성
-                const slots = [slot1, slot2, slot3].filter(s => s).join(', ');
-                const title = `[전화상담 요청] ${category} - ${currentUserData.managerName || ''}`;
-                const requestContent = `
-[상담 분야] ${category}
-[희망 시간대] ${slots}
-[연락처] ${phone}
-[상담 내용]
-${content}
-                `.trim();
-
-                // posts 테이블에 전화상담 요청 저장
-                await posts.create({
-                    category: 'phone_request',
+                const slots = [slot1, slot2, slot3].filter(s => s);
+                const title = `[전화상담] ${category} - ${currentUserData.managerName || ''}`;
+                
+                const requestPayload = {
+                    category: 'phone_request', // for posts table
                     title: title,
-                    content: requestContent,
-                    status: 'pending'
-                });
+                    content: `[상담 분야] ${category}\n[희망 시간대] ${slots.join(', ')}\n[연락처] ${phone}\n[상담 내용]\n${content}`.trim(),
+                    status: 'pending',
+                     // for approval request's requestData
+                    requestCategory: category,
+                    slots: slots,
+                    phone: phone,
+                    summary: content
+                };
 
-                alert('전화상담 신청이 완료되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
+                if (useApprovalFlow && isStaff) {
+                    await approvalRequests.createRequest({
+                        requestType: '전화상담',
+                        requestData: requestPayload
+                    });
+                    alert('전화상담 신청이 대표(CEO)에게 승인 요청되었습니다.');
+                } else {
+                    await posts.create(requestPayload);
+                    alert('전화상담 신청이 완료되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
+                }
+
                 location.href = '../../pages/user/dashboard.html';
 
             } catch (error) {
