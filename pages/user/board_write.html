@@ -321,8 +321,9 @@
                     }
                 }
 
-                // 사용량 표시
+                // 사용량 표시 및 버튼 텍스트 초기화
                 updateUsageBadge(gUserData);
+                updateSubmitButtonText();
 
                 console.log('자문 신청 페이지 로드:', gUserData);
 
@@ -406,15 +407,8 @@
                 console.error('등록 에러:', error);
                 alert('등록 중 오류가 발생했습니다.');
                 if (btn) {
-                    // 원래 버튼 텍스트로 복원
-                    const qaRemaining = Math.max(0, qaLimit - qaUsed);
-                     if (qaRemaining > 0) {
-                        btn.innerText = '신청하기 (1회 차감)';
-                        btn.disabled = false;
-                    } else {
-                        btn.innerText = '사용 가능 횟수 초과';
-                        btn.disabled = true;
-                    }
+                    btn.disabled = false;
+                    updateSubmitButtonText(); // 버튼 텍스트 복원
                 }
             }
         };
@@ -423,6 +417,36 @@
             await auth.logout();
             location.href = '../../index.html';
         };
+
+        // 제출 버튼 텍스트 업데이트 함수
+        function updateSubmitButtonText() {
+            const btn = document.getElementById('btnSubmit');
+            if (!btn || !gUserData) return;
+
+            const useApprovalFlow = gUserData.useApproval === 1;
+            const isStaff = gUserData.role === 'user' || gUserData.role === 'manager';
+
+            if (useApprovalFlow && isStaff) {
+                btn.textContent = '승인 요청하기';
+            } else {
+                // 사용량에 따라 텍스트 변경
+                const spec = PLAN_SPECS[gUserData.plan] || PLAN_SPECS['none'];
+                const qaLimit = gUserData.plan === 'Enterprise' ? (gUserData.customQaLimit || 0) : spec.qa;
+                const qaUsed = gUserData.qaUsedCount || 0;
+                const qaRemaining = Math.max(0, qaLimit - qaUsed);
+
+                if (qaLimit === 0) {
+                    btn.textContent = '플랜을 구독해주세요';
+                    btn.disabled = true;
+                } else if (qaRemaining === 0) {
+                    btn.textContent = '사용 가능 횟수 초과';
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = '신청하기 (1회 차감)';
+                    btn.disabled = false;
+                }
+            }
+        }
     </script>
 </body>
 </html>

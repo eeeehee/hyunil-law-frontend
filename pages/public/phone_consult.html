@@ -107,6 +107,7 @@
                         document.getElementById('phone').value = currentUserData.phone;
                     }
                     
+                    updateSubmitButtonText(); // 버튼 텍스트 초기화
                     console.log('전화상담 페이지 로드:', currentUserData);
                 } catch (error) {
                     console.error('사용자 정보 로드 실패:', error);
@@ -184,10 +185,10 @@
                 location.href = '../../pages/user/dashboard.html';
 
             } catch (error) {
-                console.error('신청 에러:', error);
+                console.error('신청 중 에러:', error);
                 alert('신청 중 오류가 발생했습니다.');
-                btn.innerText = '예약 신청하기 (1회 차감)';
                 btn.disabled = false;
+                updateSubmitButtonText(); // 버튼 텍스트 복원
             }
         };
 
@@ -195,6 +196,22 @@
             await auth.logout();
             location.href = '../../index.html';
         };
+
+        // 제출 버튼 텍스트 업데이트 함수
+        function updateSubmitButtonText() {
+            const btn = document.querySelector('.btn-submit');
+            if (!btn || !currentUserData) return;
+
+            const useApprovalFlow = currentUserData.useApproval === 1;
+            const isStaff = currentUserData.role === 'user' || currentUserData.role === 'manager';
+
+            if (useApprovalFlow && isStaff) {
+                btn.textContent = '승인 요청하기';
+            } else {
+                btn.textContent = '예약 신청하기 (1회 차감)';
+            }
+            btn.disabled = false; // 기본적으로 활성화
+        }
     </script>
 </body>
 </html>

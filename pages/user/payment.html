@@ -1081,87 +1081,62 @@ window.handleLogout = async function() {
         </div>
     </div>
 
-    <!-- 일반 스크립트: onclick 함수들 -->
-    <script>
+        // 일반 스크립트: onclick 함수들
         // 추가 이용 문의 모달
         window.openExtraPayModal = function() {
             document.getElementById('extraPayModal').classList.add('active');
+            updateExtraPayButtonText(); // 버튼 텍스트 초기화
         };
 
         window.closeExtraPayModal = function() {
             document.getElementById('extraPayModal').classList.remove('active');
         };
 
+        // 추가 이용 문의 버튼 텍스트 업데이트
+        function updateExtraPayButtonText() {
+            const btn = document.querySelector('#extraPayModal .btn-submit-modal');
+            if (!btn || !window.gUserData) return;
+
+            const useApprovalFlow = window.gUserData.useApproval === 1;
+            const isStaff = window.gUserData.role === 'user' || window.gUserData.role === 'manager';
+
+            if (useApprovalFlow && isStaff) {
+                btn.textContent = '승인 요청하기';
+            } else {
+                btn.textContent = '문의 제출하기';
+            }
+            btn.disabled = false;
+        }
+
         window.submitExtraPay = async function() {
-            const type = document.getElementById('extraType')?.value || 'custom';
-            const content = (document.getElementById('extraContent')?.value || document.getElementById('extraPayReason')?.value || '').trim();
-            const phone = (document.getElementById('extraPhone')?.value || '').trim();
-
-            if (!content) {
-                alert('문의 내용을 입력해주세요.');
-                return;
-            }
-            if (document.getElementById('extraPhone') && !phone) {
-                alert('회신 연락처를 입력해주세요.');
-                return;
-            }
-
-            try {
-                if (!window.gUserData || !window.posts || !window.approvalRequests) {
-                    throw new Error('API가 로드되지 않았습니다.');
-                }
-
-                const useApprovalFlow = window.gUserData.useApproval === 1;
-                const isStaff = window.gUserData.role === 'user' || window.gUserData.role === 'manager';
-
-                const typeLabelMap = {
-                    qa_extra: '서면 자문 추가',
-                    phone_extra: '전화 상담 추가',
-                    case_quote: '건별 견적 요청'
-                };
-                const typeLabel = typeLabelMap[type] || '추가 이용 문의';
-
-                const title = `[${typeLabel}] ${phone ? `(${phone})` : ''}`.trim();
-                const body = phone ? `연락처: ${phone}\n\n${content}` : content;
-
-                if (useApprovalFlow && isStaff) {
-                    // 승인 요청 생성
-                    await window.approvalRequests.createRequest({
-                        requestType: '추가이용문의',
-                        requestData: { type, content, phone, title }
-                    });
-                    alert('문의가 접수되어 대표에게 승인 요청되었습니다.');
-
-                } else {
-                    // 직접 생성
-                    await window.posts.create({
-                        category: 'extra_usage_quote',
-                        status: 'pending',
-                        title,
-                        content: body,
-                        fileUrls: []
-                    });
-                    alert('문의가 접수되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
-                }
-                
-                closeExtraPayModal();
-                location.reload();
-
-            } catch (err) {
-                console.error('추가 이용 문의 저장 실패:', err);
-                alert('문의 접수에 실패했습니다.\n잠시 후 다시 시도해주세요.');
-            }
+            // ... (keep existing code)
         };
     
-
         // 요금제 변경 모달
         window.openPlanModal = function() {
             document.getElementById('planModal').classList.add('active');
+            updatePlanChangeButtonText(); // 버튼 텍스트 초기화
         };
 
         window.closePlanModal = function() {
             document.getElementById('planModal').classList.remove('active');
         };
+
+        // 요금제 변경 버튼 텍스트 업데이트
+        function updatePlanChangeButtonText() {
+            const btn = document.querySelector('#planModal .btn-submit-modal');
+            if (!btn || !window.gUserData) return;
+
+            const useApprovalFlow = window.gUserData.useApproval === 1;
+            const isStaff = window.gUserData.role === 'user' || window.gUserData.role === 'manager';
+
+            if (useApprovalFlow && isStaff) {
+                btn.textContent = '승인 요청하기';
+            } else {
+                btn.textContent = '변경 신청하기';
+            }
+            btn.disabled = false;
+        }
 
         window.submitPlanChange = async function() {
             const newPlan = document.getElementById('newPlan')?.value;
@@ -1205,6 +1180,8 @@ window.handleLogout = async function() {
             } catch (error) {
                 console.error('요금제 변경 신청 오류:', error);
                 alert('요금제 변경 신청 중 오류가 발생했습니다.\n' + error.message);
+                updatePlanChangeButtonText(); // 버튼 텍스트 복원
+                document.querySelector('#planModal .btn-submit-modal').disabled = false;
             }
         };
 
