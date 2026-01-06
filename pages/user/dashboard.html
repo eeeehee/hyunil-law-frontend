@@ -226,7 +226,20 @@
             try {
                 // 전체 게시글 조회
                 const postsData = await posts.getAll({ limit: 1000 });
-                const allPosts = postsData.posts || [];
+                let allPosts = postsData.posts || [];
+
+                // 시스템 카테고리 제외 (자문이 아닌 요청들)
+                const EXCLUDED_CATEGORIES = [
+                    'extra_usage_quote',
+                    'payment_request',
+                    'plan_change',
+                    'payment_method',
+                    'member_req',
+                    'member_req_internal',
+                    'member_req_admin',
+                    'phone_log'
+                ];
+                allPosts = allPosts.filter(post => !EXCLUDED_CATEGORIES.includes(post.category));
 
                 console.log('📊 전체 게시글 수:', allPosts.length);
 

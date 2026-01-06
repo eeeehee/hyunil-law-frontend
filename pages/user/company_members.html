@@ -458,62 +458,70 @@
 
         // 승인 요청 로드
         async function loadApprovalRequests() {
+            console.log('🔔 승인 요청 로드 시작...');
             try {
                 const response = await approvalRequests.getRequests({ status: 'Pending' });
-                const requests = response.requests || [];
+                console.log('📡 API 응답:', response);
 
-                console.log('승인 요청 목록:', requests);
+                const requests = response.requests || [];
+                console.log('✅ 승인 요청 목록:', requests);
+                console.log('📊 전체 요청 수:', requests.length);
 
                 if (requests.length === 0) {
+                    console.log('ℹ️ 승인 요청이 없어서 섹션 숨김');
+                    document.getElementById('approvalSection').style.display = 'none';
+                    return;
+                }
+
+                // 부서변경 요청 필터링
+                const deptChangeRequests = requests.filter(req => req.requestType === '부서변경');
+                console.log('🔄 부서변경 요청 수:', deptChangeRequests.length);
+
+                if (deptChangeRequests.length === 0) {
+                    console.log('ℹ️ 부서변경 요청이 없어서 섹션 숨김');
                     document.getElementById('approvalSection').style.display = 'none';
                     return;
                 }
 
                 // 승인 요청이 있으면 섹션 표시
+                console.log('✨ 승인결재 섹션 표시!');
                 document.getElementById('approvalSection').style.display = 'block';
-                document.getElementById('reqCount').textContent = requests.length;
+                document.getElementById('reqCount').textContent = deptChangeRequests.length;
 
                 const tbody = document.getElementById('reqListBody');
                 tbody.innerHTML = '';
 
-                requests.forEach(req => {
+                deptChangeRequests.forEach(req => {
                     const requestData = req.requestData || {};
 
-                    // 부서변경 요청만 표시
-                    if (req.requestType === '부서변경') {
-                        const dateStr = new Date(req.createdAt).toLocaleString('ko-KR', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
+                    const dateStr = new Date(req.createdAt).toLocaleString('ko-KR', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
 
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>
-                                    <div style="font-weight:700;">${req.requesterName || '이름 없음'}</div>
-                                    <div style="font-size:11px; color:#888;">${req.requesterDepartment || '-'}</div>
-                                    <div style="font-size:11px; color:#999;">요청일: ${dateStr}</div>
-                                </td>
-                                <td>${requestData.fromDepartment || '-'}</td>
-                                <td class="req-highlight">${requestData.toDepartment || '-'}</td>
-                                <td>
-                                    <button class="btn-act ok" onclick="handleApprovalRequest(${req.id}, true)">✓ 승인</button>
-                                    <button class="btn-act no" onclick="handleApprovalRequest(${req.id}, false)">✕ 거절</button>
-                                </td>
-                            </tr>
-                        `;
-                    }
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>
+                                <div style="font-weight:700;">${req.requesterName || '이름 없음'}</div>
+                                <div style="font-size:11px; color:#888;">${req.requesterDepartment || '-'}</div>
+                                <div style="font-size:11px; color:#999;">요청일: ${dateStr}</div>
+                            </td>
+                            <td>${requestData.fromDepartment || '-'}</td>
+                            <td class="req-highlight">${requestData.toDepartment || '-'}</td>
+                            <td>
+                                <button class="btn-act ok" onclick="handleApprovalRequest(${req.id}, true)">✓ 승인</button>
+                                <button class="btn-act no" onclick="handleApprovalRequest(${req.id}, false)">✕ 거절</button>
+                            </td>
+                        </tr>
+                    `;
                 });
 
-                // 부서변경 요청이 없으면 섹션 숨김
-                if (tbody.innerHTML === '') {
-                    document.getElementById('approvalSection').style.display = 'none';
-                }
-
             } catch (error) {
-                console.error('승인 요청 로드 실패:', error);
+                console.error('❌ 승인 요청 로드 실패:', error);
+                console.error('에러 상세:', error.message, error.stack);
                 document.getElementById('approvalSection').style.display = 'none';
             }
         }
