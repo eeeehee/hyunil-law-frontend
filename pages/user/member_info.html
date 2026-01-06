@@ -261,6 +261,9 @@
             if (!confirm("대표님께 승인 요청을 보내시겠습니까?")) return;
 
             try {
+                console.log('🔔 부서변경 요청 시작');
+                console.log('👤 현재 사용자:', gUserData);
+
                 // 부서 변경 승인 요청 생성 (새로운 approvalRequests API 사용)
                 const requestData = {
                     requestType: '부서변경',
@@ -270,11 +273,17 @@
                     }
                 };
 
-                await approvalRequests.createRequest(requestData);
+                console.log('📤 전송할 데이터:', requestData);
+
+                const response = await approvalRequests.createRequest(requestData);
+                console.log('✅ API 응답:', response);
+
                 alert("✅ 대표자에게 승인 요청이 전송되었습니다.\n승인 완료 시 부서가 자동으로 변경됩니다.");
                 closeChangeModal();
             } catch (error) {
-                console.error('승인 요청 오류:', error);
+                console.error('❌ 승인 요청 오류:', error);
+                console.error('에러 상세:', error.message);
+                console.error('에러 스택:', error.stack);
                 alert("오류가 발생했습니다: " + (error.message || '알 수 없는 오류'));
             }
         }
