@@ -277,8 +277,8 @@
             </div>
         </div>
 
-        <!-- 승인 요청 알림 섹션 -->
-        <div id="approvalAlertSection" style="display:none;">
+        <!-- 승인 요청 알림 섹션 - CEO 페이지(company_members.html)로 이동됨 -->
+        <!-- <div id="approvalAlertSection" style="display:none;">
             <div class="approval-alert">
                 <div class="approval-alert-header">
                     ⚠️ 승인 대기 중인 요청이 <span id="pendingCount">0</span>건 있습니다.
@@ -295,12 +295,11 @@
                             </tr>
                         </thead>
                         <tbody id="approvalTableBody">
-                            <!-- 승인 요청 목록이 동적으로 추가됩니다 -->
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div id="loadingMsg" style="text-align:center; padding:50px; color:#666;">데이터를 불러오는 중...</div>
         <div class="member-list" id="companyList"></div>
@@ -570,7 +569,8 @@
 
             // 데이터 로드 시작
             await loadMemberData(true);
-            await loadApprovalRequests();
+            // 승인 요청은 CEO 페이지(company_members.html)에서만 표시
+            // await loadApprovalRequests();
 
         } catch (error) {
             console.error('권한 체크 에러:', error);
@@ -1197,90 +1197,90 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
     window.loadMemberData = loadMemberData;
 
     // ============================================
-    // 승인 요청 관련 함수
+    // 승인 요청 관련 함수 - CEO 페이지(company_members.html)로 이동됨
     // ============================================
-    async function loadApprovalRequests() {
-        try {
-            const response = await approvalRequests.getRequests({ status: 'Pending' });
-            const requests = response.requests || [];
+    // async function loadApprovalRequests() {
+    //     try {
+    //         const response = await approvalRequests.getRequests({ status: 'Pending' });
+    //         const requests = response.requests || [];
 
-            if (requests.length === 0) {
-                document.getElementById('approvalAlertSection').style.display = 'none';
-                return;
-            }
+    //         if (requests.length === 0) {
+    //             document.getElementById('approvalAlertSection').style.display = 'none';
+    //             return;
+    //         }
 
-            document.getElementById('approvalAlertSection').style.display = 'block';
-            document.getElementById('pendingCount').textContent = requests.length;
+    //         document.getElementById('approvalAlertSection').style.display = 'block';
+    //         document.getElementById('pendingCount').textContent = requests.length;
 
-            const tbody = document.getElementById('approvalTableBody');
-            tbody.innerHTML = '';
+    //         const tbody = document.getElementById('approvalTableBody');
+    //         tbody.innerHTML = '';
 
-            requests.forEach(req => {
-                const requestData = req.requestData;
-                let contentHtml = '';
+    //         requests.forEach(req => {
+    //             const requestData = req.requestData;
+    //             let contentHtml = '';
 
-                if (req.requestType === '부서변경') {
-                    contentHtml = `
-                        ${requestData.fromDepartment}
-                        <span class="approval-arrow">➡️</span>
-                        ${requestData.toDepartment}
-                    `;
-                } else {
-                    contentHtml = JSON.stringify(requestData);
-                }
+    //             if (req.requestType === '부서변경') {
+    //                 contentHtml = `
+    //                     ${requestData.fromDepartment}
+    //                     <span class="approval-arrow">➡️</span>
+    //                     ${requestData.toDepartment}
+    //                 `;
+    //             } else {
+    //                 contentHtml = JSON.stringify(requestData);
+    //             }
 
-                const dateStr = new Date(req.createdAt).toLocaleString('ko-KR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+    //             const dateStr = new Date(req.createdAt).toLocaleString('ko-KR', {
+    //                 year: 'numeric',
+    //                 month: '2-digit',
+    //                 day: '2-digit',
+    //                 hour: '2-digit',
+    //                 minute: '2-digit'
+    //             });
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td>
-                            <div style="font-weight:700;">${req.requesterName}</div>
-                            <div style="font-size:11px; color:#888;">${req.requesterDepartment || '-'}</div>
-                        </td>
-                        <td><span style="font-weight:700; color:#2c5bf2;">${req.requestType}</span></td>
-                        <td>${contentHtml}</td>
-                        <td style="font-size:12px; color:#666;">${dateStr}</td>
-                        <td>
-                            <button class="btn-approve" onclick="handleApproval(${req.id}, true)">승인</button>
-                            <button class="btn-reject" onclick="handleApproval(${req.id}, false)">거절</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        } catch (error) {
-            console.error('승인 요청 로드 실패:', error);
-        }
-    }
+    //             tbody.innerHTML += `
+    //                 <tr>
+    //                     <td>
+    //                         <div style="font-weight:700;">${req.requesterName}</div>
+    //                         <div style="font-size:11px; color:#888;">${req.requesterDepartment || '-'}</div>
+    //                     </td>
+    //                     <td><span style="font-weight:700; color:#2c5bf2;">${req.requestType}</span></td>
+    //                     <td>${contentHtml}</td>
+    //                     <td style="font-size:12px; color:#666;">${dateStr}</td>
+    //                     <td>
+    //                         <button class="btn-approve" onclick="handleApproval(${req.id}, true)">승인</button>
+    //                         <button class="btn-reject" onclick="handleApproval(${req.id}, false)">거절</button>
+    //                     </td>
+    //                 </tr>
+    //             `;
+    //         });
+    //     } catch (error) {
+    //         console.error('승인 요청 로드 실패:', error);
+    //     }
+    // }
 
-    window.handleApproval = async function(requestId, isApprove) {
-        try {
-            if (isApprove) {
-                if (!confirm('이 요청을 승인하시겠습니까?')) return;
-                await approvalRequests.approve(requestId);
-                alert('✅ 승인이 완료되었습니다.');
-            } else {
-                const reason = prompt('거절 사유를 입력하세요:');
-                if (!reason) return;
-                await approvalRequests.reject(requestId, reason);
-                alert('❌ 요청이 거절되었습니다.');
-            }
+    // window.handleApproval = async function(requestId, isApprove) {
+    //     try {
+    //         if (isApprove) {
+    //             if (!confirm('이 요청을 승인하시겠습니까?')) return;
+    //             await approvalRequests.approve(requestId);
+    //             alert('✅ 승인이 완료되었습니다.');
+    //         } else {
+    //             const reason = prompt('거절 사유를 입력하세요:');
+    //             if (!reason) return;
+    //             await approvalRequests.reject(requestId, reason);
+    //             alert('❌ 요청이 거절되었습니다.');
+    //         }
 
-            // 목록 새로고침
-            await loadApprovalRequests();
-            await loadMemberData();
-        } catch (error) {
-            console.error('승인 처리 에러:', error);
-            alert('처리 중 오류가 발생했습니다: ' + error.message);
-        }
-    };
+    //         // 목록 새로고침
+    //         await loadApprovalRequests();
+    //         await loadMemberData();
+    //     } catch (error) {
+    //         console.error('승인 처리 에러:', error);
+    //         alert('처리 중 오류가 발생했습니다: ' + error.message);
+    //     }
+    // };
 
-    window.loadApprovalRequests = loadApprovalRequests;
+    // window.loadApprovalRequests = loadApprovalRequests;
 
 </script>
 </body>
