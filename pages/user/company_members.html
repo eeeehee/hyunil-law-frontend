@@ -478,25 +478,15 @@
                     return;
                 }
 
-                // 부서변경 요청 필터링
-                const deptChangeRequests = requests.filter(req => req.requestType === '부서변경');
-                console.log('🔄 부서변경 요청 수:', deptChangeRequests.length);
-
-                if (deptChangeRequests.length === 0) {
-                    console.log('ℹ️ 부서변경 요청이 없어서 섹션 숨김');
-                    document.getElementById('approvalSection').style.display = 'none';
-                    return;
-                }
-
                 // 승인 요청이 있으면 섹션 표시
                 console.log('✨ 승인결재 섹션 표시!');
                 document.getElementById('approvalSection').style.display = 'block';
-                document.getElementById('reqCount').textContent = deptChangeRequests.length;
+                document.getElementById('reqCount').textContent = requests.length;
 
                 const tbody = document.getElementById('reqListBody');
                 tbody.innerHTML = '';
 
-                deptChangeRequests.forEach(req => {
+                requests.forEach(req => {
                     const requestData = req.requestData || {};
 
                     const dateStr = new Date(req.createdAt).toLocaleString('ko-KR', {
@@ -507,6 +497,15 @@
                         minute: '2-digit'
                     });
 
+                    // 요청 내용 포맷팅
+                    let requestContentHtml = '';
+                    if (req.requestType === '부서변경') {
+                        requestContentHtml = `${requestData.fromDepartment || '미지정'} → <span class="req-highlight">${requestData.toDepartment || '미지정'}</span>`;
+                    } else {
+                        // 향후 다른 요청 유형을 위한 확장 지점
+                        requestContentHtml = JSON.stringify(requestData);
+                    }
+
                     tbody.innerHTML += `
                         <tr>
                             <td>
@@ -514,8 +513,8 @@
                                 <div style="font-size:11px; color:#888;">${req.requesterDepartment || '-'}</div>
                                 <div style="font-size:11px; color:#999;">요청일: ${dateStr}</div>
                             </td>
-                            <td>${requestData.fromDepartment || '-'}</td>
-                            <td class="req-highlight">${requestData.toDepartment || '-'}</td>
+                            <td>${req.requestType}</td>
+                            <td>${requestContentHtml}</td>
                             <td>
                                 <button class="btn-act ok" onclick="handleApprovalRequest(${req.id}, true)">✓ 승인</button>
                                 <button class="btn-act no" onclick="handleApprovalRequest(${req.id}, false)">✕ 거절</button>
