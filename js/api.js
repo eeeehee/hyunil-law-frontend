@@ -715,3 +715,49 @@ export const billing = {
         return await apiRequest(`/billing/stats${queryString ? '?' + queryString : ''}`);
     }
 };
+
+// ============================================
+// Approval Requests API (승인 요청)
+// ============================================
+export const approvalRequests = {
+    // 승인 요청 목록 조회
+    getRequests: async (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return await apiRequest(`/approval-requests${queryString ? '?' + queryString : ''}`);
+    },
+
+    // 승인 요청 상세 조회
+    getRequest: async (id) => {
+        return await apiRequest(`/approval-requests/${id}`);
+    },
+
+    // 승인 요청 생성
+    createRequest: async (data) => {
+        return await apiRequest('/approval-requests', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
+    // 승인 요청 승인
+    approve: async (id) => {
+        return await apiRequest(`/approval-requests/${id}/approve`, {
+            method: 'PUT'
+        });
+    },
+
+    // 승인 요청 거절
+    reject: async (id, reason) => {
+        return await apiRequest(`/approval-requests/${id}/reject`, {
+            method: 'PUT',
+            body: JSON.stringify({ reason })
+        });
+    },
+
+    // 승인 요청 삭제
+    deleteRequest: async (id) => {
+        return await apiRequest(`/approval-requests/${id}`, {
+            method: 'DELETE'
+        });
+    }
+};
