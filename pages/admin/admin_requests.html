@@ -342,6 +342,27 @@
                 const list = Array.from(map.values())
                     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+                // 자동 취소 로직
+                const now = new Date();
+                const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
+                const autoCancelPromises = [];
+
+                list.forEach(item => {
+                    if (item.status === 'quoted' && item.quotedAt && new Date(item.quotedAt) < tenDaysAgo) {
+                        console.log(`⏳ 10일 초과된 견적 자동 취소 처리: ${item.docId}`);
+                        autoCancelPromises.push(
+                            posts.update(item.docId, { status: 'auto_cancelled' })
+                        );
+                        // 화면 즉시 반영을 위해 상태 변경
+                        item.status = 'auto_cancelled';
+                    }
+                });
+
+                if (autoCancelPromises.length > 0) {
+                    await Promise.all(autoCancelPromises);
+                    console.log(`✅ 총 ${autoCancelPromises.length}건 자동 취소 완료`);
+                }
+
                 document.getElementById('cnt-payment').innerText = list.length;
                 const tbody = document.getElementById('list-payment');
 
@@ -462,7 +483,7 @@
                             actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                         } else if (d.status === 'quoted') {
                             statusHtml = `<span style="color:#fa8c16; font-weight:700;">견적 확인중</span>`;
-                            actionHtml = `<button class="btn-action" style="background:#888; cursor:default;" disabled>대기중</button>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="cancelQuoteByAdmin('${d.docId}')">취소</button>`;
                         } else if (d.status === 'approved') {
                             statusHtml = `<span style="color:#52c41a; font-weight:700;">✓ 승인됨</span>`;
                             actionHtml = `
@@ -477,6 +498,12 @@
                             `;
                         } else if (d.status === 'cancelled') {
                             statusHtml = `<span style="color:#ff4d4f; font-weight:700;">사용자 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'auto_cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">자동 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'admin_cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">관리자 취소</span>`;
                             actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                         } else {
                             statusHtml = `<span style="color:#1890ff; font-weight:700;">접수</span>`;
@@ -799,6 +826,20 @@
         }
 
         // --- Action 함수들 ---
+
+        // 관리자가 견적을 직접 취소
+        window.cancelQuoteByAdmin = async function(docId) {
+            if (!confirm("관리자가 이 요청을 직접 취소 처리하시겠습니까?")) return;
+
+            try {
+                await posts.update(docId, { status: 'admin_cancelled' });
+                alert("관리자가 요청을 취소 처리했습니다.");
+                await loadAllRequests();
+            } catch (error) {
+                console.error('관리자 취소 처리 실패:', error);
+                alert("오류가 발생했습니다.");
+            }
+        }
 
         // 요금제 변경 승인
         window.approvePlanChange = async function(docId, targetUid, newPlan) {
