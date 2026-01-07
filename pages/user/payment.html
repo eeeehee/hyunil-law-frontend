@@ -195,7 +195,7 @@
             </div>
         </div>
 
-        <div class="card-box">
+        <div class="card-box" id="paymentHistoryCard">
             <div class="card-header">
                 <span class="card-title">결제 내역</span>
             </div>
@@ -799,6 +799,14 @@ function renderPaymentHistory(items) {
                     planNameEl.innerText = planSpec.label;
                 }
 
+                // [요청사항 2] 대표(owner)가 아니면 결제내역 숨기기
+                if (userData.role !== 'owner') {
+                    const paymentHistoryCard = document.getElementById('paymentHistoryCard');
+                    if (paymentHistoryCard) {
+                        paymentHistoryCard.style.display = 'none';
+                    }
+                }
+
                 console.log('💳 결제 페이지 로드:', {
                     uid: userData.uid,
                     bizNum: userData.bizNum || userData.biz_num,
@@ -811,18 +819,30 @@ function renderPaymentHistory(items) {
 
                 // 결제 내역 및 요청 내역 표시
                 try {
-                    // 1. 결제 내역 (billing_logs 테이블)
-                    console.log('📊 결제내역 조회 시작...');
-                    const billingData = await billing.getMyLogs();
-                    const billingLogs = billingData?.logs || [];
-                    console.log(`✅ 결제내역 조회 완료: ${billingLogs.length}건`, billingLogs);
-                    renderPaymentHistory(billingLogs);
+                    // 1. 결제 내역 (billing_logs 테이블) - owner에게만 로드
+                    if (userData.role === 'owner') {
+                        console.log('📊 결제내역 조회 시작...');
+                        const billingData = await billing.getMyLogs();
+                        const billingLogs = billingData?.logs || [];
+                        console.log(`✅ 결제내역 조회 완료: ${billingLogs.length}건`, billingLogs);
+                        renderPaymentHistory(billingLogs);
+                    }
 
                     // 2. 요청 내역 (posts 테이블: payment_method, plan_change, extra_usage_quote)
                     console.log('📋 요청내역 조회 시작...');
                     const requestsData = await posts.getAll({ category: 'payment_method,plan_change,extra_usage_quote' });
-                    const requests = requestsData?.posts || [];
+                    let requests = requestsData?.posts || [];
                     console.log(`✅ 요청내역 조회 완료: ${requests.length}건`, requests);
+
+                    // [요청사항 1] 역할(role)에 따른 요청내역 필터링
+                    if (userData.role === 'manager') {
+                        // 부서장은 자신의 부서 요청만 확인
+                        requests = requests.filter(r => r.userDepartment === userData.department);
+                    } else if (userData.role === 'user' || userData.role === 'staff') {
+                        // 일반 직원은 자신의 요청만 확인
+                        requests = requests.filter(r => r.authorUid === userData.uid);
+                    }
+                    // owner는 모든 요청 확인 (별도 필터링 없음)
 
                     // 'cancelled' 상태인 요청을 필터링하여 제외
                     const visibleRequests = requests.filter(r => r.status !== 'cancelled');
