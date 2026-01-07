@@ -178,6 +178,7 @@
                         <th>요청 내용</th>
                         <th width="15%">견적 금액</th>
                         <th width="12%">상태</th>
+                        <th width="15%">요청자</th>
                         <th width="15%">액션</th>
                     </tr>
                 </thead>
@@ -565,6 +566,7 @@
                         <td>${titleHtml}</td>
                         <td class="amount">${amountDisplay}</td>
                         <td>${escapeHtml(String(statusLabel))}</td>
+                        <td>${r.authorName || '-'}</td>
                         <td>${actionHtml}</td>
                     </tr>
                 `;
