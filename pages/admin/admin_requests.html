@@ -422,6 +422,9 @@
                         if (d.status === 'done' || d.status === 'completed') {
                             statusHtml = `<span style="color:#52c41a; font-weight:700;">변경완료</span>`;
                             actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">사용자 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                         } else {
                             statusHtml = `<span style="color:#722ed1; font-weight:700;">승인 대기</span>`;
                             actionHtml = `
@@ -435,6 +438,9 @@
 
                         if (d.status === 'done' || d.status === 'completed') {
                             statusHtml = `<span style="color:#52c41a; font-weight:700;">처리완료</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">사용자 취소</span>`;
                             actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                         } else {
                             statusHtml = `<span style="color:#1890ff; font-weight:700;">접수</span>`;
@@ -469,6 +475,9 @@
                                 <button class="btn-action btn-approve" onclick="markAsCompleted('${d.docId}')">확인완료</button>
                                 <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
                             `;
+                        } else if (d.status === 'cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">사용자 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                         } else {
                             statusHtml = `<span style="color:#1890ff; font-weight:700;">접수</span>`;
                             actionHtml = `<button class="btn-action btn-approve" onclick="openQuoteModal('${d.docId}')">견적 발송</button>`;
