@@ -261,6 +261,48 @@
                             <input id="cmsBirth" type="text" id="cmsBirth" class="input-box" placeholder="출금 동의용 필수 정보">
                         </div>
                     </div>
+                    <hr style="border:0; border-top:1px dashed #ddd; margin:20px 0;">
+                    <div class="form-group">
+                        <label class="label">증빙 서류 발행</label>
+                        <select id="taxEvidenceType" class="input-box" onchange="toggleTaxFields(this.value)">
+                            <option value="none" selected>발행 안함</option>
+                            <option value="tax_invoice">세금계산서 발행</option>
+                            <option value="cash_receipt">현금영수증 발행</option>
+                        </select>
+                    </div>
+
+                    <div id="taxInvoiceFields" style="display:none;">
+                        <h5 style="font-size:14px; margin-bottom:10px; color:#1a1a1a;">세금계산서 정보</h5>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="label">기업명</label>
+                                <input type="text" id="taxCompanyName" class="input-box">
+                            </div>
+                            <div class="form-group">
+                                <label class="label">사업자번호</label>
+                                <input type="text" id="taxBizNum" class="input-box">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">수신 이메일주소</label>
+                            <input type="email" id="taxEmail" class="input-box">
+                        </div>
+                    </div>
+
+                    <div id="cashReceiptFields" style="display:none;">
+                        <h5 style="font-size:14px; margin-bottom:10px; color:#1a1a1a;">현금영수증 정보</h5>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="label">이름</label>
+                                <input type="text" id="cashReceiptName" class="input-box">
+                            </div>
+                            <div class="form-group">
+                                <label class="label">휴대폰번호</label>
+                                <input type="tel" id="cashReceiptPhone" class="input-box">
+                            </div>
+                        </div>
+                    </div>
+                    <hr style="border:0; border-top:1px dashed #ddd; margin:20px 0;">
                     <div class="form-group">
                         <label class="label" style="color:#2c5bf2;">[필수] 출금 이체 동의</label>
                         <div class="terms-box">
@@ -909,6 +951,15 @@ function renderPaymentHistory(items) {
         }
 
 
+        // ✅ 증빙서류 필드 토글(HTML onchange 대응)
+        window.toggleTaxFields = function(type) {
+            const taxInvoiceDiv = document.getElementById('taxInvoiceFields');
+            const cashReceiptDiv = document.getElementById('cashReceiptFields');
+
+            taxInvoiceDiv.style.display = (type === 'tax_invoice') ? 'block' : 'none';
+            cashReceiptDiv.style.display = (type === 'cash_receipt') ? 'block' : 'none';
+        }
+
         // ✅ 결제수단 저장 버튼에서 호출되는 함수(HTML onclick 대응)
         window.savePaymentInfo = async function() {
             try {
@@ -968,7 +1019,21 @@ function renderPaymentHistory(items) {
                         alert('필수 약관 동의가 필요합니다.');
                         return;
                     }
+                    
                     payload = { type: 'cms', bank, accountNumber, depositor, birth, agreeCms, agreeThirdParty: agreeThird };
+
+                    // 증빙 서류 정보 추가
+                    const taxEvidenceType = document.getElementById('taxEvidenceType').value;
+                    payload.taxEvidenceType = taxEvidenceType;
+
+                    if (taxEvidenceType === 'tax_invoice') {
+                        payload.taxCompanyName = document.getElementById('taxCompanyName').value;
+                        payload.taxBizNum = document.getElementById('taxBizNum').value;
+                        payload.taxEmail = document.getElementById('taxEmail').value;
+                    } else if (taxEvidenceType === 'cash_receipt') {
+                        payload.cashReceiptName = document.getElementById('cashReceiptName').value;
+                        payload.cashReceiptPhone = document.getElementById('cashReceiptPhone').value;
+                    }
                 }
 
                 // posts API를 통해 결제수단 정보 저장 (category='payment_method')
