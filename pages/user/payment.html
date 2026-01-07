@@ -503,8 +503,11 @@
                     actionHtml = `<span style="color:#52c41a; font-weight:700;">✓ 승인됨</span>`;
                 } else if (status === 'done' || status === 'completed' || status === 'archived' || status === 'archive') {
                     actionHtml = `<span style="color:#999;">완료</span>`;
-                } else {
-                    actionHtml = `<span style="color:#888;">대기중</span>`;
+                } else if (status === 'waiting' || status === 'pending') {
+                    actionHtml = `<button class="btn-cancel" onclick="cancelRequest('${r.docId}')" style="background:#ff4d4f; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:700; cursor:pointer; font-size:12px;">취소</button>`;
+                }
+                else {
+                    actionHtml = `<span style="color:#888;">${escapeHtml(String(statusLabel))}</span>`; // 그 외 상태는 statusLabel 표시
                 }
 
                 // 요청 내용을 클릭 가능한 링크로
@@ -1291,6 +1294,26 @@ window.handleLogout = async function() {
             } catch (error) {
                 console.error('견적 거절 실패:', error);
                 alert('거절 처리 중 오류가 발생했습니다.');
+            }
+        };
+
+        // 요청 취소
+        window.cancelRequest = async function(docId) {
+            if (!confirm('정말로 요청을 취소하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                await window.posts.update(docId, {
+                    status: 'cancelled', // 또는 'rejected' 등으로 상태 변경
+                    rejectReason: '사용자 취소'
+                });
+
+                alert('✅ 요청이 취소되었습니다.');
+                location.reload();
+            } catch (error) {
+                console.error('요청 취소 실패:', error);
+                alert('요청 취소 중 오류가 발생했습니다.');
             }
         };
     </script>
