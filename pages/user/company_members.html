@@ -566,13 +566,9 @@
                         requestContentHtml = `[${requestData.category}] ${requestData.title}`;
                     } else if (req.requestType === '전화상담') {
                         requestContentHtml = `[${requestData.requestCategory}] 희망시간: ${requestData.slots.join(', ')}`;
-                    } else if (req.requestType === '추가이용문의') {
-                        requestContentHtml = `[${requestData.type}] ${requestData.content}`;
-                    } else if (req.requestType === '요금제변경신청') {
-                        requestContentHtml = `→ <span class="req-highlight">${requestData.newPlan}</span>으로 변경`;
                     } else {
-                        // 향후 다른 요청 유형을 위한 확장 지점
-                        requestContentHtml = JSON.stringify(requestData);
+                        // 추가이용문의, 요금제변경신청 및 기타 모든 요청은 title을 우선 표시
+                        requestContentHtml = requestData.title || req.requestType;
                     }
 
                     tbody.innerHTML += `
