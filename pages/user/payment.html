@@ -176,9 +176,9 @@
                     <tr>
                         <th width="12%">요청일</th>
                         <th>요청 내용</th>
+                        <th width="15%">요청자</th>
                         <th width="15%">견적 금액</th>
                         <th width="12%">상태</th>
-                        <th width="15%">요청자</th>
                         <th width="15%">액션</th>
                     </tr>
                 </thead>
@@ -564,9 +564,9 @@
                     <tr>
                         <td>${createdAt ? new Date(createdAt).toLocaleDateString() : "-"}</td>
                         <td>${titleHtml}</td>
+                        <td>${r.authorName || r.userCompanyName || r.userManagerName || '-'}</td>
                         <td class="amount">${amountDisplay}</td>
                         <td>${escapeHtml(String(statusLabel))}</td>
-                        <td>${r.authorName || '-'}</td>
                         <td>${actionHtml}</td>
                     </tr>
                 `;
