@@ -378,7 +378,7 @@
     <script src="../../js/channel-service.js"></script>
 
     <script type="module">
-        import { auth, users, requireAuth } from "../../js/api.js";
+        import { auth, users, requireAuth, posts } from "../../js/api.js";
         // REMOVED: Firebase config import
         // REMOVED: Firebase SDK import
         // REMOVED: Firebase SDK import
@@ -430,9 +430,9 @@
             btn.innerText = "전송 중..."; btn.disabled = true;
 
             try {
-                await addDoc(collection(db, "posts"), {
+                await posts.create({
                     category: 'guest', title: `[일반상담] ${category} 문의`, content: content,
-                    authorName: "비회원", contact: phone, status: 'waiting', createdAt: new Date()
+                    authorName: "비회원", contact: phone, status: 'waiting'
                 });
                 alert("상담 신청 완료"); location.reload();
             } catch(e) { console.error(e); alert("오류"); btn.innerText = "제출"; btn.disabled = false; }
@@ -461,10 +461,13 @@
             btn.innerText = "처리 중..."; btn.disabled = true;
 
             try {
-                await addDoc(collection(db, "posts"), {
-                    category: 'inquiry', title: `[가입문의] ${plan} 플랜`,
-                    content: `${company} 에서 ${plan} 가입 요청`, authorName: company, contact: phone,
-                    status: 'waiting', createdAt: new Date()
+                await posts.create({
+                    category: 'plan_change',
+                    title: `[가입문의] ${plan} 플랜`,
+                    content: `${company} 에서 ${plan} 가입 요청`,
+                    authorName: company,
+                    contact: phone,
+                    status: 'waiting'
                 });
                 alert("신청 접수 완료"); closeModal(); location.reload();
             } catch(e) { console.error(e); alert("오류"); btn.innerText = "작성"; btn.disabled = false; }

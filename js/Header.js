@@ -1,7 +1,5 @@
 // Header.js
-// 1. 같은 폴더에 있는 firebase-config.js를 불러옵니다. (./)
-import { auth } from "/js/firebase-config.js";
-import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { auth } from './api.js';
 
 // 2. 이 함수 안에 HTML 내용이 가득 들어있습니다! (빈 게 아님)
 export function loadHeader() {
@@ -34,24 +32,18 @@ export function loadHeader() {
     // 5. 로그인/로그아웃 버튼 로직
     const authBtn = document.getElementById("authBtn");
     
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            authBtn.innerText = "로그아웃";
-            authBtn.href = "#";
-            authBtn.onclick = async (e) => {
-                e.preventDefault();
-                try {
-                    await signOut(auth);
-                    alert("로그아웃 되었습니다.");
-                    window.location.href = "/"; 
-                } catch (error) {
-                    console.error("로그아웃 실패:", error);
-                }
-            };
-        } else {
-            authBtn.innerText = "로그인";
-            authBtn.href = "/pages/public/login.html"; 
-            authBtn.onclick = null;
-        }
-    });
+    if (auth.isLoggedIn()) {
+        authBtn.innerText = "로그아웃";
+        authBtn.href = "#";
+        authBtn.onclick = (e) => {
+            e.preventDefault();
+            auth.logout();
+            alert("로그아웃 되었습니다.");
+            window.location.href = "/";
+        };
+    } else {
+        authBtn.innerText = "로그인";
+        authBtn.href = "/pages/public/login.html";
+        authBtn.onclick = null;
+    }
 }
