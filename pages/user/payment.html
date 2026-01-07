@@ -477,7 +477,9 @@
                     done: '처리 완료',
                     completed: '처리 완료',
                     archived: '완료',
-                    archive: '완료'
+                    archive: '완료',
+                    admin_cancelled: '관리자 취소', // 추가
+                    auto_cancelled: '자동 취소'    // 추가
                 };
                 const statusLabel = statusLabelMap[String(status)] || String(status);
 
@@ -505,6 +507,8 @@
                     actionHtml = `<span style="color:#999;">완료</span>`;
                 } else if (status === 'waiting' || status === 'pending') {
                     actionHtml = `<button class="btn-cancel" onclick="cancelRequest('${r.docId}')" style="background:#ff4d4f; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:700; cursor:pointer; font-size:12px;">취소</button>`;
+                } else if (status === 'admin_cancelled' || status === 'auto_cancelled') { // 추가
+                    actionHtml = `<span style="color:#ff4d4f; font-weight:700;">취소</span>`;
                 }
                 else {
                     actionHtml = `<span style="color:#888;">${escapeHtml(String(statusLabel))}</span>`; // 그 외 상태는 statusLabel 표시
