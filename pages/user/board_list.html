@@ -341,6 +341,24 @@
                 let statusClass = 'status-done';
                 let statusText = '답변 완료';
 
+                // 카테고리 매핑
+                const categoryMap = {
+                    'contract': '계약 검토',
+                    'labor': '노무/인사',
+                    'debt': '채권/미수금',
+                    'ip': '지식재산권',
+                    'etc': '기타 자문',
+                    'guest': '비회원 상담', // posts.getAll 필터링으로 걸러지지만, 혹시 모르니 추가
+                    'plan_change': '요금제 변경',
+                    'payment_method': '결제수단 등록',
+                    'extra_usage_quote': '추가 이용 견적',
+                    'member_req_internal': '부서 변경 요청',
+                    'member_req_admin': '회원 정보 변경',
+                    'phone_request': '전화상담 요청',
+                    'phone_log': '전화상담 기록'
+                };
+                const displayCategory = categoryMap[post.category] || post.category || '-';
+
                 // 추가 질문이 있고 아직 답변이 analyzing 상태면 "추가질문"으로 표시
                 if (hasFollowup && (post.status === 'analyzing' || post.status === 'processing')) {
                     statusClass = 'status-progress';
@@ -366,7 +384,7 @@
                 return `
                     <tr onclick="location.href='board_view.html?id=${post.docId}'" style="cursor:pointer;">
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td>${post.category || '-'}</td>
+                        <td>${displayCategory}</td>
                         <td class="title-cell">${post.title || '(제목 없음)'}</td>
                         ${deptCell}
                         <td>${displayManager}</td>
