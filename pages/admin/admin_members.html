@@ -405,6 +405,11 @@
                      <div class="form-group"><label>사업자 등록번호</label><input type="text" id="editBizNum" class="form-input"></div>
                  </div>
                  <hr style="border:0; border-top:1px dashed #ddd; margin:20px 0;">
+                 <h4 style="margin-bottom:15px; color:#1a1a2e;">💳 등록된 결제수단 정보</h4>
+                 <div id="paymentMethodInfo" class="info-grid">
+                     <p>등록된 결제수단 정보가 없습니다.</p>
+                 </div>
+                 <hr style="border:0; border-top:1px dashed #ddd; margin:20px 0;">
                  <h4 style="margin-bottom:15px; color:#1a1a2e;">📅 계약 기간 설정 (자동갱신 관리)</h4>
                  <div class="info-grid">
                     <div class="form-group"><label>최초 가입일</label><input type="date" id="dateJoin" class="form-input" disabled></div>
@@ -729,6 +734,53 @@
         });
     }
 
+    // 3-1. 결제수단 정보 렌더링
+    async function renderPaymentMethod(bizNum) {
+        const container = document.getElementById('paymentMethodInfo');
+        if (!container) return;
+        container.innerHTML = '<p>정보를 불러오는 중...</p>';
+
+        try {
+            const response = await posts.getAll({
+                category: 'payment_method',
+                bizNum: bizNum,
+                limit: 1 // 가장 최근 1건만
+            });
+
+            const paymentPost = response.posts && response.posts[0];
+            if (!paymentPost || !paymentPost.content) {
+                container.innerHTML = '<p>등록된 결제수단 정보가 없습니다.</p>';
+                return;
+            }
+
+            const info = JSON.parse(paymentPost.content);
+            let html = '';
+
+            if (info.type === 'cms') {
+                html = `
+                    <div class="form-group"><label>종류</label><input class="form-input" value="계좌 자동이체 (CMS)" readonly></div>
+                    <div class="form-group"><label>은행</label><input class="form-input" value="${info.bank || '-'}" readonly></div>
+                    <div class="form-group"><label>계좌번호</label><input class="form-input" value="${info.accountNumber ? '***' + info.accountNumber.slice(-4) : '-'}" readonly></div>
+                    <div class="form-group"><label>예금주</label><input class="form-input" value="${info.depositor || '-'}" readonly></div>
+                `;
+            } else if (info.type === 'card') {
+                html = `
+                    <div class="form-group"><label>종류</label><input class="form-input" value="신용카드 정기결제" readonly></div>
+                    <div class="form-group"><label>카드사</label><input class="form-input" value="${info.cardCompany || '-'}" readonly></div>
+                    <div class="form-group"><label>카드번호</label><input class="form-input" value="${info.cardNum ? info.cardNum.slice(0, 4) + '-****-****-' + info.cardNum.slice(-4) : '-'}" readonly></div>
+                    <div class="form-group"><label>유효기간</label><input class="form-input" value="${info.cardExpiry || '-'}" readonly></div>
+                `;
+            } else {
+                 container.innerHTML = '<p>알 수 없는 결제수단 정보입니다.</p>';
+                 return;
+            }
+            container.innerHTML = html;
+
+        } catch (error) {
+            console.error("결제수단 정보 로드 실패:", error);
+            container.innerHTML = '<p style="color:red;">결제수단 정보를 불러오는 중 오류가 발생했습니다.</p>';
+        }
+    }
     // 4. 팝업 열기
     window.openPopup = async function(uid) {
         currentCompId = uid;
@@ -764,6 +816,9 @@
 
         checkExpiryWarning(comp.contractEndDate);
         updateGauge(comp);
+
+        // 결제수단 정보 로드 및 렌더링
+        renderPaymentMethod(comp.bizNum);
 
         document.getElementById('popup').style.display = 'flex';
     }
