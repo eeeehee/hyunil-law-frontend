@@ -777,7 +777,10 @@ function renderPaymentHistory(items) {
                     const requestsData = await posts.getAll({ category: 'payment_method,plan_change,extra_usage_quote' });
                     const requests = requestsData?.posts || [];
                     console.log(`✅ 요청내역 조회 완료: ${requests.length}건`, requests);
-                    renderRequestList(requests);
+
+                    // 'cancelled' 상태인 요청을 필터링하여 제외
+                    const visibleRequests = requests.filter(r => r.status !== 'cancelled');
+                    renderRequestList(visibleRequests);
 
                     // ✅ usage(남은 수량/총량) 표시
                     renderUsageBadges(userData);
