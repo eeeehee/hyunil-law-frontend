@@ -637,12 +637,12 @@
                 if (isApprove) {
                     if (!confirm(`이 ${typeText}을(를) 승인하시겠습니까?`)) return;
                     await approvalRequests.approve(requestId);
-                    alert(`✅ ${typeText}이(가) 승인되었습니다.`);
+                    alert(`✅ 요청하신 '${typeText}' 건의 승인이 완료되었습니다.`);
                 } else {
                     const reason = prompt('거절 사유를 입력하세요:');
                     if (reason === null) return; // 사용자가 취소 버튼을 누른 경우
                     await approvalRequests.reject(requestId, reason || '사유 없음');
-                    alert(`❌ ${typeText}이(가) 거절되었습니다.`);
+                    alert(`❌ 요청이 거절되었습니다.`);
                 }
 
                 // 목록 새로고침
