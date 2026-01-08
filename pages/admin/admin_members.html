@@ -845,19 +845,21 @@
         const tbody = document.getElementById('empBody');
         tbody.innerHTML = '';
 
-        const reversedEmployees = [...comp.employees].reverse();
-
-        reversedEmployees.forEach(emp => {
+        comp.employees.forEach(emp => {
             let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
             let actionBtn = "";
 
-            if (emp.status === 'Pending') statusBadge = `<span style="color:#faad14;">승인대기</span>`;
-            if (emp.status === 'Suspended') statusBadge = `<span style="color:#ff4d4f; font-weight:bold;">권한중지</span>`;
+            // emp.status 대신 emp.isActive로 확인
+            if (emp.isActive === 0) {
+                statusBadge = `<span style="color:#ff4d4f; font-weight:bold;">권한중지</span>`;
+            } else if (emp.status === 'Pending') {
+                 statusBadge = `<span style="color:#faad14;">승인대기</span>`;
+            }
 
             actionBtn = `
                 <button class="btn-mini" onclick="openEditModal('${emp.uid}')">수정</button>
-                ${emp.status === 'Suspended'
-                    ? `<button class="btn-mini" onclick="restoreMember('${emp.uid}')">복구</button>`
+                ${emp.isActive === 0
+                    ? `<button class="btn-mini" onclick="restoreMember('${emp.uid}')">재활성화</button>`
                     : `<button class="btn-mini btn-stop" onclick="suspendMember('${emp.uid}')">권한중지</button>`}
             `;
 
@@ -1109,15 +1111,27 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
     window.suspendMember = async function(uid) {
         if(confirm("권한을 중지하시겠습니까?")) {
             await admin.suspendEmployee(uid, true);
-            await loadMemberData();
-            openPopup(currentCompId);
+            // 로컬 데이터 직접 수정
+            const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
+            if (comp) {
+                const emp = comp.employees.find(e => e.uid === uid);
+                if (emp) emp.isActive = 0;
+            }
+            // 팝업 즉시 재렌더링
+            openPopup(currentCompId); 
         }
     }
 
     window.restoreMember = async function(uid) {
-        if(confirm("복구하시겠습니까?")) {
+        if(confirm("재활성화하시겠습니까?")) {
             await admin.suspendEmployee(uid, false);
-            await loadMemberData();
+            // 로컬 데이터 직접 수정
+            const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
+            if (comp) {
+                const emp = comp.employees.find(e => e.uid === uid);
+                if (emp) emp.isActive = 1;
+            }
+            // 팝업 즉시 재렌더링
             openPopup(currentCompId);
         }
     }
