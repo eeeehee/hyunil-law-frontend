@@ -166,7 +166,7 @@
 
     <!-- 사이드바는 JavaScript로 동적 생성됩니다 -->
 
-    <script src="../../js/admin_sidebar.js"></script>
+    <script src="../../js/admin_sidebar.js?v=2"></script>
     <script>
         // 사이드바 즉시 렌더링
         if (typeof renderAdminSidebar === 'function') {
@@ -286,18 +286,17 @@
         if (emailEl) emailEl.textContent = user.email || '';
 
         const roleMap = {
-            'master': { label: 'MASTER', class: 'badge-master' },
-            'admin': { label: 'ADMIN', class: 'badge-admin' },
-            'general_manager': { label: 'GENERAL', class: 'badge-general_manager' },
-            'lawyer': { label: 'LAWYER', class: 'badge-lawyer' }
+            'master': { label: '최고 관리자', class: 'badge-admin' },
+            'admin': { label: '시스템 관리자', class: 'badge-admin' },
+            'general_manager': { label: '총괄 관리자', class: 'badge-general_manager' },
+            'lawyer': { label: '변호사', class: 'badge-lawyer' }
         };
 
         if (roleEl) {
-            const roleInfo = roleMap[user.role] || { label: (user.role?.toUpperCase() || 'USER'), class: 'badge-admin' };
-            roleEl.textContent = roleInfo.label;
-            // sidebar의 role 엘리먼트는 profile-role 이고, admin.html은 user-role을 씀. 둘 다 안전 처리
-            const baseClass = roleEl.classList.contains('profile-role') ? 'profile-role' : 'user-role';
-            roleEl.className = `${baseClass} ${roleInfo.class}`;
+            // const roleInfo = roleMap[user.role] || { label: (user.role?.toUpperCase() || 'USER'), class: 'badge-admin' };
+            // roleEl.textContent = roleInfo.label;
+            // const baseClass = roleEl.classList.contains('profile-role') ? 'profile-role' : 'user-role';
+            // roleEl.className = `${baseClass} ${roleInfo.class}`;
         }
     }
 

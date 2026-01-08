@@ -845,17 +845,19 @@
         const tbody = document.getElementById('empBody');
         tbody.innerHTML = '';
 
-        comp.employees.forEach(emp => {
+        reversedEmployees.forEach(emp => {
+            const isSuspended = emp.status === 'Suspended';
             let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
-            let actionBtn = "";
+            if (isSuspended) {
+                statusBadge = `<span style="color:#ff4d4f; font-weight:bold;">권한중지</span>`;
+            } else if (emp.status === 'Pending') {
+                 statusBadge = `<span style="color:#faad14;">승인대기</span>`;
+            }
 
-            if (emp.status === 'Pending') statusBadge = `<span style="color:#faad14;">승인대기</span>`;
-            if (emp.status === 'Suspended') statusBadge = `<span style="color:#ff4d4f; font-weight:bold;">권한중지</span>`;
-
-            actionBtn = `
+            const actionBtn = `
                 <button class="btn-mini" onclick="openEditModal('${emp.uid}')">수정</button>
-                ${emp.status === 'Suspended'
-                    ? `<button class="btn-mini" onclick="restoreMember('${emp.uid}')">복구</button>`
+                ${isSuspended
+                    ? `<button class="btn-mini" onclick="restoreMember('${emp.uid}')">재활성화</button>`
                     : `<button class="btn-mini btn-stop" onclick="suspendMember('${emp.uid}')">권한중지</button>`}
             `;
 
@@ -865,9 +867,9 @@
             if(emp.role === 'manager') roleText = "부서장";
             if(emp.role === 'owner') roleText = "총괄(CEO)";
 
-            tbody.innerHTML += `
-                <tr>
-                    <td>${emp.managerName}</td>
+            return `
+                <tr style="${isSuspended ? 'background-color: #fafafa; opacity: 0.6;' : ''}">
+                    <td>${emp.managerName || '-'}</td>
                     <td>${emp.department||'-'}</td>
                     <td><span style='font-size:12px; color:#555;'>${roleText}</span></td>
                     <td>${emp.email}</td>
@@ -1107,16 +1109,28 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
     window.suspendMember = async function(uid) {
         if(confirm("권한을 중지하시겠습니까?")) {
             await admin.suspendEmployee(uid, true);
-            await loadMemberData();
-            setTimeout(() => openPopup(currentCompId), 500);
+            // 로컬 데이터 직접 수정
+            const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
+            if (comp) {
+                const emp = comp.employees.find(e => e.uid === uid);
+                if (emp) emp.status = 'Suspended';
+            }
+            // 팝업 즉시 재렌더링
+            openPopup(currentCompId); 
         }
     }
 
     window.restoreMember = async function(uid) {
-        if(confirm("복구하시겠습니까?")) {
+        if(confirm("재활성화하시겠습니까?")) {
             await admin.suspendEmployee(uid, false);
-            await loadMemberData();
-            setTimeout(() => openPopup(currentCompId), 500);
+            // 로컬 데이터 직접 수정
+            const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
+            if (comp) {
+                const emp = comp.employees.find(e => e.uid === uid);
+                if (emp) emp.status = 'Active';
+            }
+            // 팝업 즉시 재렌더링
+            openPopup(currentCompId);
         }
     }
 

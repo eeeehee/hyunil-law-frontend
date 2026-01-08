@@ -491,7 +491,6 @@
             }
 
             tbody.innerHTML = currentPageRequests.map(r => {
-                console.log('Rendering request:', r); // 디버깅용 로그 추가
                 const createdAt = r.createdAt || r.requestedAt || r.date || "";
                 const title = r.title || r.content || r.reason || "-";
                 let amount = (r.quotedPrice ?? r.amount ?? r.quoteAmount ?? r.price);
@@ -522,8 +521,8 @@
                     completed: '처리 완료',
                     archived: '완료',
                     archive: '완료',
-                    admin_cancelled: '관리자 취소', // 추가
-                    auto_cancelled: '자동 취소'    // 추가
+                    admin_cancelled: '관리자 취소',
+                    auto_cancelled: '자동 취소'
                 };
                 const statusLabel = statusLabelMap[String(status)] || String(status);
 
@@ -540,7 +539,6 @@
                 // 상태별 액션 버튼
                 let actionHtml = "";
                 if (status === 'quoted') {
-                    // 견적 도착 - 승인/거절 버튼
                     actionHtml = `
                         <button class="btn-approve" onclick="approveQuote('${r.docId}')" style="background:#52c41a; color:#fff; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:700; margin-right:4px;">승인</button>
                         <button class="btn-reject" onclick="rejectQuote('${r.docId}')" style="background:#fff; border:1px solid #ddd; color:#555; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:600;">거절</button>
@@ -551,21 +549,23 @@
                     actionHtml = `<span style="color:#999;">완료</span>`;
                 } else if (status === 'waiting' || status === 'pending') {
                     actionHtml = `<button class="btn-cancel" onclick="cancelRequest('${r.docId}')" style="background:#ff4d4f; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:700; cursor:pointer; font-size:12px;">취소</button>`;
-                } else if (status === 'admin_cancelled' || status === 'auto_cancelled') { // 추가
+                } else if (status === 'admin_cancelled' || status === 'auto_cancelled') {
                     actionHtml = `<span style="color:#ff4d4f; font-weight:700;">취소</span>`;
                 }
                 else {
-                    actionHtml = `<span style="color:#888;">${escapeHtml(String(statusLabel))}</span>`; // 그 외 상태는 statusLabel 표시
+                    actionHtml = `<span style="color:#888;">${escapeHtml(String(statusLabel))}</span>`;
                 }
 
                 // 요청 내용을 클릭 가능한 링크로
                 const titleHtml = `<a href="javascript:void(0)" onclick="showRequestDetail('${r.docId}')" style="color:#2c5bf2; text-decoration:underline; cursor:pointer;">${escapeHtml(String(title))}</a>`;
 
+                const requesterName = r.authorName || r.userManagerName || r.userCompanyName || '-';
+
                 return `
                     <tr>
                         <td>${createdAt ? new Date(createdAt).toLocaleDateString() : "-"}</td>
                         <td>${titleHtml}</td>
-                        <td>${r.authorName || r.userCompanyName || r.userManagerName || '-'}</td>
+                        <td>${requesterName}</td>
                         <td class="amount">${amountDisplay}</td>
                         <td>${escapeHtml(String(statusLabel))}</td>
                         <td>${actionHtml}</td>

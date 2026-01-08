@@ -179,8 +179,37 @@
         import { auth, users, requireAuth, approvalRequests } from "../../js/api.js";
         import { renderClientSidebar } from "../../js/client_ui.js";
 
-        let gCompanyDepartments = []; // 회사 부서 목록
-        let gOwnerData = null; // 대표 정보
+    const PLANS = {
+        'none': {limit:1},
+        'Basic':{limit:3},
+        'Standard':{limit:7},
+        'Pro':{limit:12},
+        'Premium':{limit:17},
+        'Enterprise':{limit:999}
+    };
+
+    const categoryMap = {
+        'contract': '계약 검토',
+        'labor': '노무/인사',
+        'debt': '채권/미수금',
+        'ip': '지식재산권',
+        'etc': '기타 자문',
+        // 'phone_request': '전화 상담', // 자문요청과 겹치므로 제외
+        // 'extra_usage_quote': '추가 이용 견적', // 요청 유형으로 처리되므로 제외
+        // 'plan_change': '요금제 변경' // 요청 유형으로 처리되므로 제외
+    };
+
+    const requestTypeKoreanMap = {
+        '자문요청': '자문 요청',
+        '부서변경': '부서 변경 요청',
+        '전화상담': '전화 상담 요청',
+        '추가이용문의': '추가 이용 문의',
+        '요금제변경신청': '요금제 변경 신청'
+    };
+    
+    let allCompanies = [];
+    let inactiveCompanies = [];
+    let gOwnerData = null; // 대표 정보
 
         (async () => {
             if (!requireAuth()) {
@@ -563,12 +592,18 @@
                     if (req.requestType === '부서변경') {
                         requestContentHtml = `${requestData.fromDepartment || '미지정'} → <span class="req-highlight">${requestData.toDepartment || '미지정'}</span>`;
                     } else if (req.requestType === '자문요청') {
-                        requestContentHtml = `[${requestData.category}] ${requestData.title}`;
+                        const categoryKorean = categoryMap[requestData.category] || requestData.category;
+                        requestContentHtml = `[${categoryKorean}] ${requestData.title}`;
                     } else if (req.requestType === '전화상담') {
                         requestContentHtml = `[${requestData.requestCategory}] 희망시간: ${requestData.slots.join(', ')}`;
+                    } else if (req.requestType === '추가이용문의') {
+                        const content = requestData.content || '';
+                        const contentMatch = content.match(/\[내용\]\n([\s\S]*)/);
+                        requestContentHtml = contentMatch ? contentMatch[1].trim() : content;
+                    } else if (req.requestType === '요금제변경신청') {
+                        requestContentHtml = requestData.reason || `(${requestData.newPlan}으로 변경)`;
                     } else {
-                        // 추가이용문의, 요금제변경신청 및 기타 모든 요청은 title을 우선 표시
-                        requestContentHtml = requestData.title || req.requestType;
+                        requestContentHtml = requestData.title || requestData.content || req.requestType;
                     }
 
                     tbody.innerHTML += `
@@ -597,18 +632,18 @@
 
         // 개별 승인/거절 처리
         window.handleApprovalRequest = async function(requestId, isApprove, requestType) {
-            const typeText = requestType === '자문요청' ? '자문 요청' : '부서 변경 요청';
+            const typeText = requestTypeKoreanMap[requestType] || requestType;
             
             try {
                 if (isApprove) {
                     if (!confirm(`이 ${typeText}을(를) 승인하시겠습니까?`)) return;
                     await approvalRequests.approve(requestId);
-                    alert(`✅ ${typeText}이(가) 승인되었습니다.`);
+                    alert(`✅ 요청하신 '${typeText}' 건의 승인이 완료되었습니다.`);
                 } else {
                     const reason = prompt('거절 사유를 입력하세요:');
                     if (reason === null) return; // 사용자가 취소 버튼을 누른 경우
                     await approvalRequests.reject(requestId, reason || '사유 없음');
-                    alert(`❌ ${typeText}이(가) 거절되었습니다.`);
+                    alert(`❌ 요청이 거절되었습니다.`);
                 }
 
                 // 목록 새로고침

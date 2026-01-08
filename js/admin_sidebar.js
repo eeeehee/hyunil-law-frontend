@@ -72,12 +72,12 @@ function renderAdminSidebar() {
                     <span style="font-size:10px;">▼</span>
                 </div>
                 <ul id="groupCorp" class="submenu" style="display:block;">
+                    <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
+                    <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
                     <li><a href="admin.html">📝 자문 관리 (전체)</a></li>
                     <li><a href="admin_requests.html">📩 요청 관리함</a></li>
                     <li><a href="admin_report.html">📊 리포트 발송</a></li>
                     <li><a href="admin_corpbilling.html">💰 자문료 청구/발송</a></li>
-                    <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
-                    <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
                 </ul>
             </li>
 
