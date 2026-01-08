@@ -845,7 +845,9 @@
         const tbody = document.getElementById('empBody');
         tbody.innerHTML = '';
 
-        comp.employees.forEach(emp => {
+        const reversedEmployees = [...comp.employees].reverse();
+
+        reversedEmployees.forEach(emp => {
             let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
             let actionBtn = "";
 
@@ -1108,7 +1110,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
         if(confirm("권한을 중지하시겠습니까?")) {
             await admin.suspendEmployee(uid, true);
             await loadMemberData();
-            setTimeout(() => openPopup(currentCompId), 500);
+            openPopup(currentCompId);
         }
     }
 
@@ -1116,7 +1118,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
         if(confirm("복구하시겠습니까?")) {
             await admin.suspendEmployee(uid, false);
             await loadMemberData();
-            setTimeout(() => openPopup(currentCompId), 500);
+            openPopup(currentCompId);
         }
     }
 
