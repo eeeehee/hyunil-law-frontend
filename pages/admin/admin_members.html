@@ -587,8 +587,16 @@
     async function loadMemberData(runAutoCheck = false) {
         document.getElementById('loadingMsg').style.display = 'block';
         try {
+            console.log('🔄 회사 목록 로드 시작...');
             const response = await admin.getCompanies({ includeInactive: true });
+            console.log('✅ API 응답:', response);
+
+            if (!response) {
+                throw new Error('API 응답이 null입니다.');
+            }
+
             const companiesData = response.companies || [];
+            console.log(`📊 로드된 회사 수: ${companiesData.length}`);
 
             allCompanies = [];
             inactiveCompanies = [];
@@ -646,13 +654,21 @@
             document.getElementById('loadingMsg').style.display = 'none';
 
         } catch (error) {
-            console.error('회사 데이터 로드 실패:', error);
+            console.error('❌ 회사 데이터 로드 실패:', error);
+            console.error('Error type:', error.constructor.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+
             let errorMsg = "데이터 로딩 중 오류가 발생했습니다.\n\n";
 
-            if (error.message.includes('fetch')) {
+            if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
                 errorMsg += "❌ 백엔드 서버에 연결할 수 없습니다.\n";
-                errorMsg += "→ 서버가 실행 중인지 확인하세요. (http://localhost:3000)\n";
+                errorMsg += "→ 서버가 실행 중인지 확인하세요.\n";
                 errorMsg += "→ CORS 설정을 확인하세요.";
+            } else if (error.message.includes('Unauthorized') || error.message.includes('401')) {
+                errorMsg += "❌ 인증 오류: 다시 로그인해주세요.\n";
+            } else if (error.message.includes('403')) {
+                errorMsg += "❌ 권한 오류: 관리자 권한이 필요합니다.\n";
             } else {
                 errorMsg += "상세: " + error.message;
             }
@@ -661,8 +677,8 @@
             document.getElementById('companyList').innerHTML =
                 '<div style="text-align:center; padding:40px; color:#999;">' +
                 '<h3 style="color:#ff4d4f; margin-bottom:10px;">⚠️ 데이터 로드 실패</h3>' +
-                '<p>백엔드 서버가 실행 중인지 확인하세요.</p>' +
-                '<p style="font-size:12px; margin-top:10px;">API URL: http://localhost:3000/api/admin/companies</p>' +
+                '<p>' + error.message + '</p>' +
+                '<p style="font-size:12px; margin-top:10px; color:#666;">콘솔(F12)에서 자세한 오류를 확인하세요.</p>' +
                 '</div>';
             document.getElementById('loadingMsg').style.display = 'none';
         }
