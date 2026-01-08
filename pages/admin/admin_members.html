@@ -861,7 +861,14 @@
         const tbody = document.getElementById('empBody');
         tbody.innerHTML = '';
 
-        reversedEmployees.forEach(emp => {
+        if (!comp || !comp.employees) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">직원 정보를 불러올 수 없습니다.</td></tr>';
+            return;
+        }
+
+        const reversedEmployees = [...comp.employees].reverse();
+
+        const rows = reversedEmployees.map(emp => {
             const isSuspended = emp.status === 'Suspended';
             let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
             if (isSuspended) {
@@ -896,8 +903,10 @@
             `;
         });
 
-        if (comp.employees.length === 0) {
+        if (rows.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">등록된 직원이 없습니다.</td></tr>';
+        } else {
+            tbody.innerHTML = rows.join('');
         }
     }
 
