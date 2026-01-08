@@ -607,6 +607,7 @@
                 if (comp.bizNum) {
                     try {
                         const empResponse = await admin.getEmployees(comp.bizNum);
+                        console.log(`[디버깅] ${comp.bizNum} 직원 목록 API 응답:`, empResponse); // 디버깅 로그 추가
                         comp.employees = empResponse.employees || [];
                     } catch (err) {
                         console.error(`직원 로드 실패 (${comp.bizNum}):`, err);
@@ -870,14 +871,8 @@
 
         const rows = reversedEmployees.map(emp => {
             const isSuspended = emp.status === 'Suspended';
-            let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
-            if (isSuspended) {
-                statusBadge = `<span style="color:#ff4d4f; font-weight:bold;">권한중지</span>`;
-            } else if (emp.status === 'Pending') {
-                 statusBadge = `<span style="color:#faad14;">승인대기</span>`;
-            }
 
-            const actionBtn = `
+            actionBtn = `
                 <button class="btn-mini" onclick="openEditModal('${emp.uid}')">수정</button>
                 ${isSuspended
                     ? `<button class="btn-mini" onclick="restoreMember('${emp.uid}')">재활성화</button>`
@@ -890,15 +885,31 @@
             if(emp.role === 'manager') roleText = "부서장";
             if(emp.role === 'owner') roleText = "총괄(CEO)";
 
-            return `
+            tbody.innerHTML += `
                 <tr style="${isSuspended ? 'background-color: #fafafa; opacity: 0.6;' : ''}">
                     <td>${emp.managerName || '-'}</td>
                     <td>${emp.department||'-'}</td>
-                    <td><span style='font-size:12px; color:#555;'>${roleText}</span></td>
                     <td>${emp.email}</td>
-                    <td style="color:#666; font-size:11px;">${joinDate}</td>
-                    <td>${statusBadge}</td>
-                    <td>${actionBtn}</td>
+                    <td>${emp.phone || '-'}</td>
+                    <td>
+                        <select class="role-select" data-uid="${emp.uid}" data-current-role="${emp.role}">
+                            <option value="owner" ${emp.role === 'owner' ? 'selected' : ''}>대표 (CEO)</option>
+                            <option value="manager" ${emp.role === 'manager' ? 'selected' : ''}>부서장 (Manager)</option>
+                            <option value="user" ${emp.role === 'user' || emp.role === 'staff' || emp.role === 'employee' ? 'selected' : ''}>일반 직원</option>
+                        </select>
+                        <button class="btn-act ok" onclick="changeRole('${emp.uid}', this.previousElementSibling.value)">변경</button>
+                    </td>
+                    <td>
+                        <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="checkbox" ${emp.hasAllDeptAccess ? 'checked' : ''} onchange="toggleAllDeptAccess('${emp.uid}', this.checked)" style="cursor:pointer;">
+                                ${emp.hasAllDeptAccess ? '<span style="color:#52c41a; font-size:12px;">✓ 전사 권한</span>' : '<span style="color:#999; font-size:12px;">부서 제한</span>'}
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn-act no" onclick="deleteMember('${emp.uid}', '${emp.managerName}')">삭제</button>
+                    </td>
                 </tr>
             `;
         });
