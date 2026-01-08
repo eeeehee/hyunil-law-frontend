@@ -64,6 +64,11 @@
         </div>
 
         <div class="form-group">
+            <label class="label">개업일자 <span>*</span></label>
+            <input type="text" id="openDate" class="input-box" placeholder="예: 20240101 (8자리)" maxlength="8">
+        </div>
+
+        <div class="form-group">
             <label class="label">사업자등록번호 <span>*</span></label>
             <input type="text" id="bizNum" class="input-box" placeholder="숫자만 입력하세요 (자동 하이픈)" maxlength="12" oninput="autoHyphenBiz(this)">
         </div>
@@ -153,6 +158,7 @@
             // 데이터 가져오기
             const companyName = document.getElementById('companyName').value;
             const representativeName = document.getElementById('representativeName').value;
+            const openDate = document.getElementById('openDate').value;
             const bizNum = document.getElementById('bizNum').value;
             const companyPhone = document.getElementById('companyPhone').value;
             const managerName = document.getElementById('managerName').value;
@@ -160,12 +166,18 @@
             let department = document.getElementById('department').value;
 
             // 1. 필수값 체크
-            if (!email || !password || !companyName || !representativeName || !bizNum || !companyPhone || !managerName || !managerPhone) {
+            if (!email || !password || !companyName || !representativeName || !openDate || !bizNum || !companyPhone || !managerName || !managerPhone) {
                 alert("모든 필수 항목을 입력해주세요.");
                 return;
             }
             if (password.length < 6) {
                 alert("비밀번호는 6자리 이상이어야 합니다.");
+                return;
+            }
+
+            // 개업일자 형식 체크 (8자리 숫자)
+            if (!/^\d{8}$/.test(openDate)) {
+                alert("개업일자를 8자리 숫자로 입력해주세요 (예: 20240101)");
                 return;
             }
 
@@ -201,6 +213,7 @@
                     password: password,
                     companyName: companyName,
                     representativeName: representativeName,
+                    openDate: openDate,
                     bizNum: bizNum,
                     companyPhone: companyPhone,
                     managerName: managerName,
