@@ -465,6 +465,19 @@
                     const deadline = new Date(created);
                     deadline.setDate(deadline.getDate() + 7);
                     const diffDays = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+
+                    // 디버깅: 첫 5개 대기중 게시글의 마감일 확인
+                    if (urgentTasks.length < 5) {
+                        console.log(`⏰ [마감일 체크]`, {
+                            title: p.title?.substring(0, 20),
+                            status: p.status,
+                            생성일: created.toLocaleDateString(),
+                            마감일: deadline.toLocaleDateString(),
+                            남은일수: diffDays,
+                            임박여부: diffDays <= 4
+                        });
+                    }
+
                     if (diffDays <= 4) {
                         urgentTasks.push({
                             id: p.docId,
@@ -499,6 +512,11 @@
             renderTree(allGroups);
 
             urgentTasks.sort((a, b) => a.dDay - b.dDay);
+            console.log('⏳ 마감임박 데이터:', {
+                총게시글수: allPosts.length,
+                마감임박건수: urgentTasks.length,
+                urgentTasks: urgentTasks
+            });
             renderUrgentPanel(urgentTasks);
 
         } catch (error) {
