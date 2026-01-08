@@ -845,20 +845,18 @@
         const tbody = document.getElementById('empBody');
         tbody.innerHTML = '';
 
-        comp.employees.forEach(emp => {
+        reversedEmployees.forEach(emp => {
+            const isSuspended = emp.status === 'Suspended';
             let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
-            let actionBtn = "";
-
-            // emp.status 대신 emp.isActive로 확인
-            if (emp.isActive === 0) {
+            if (isSuspended) {
                 statusBadge = `<span style="color:#ff4d4f; font-weight:bold;">권한중지</span>`;
             } else if (emp.status === 'Pending') {
                  statusBadge = `<span style="color:#faad14;">승인대기</span>`;
             }
 
-            actionBtn = `
+            const actionBtn = `
                 <button class="btn-mini" onclick="openEditModal('${emp.uid}')">수정</button>
-                ${emp.isActive === 0
+                ${isSuspended
                     ? `<button class="btn-mini" onclick="restoreMember('${emp.uid}')">재활성화</button>`
                     : `<button class="btn-mini btn-stop" onclick="suspendMember('${emp.uid}')">권한중지</button>`}
             `;
@@ -868,8 +866,6 @@
             let roleText = "일반 직원";
             if(emp.role === 'manager') roleText = "부서장";
             if(emp.role === 'owner') roleText = "총괄(CEO)";
-
-            const isSuspended = emp.isActive === 0;
 
             return `
                 <tr style="${isSuspended ? 'background-color: #fafafa; opacity: 0.6;' : ''}">
@@ -1117,7 +1113,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
             const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
             if (comp) {
                 const emp = comp.employees.find(e => e.uid === uid);
-                if (emp) emp.isActive = 0;
+                if (emp) emp.status = 'Suspended';
             }
             // 팝업 즉시 재렌더링
             openPopup(currentCompId); 
@@ -1131,7 +1127,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
             const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
             if (comp) {
                 const emp = comp.employees.find(e => e.uid === uid);
-                if (emp) emp.isActive = 1;
+                if (emp) emp.status = 'Active';
             }
             // 팝업 즉시 재렌더링
             openPopup(currentCompId);
