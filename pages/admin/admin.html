@@ -293,11 +293,10 @@
         };
 
         if (roleEl) {
-            const roleInfo = roleMap[user.role] || { label: (user.role?.toUpperCase() || 'USER'), class: 'badge-admin' };
-            roleEl.textContent = roleInfo.label;
-            // sidebar의 role 엘리먼트는 profile-role 이고, admin.html은 user-role을 씀. 둘 다 안전 처리
-            const baseClass = roleEl.classList.contains('profile-role') ? 'profile-role' : 'user-role';
-            roleEl.className = `${baseClass} ${roleInfo.class}`;
+            // const roleInfo = roleMap[user.role] || { label: (user.role?.toUpperCase() || 'USER'), class: 'badge-admin' };
+            // roleEl.textContent = roleInfo.label;
+            // const baseClass = roleEl.classList.contains('profile-role') ? 'profile-role' : 'user-role';
+            // roleEl.className = `${baseClass} ${roleInfo.class}`;
         }
     }
 
