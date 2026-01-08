@@ -566,9 +566,14 @@
                         requestContentHtml = `[${requestData.category}] ${requestData.title}`;
                     } else if (req.requestType === '전화상담') {
                         requestContentHtml = `[${requestData.requestCategory}] 희망시간: ${requestData.slots.join(', ')}`;
+                    } else if (req.requestType === '추가이용문의') {
+                        const content = requestData.content || '';
+                        const contentMatch = content.match(/\[내용\]\n([\s\S]*)/);
+                        requestContentHtml = contentMatch ? contentMatch[1].trim() : content;
+                    } else if (req.requestType === '요금제변경신청') {
+                        requestContentHtml = requestData.reason || `(${requestData.newPlan}으로 변경)`;
                     } else {
-                        // 추가이용문의, 요금제변경신청 및 기타 모든 요청은 title을 우선 표시
-                        requestContentHtml = requestData.title || req.requestType;
+                        requestContentHtml = requestData.title || requestData.content || req.requestType;
                     }
 
                     tbody.innerHTML += `
