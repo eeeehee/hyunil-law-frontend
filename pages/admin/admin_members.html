@@ -564,8 +564,8 @@
             }
 
             const roleNorm = (userData.role || '').toLowerCase();
-            if (!['master','owner'].includes(roleNorm)) {
-                alert('Master 또는 Owner 권한이 필요합니다.');
+            if (!['master', 'admin', 'general_manager'].includes(roleNorm)) {
+                alert('관리자 권한이 필요합니다.');
                 location.href = '../../pages/user/dashboard.html';
                 return;
             }
