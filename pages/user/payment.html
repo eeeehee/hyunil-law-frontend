@@ -371,6 +371,11 @@
                 <button class="btn-save-payment" id="btnSavePayment" onclick="savePaymentInfo()">결제 정보 저장 (정기결제 시작)</button>
             </div>
 
+            <div id="savedEvidenceInfo" style="display:none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                <h5 style="font-size:14px; margin-bottom:10px; color:#1a1a1a;">저장된 증빙서류 정보</h5>
+                <div id="evidenceInfoContent"></div>
+            </div>
+
             <div id="staffPaymentView" class="staff-view-box" style="display:none;">
                 🔒 결제 수단 관리 권한이 없습니다. (CEO 전용)<br>
                 <div style="margin-top:10px; font-size:16px;">
@@ -966,6 +971,61 @@ function renderPaymentHistory(items) {
                 const btn = document.getElementById('btnSavePayment');
                 if (btn) {
                     btn.textContent = '결제정보 수정';
+                }
+
+                // 저장된 증빙서류 정보 표시
+                const evidenceContainer = document.getElementById('savedEvidenceInfo');
+                const evidenceContent = document.getElementById('evidenceInfoContent');
+
+                if (paymentInfo.taxEvidenceType && paymentInfo.taxEvidenceType !== 'none') {
+                    let html = '';
+                    if (paymentInfo.taxEvidenceType === 'tax_invoice') {
+                        html = `
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="label">발행 종류</label>
+                                    <input type="text" class="input-box" value="세금계산서" readonly style="background:#f9f9f9;">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="label">기업명</label>
+                                    <input type="text" class="input-box" value="${paymentInfo.taxCompanyName || '-'}" readonly style="background:#f9f9f9;">
+                                </div>
+                                <div class="form-group">
+                                    <label class="label">사업자번호</label>
+                                    <input type="text" class="input-box" value="${paymentInfo.taxBizNum || '-'}" readonly style="background:#f9f9f9;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="label">수신 이메일주소</label>
+                                <input type="email" class="input-box" value="${paymentInfo.taxEmail || '-'}" readonly style="background:#f9f9f9;">
+                            </div>
+                        `;
+                    } else if (paymentInfo.taxEvidenceType === 'cash_receipt') {
+                        html = `
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="label">발행 종류</label>
+                                    <input type="text" class="input-box" value="현금영수증" readonly style="background:#f9f9f9;">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="label">이름</label>
+                                    <input type="text" class="input-box" value="${paymentInfo.cashReceiptName || '-'}" readonly style="background:#f9f9f9;">
+                                </div>
+                                <div class="form-group">
+                                    <label class="label">휴대폰번호</label>
+                                    <input type="tel" class="input-box" value="${paymentInfo.cashReceiptPhone || '-'}" readonly style="background:#f9f9f9;">
+                                </div>
+                            </div>
+                        `;
+                    }
+                    evidenceContent.innerHTML = html;
+                    evidenceContainer.style.display = 'block';
+                } else {
+                    evidenceContainer.style.display = 'none';
                 }
 
             } catch (error) {
