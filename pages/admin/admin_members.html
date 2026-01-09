@@ -859,6 +859,7 @@
 
     // 5. 직원 테이블 렌더링
     function renderEmpTable(comp) {
+        console.log('[현일 시스템] renderEmpTable 함수 실행. 직원 수:', comp?.employees?.length);
         const tbody = document.getElementById('empBody');
         tbody.innerHTML = '';
 
@@ -869,10 +870,17 @@
 
         const reversedEmployees = [...comp.employees].reverse();
 
-        const rows = reversedEmployees.map(emp => {
+        const rowsHtml = reversedEmployees.map(emp => {
             const isSuspended = emp.status === 'Suspended';
 
-            actionBtn = `
+            let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
+            if (isSuspended) {
+                statusBadge = `<span style="color:#ff4d4f; font-weight:bold;">권한중지</span>`;
+            } else if (emp.status === 'Pending') {
+                 statusBadge = `<span style="color:#faad14;">승인대기</span>`;
+            }
+
+            const actionBtn = `
                 <button class="btn-mini" onclick="openEditModal('${emp.uid}')">수정</button>
                 ${isSuspended
                     ? `<button class="btn-mini" onclick="restoreMember('${emp.uid}')">재활성화</button>`
@@ -885,7 +893,11 @@
             if(emp.role === 'manager') roleText = "부서장";
             if(emp.role === 'owner') roleText = "총괄(CEO)";
 
-            tbody.innerHTML += `
+            const hasAllDeptAccess = emp.departments && ( (Array.isArray(emp.departments) && emp.departments.length > 0) || (typeof emp.departments === 'string' && emp.departments.trim() !== '' && emp.departments.trim() !== '[]') );
+            const checkboxChecked = hasAllDeptAccess ? 'checked' : '';
+            const accessBadge = hasAllDeptAccess ? '<span style="color:#52c41a; font-size:12px;">✓ 전사 권한</span>' : '<span style="color:#999; font-size:12px;">부서 제한</span>';
+
+            return `
                 <tr style="${isSuspended ? 'background-color: #fafafa; opacity: 0.6;' : ''}">
                     <td>${emp.managerName || '-'}</td>
                     <td>${emp.department||'-'}</td>
@@ -902,22 +914,23 @@
                     <td>
                         <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
                             <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                                <input type="checkbox" ${emp.hasAllDeptAccess ? 'checked' : ''} onchange="toggleAllDeptAccess('${emp.uid}', this.checked)" style="cursor:pointer;">
-                                ${emp.hasAllDeptAccess ? '<span style="color:#52c41a; font-size:12px;">✓ 전사 권한</span>' : '<span style="color:#999; font-size:12px;">부서 제한</span>'}
+                                <input type="checkbox" ${checkboxChecked} onchange="toggleAllDeptAccess('${emp.uid}', this.checked)" style="cursor:pointer;">
+                                ${accessBadge}
                             </label>
                         </div>
                     </td>
                     <td>
+                        ${actionBtn}
                         <button class="btn-act no" onclick="deleteMember('${emp.uid}', '${emp.managerName}')">삭제</button>
                     </td>
                 </tr>
             `;
-        });
+        }).join('');
 
-        if (rows.length === 0) {
+        if (rowsHtml.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">등록된 직원이 없습니다.</td></tr>';
         } else {
-            tbody.innerHTML = rows.join('');
+            tbody.innerHTML = rowsHtml;
         }
     }
 
