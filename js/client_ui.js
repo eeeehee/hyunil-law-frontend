@@ -11,9 +11,9 @@ export function renderClientSidebar(currentPage, userData) {
             width: 100%;
             margin-top: 12px;
             padding: 9px 0;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
+            background: #2c2c45; /* Darker background */
+            color: #ccc; /* Lighter text color */
+            border: 1px solid #3a3a5e; /* Darker border */
             border-radius: 6px;
             font-size: 13px;
             font-weight: 700;
