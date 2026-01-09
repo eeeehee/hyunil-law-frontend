@@ -767,5 +767,13 @@ export const approvalRequests = {
         return await apiRequest(`/approval-requests/${id}`, {
             method: 'DELETE'
         });
+    },
+
+    // 여러 요청 일괄 승인
+    bulkApprove: async (requestIds) => {
+        return await apiRequest('/approval-requests/bulk-approve', {
+            method: 'PUT',
+            body: JSON.stringify({ requestIds })
+        });
     }
 };

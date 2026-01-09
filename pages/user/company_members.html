@@ -210,6 +210,7 @@
     let allCompanies = [];
     let inactiveCompanies = [];
     let gOwnerData = null; // 대표 정보
+    let gCompanyDepartments = []; // 부서 목록
 
         (async () => {
             if (!requireAuth()) {
@@ -674,20 +675,11 @@
                     return;
                 }
 
-                let successCount = 0;
-                let failCount = 0;
-
-                for (const req of requests) {
-                    try {
-                        await approvalRequests.approve(req.id);
-                        successCount++;
-                    } catch (error) {
-                        console.error(`요청 ${req.id} 승인 실패:`, error);
-                        failCount++;
-                    }
-                }
-
-                alert(`✅ 일괄 승인 완료\n성공: ${successCount}건\n실패: ${failCount}건`);
+                const requestIds = requests.map(req => req.id);
+                
+                const result = await approvalRequests.bulkApprove(requestIds);
+                
+                alert(result.message || '일괄 승인이 완료되었습니다.');
 
                 // 목록 새로고침
                 await loadApprovalRequests();
