@@ -5,6 +5,36 @@
 //  - HTML 구조/클래스는 기존(first UI) 형태를 유지하면서 role/메뉴 노출은 최신 로직 적용
 
 export function renderClientSidebar(currentPage, userData) {
+    // 로그아웃 버튼 스타일 추가
+    const newStyles = `
+        .user-profile-area .logout-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 9px 0;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .user-profile-area .logout-btn:hover {
+            background: #ff4d4f;
+            color: #fff;
+            border-color: #ff4d4f;
+        }
+    `;
+
+    if (!document.getElementById('client-sidebar-styles')) {
+        const styleEl = document.createElement('style');
+        styleEl.id = 'client-sidebar-styles';
+        styleEl.innerHTML = newStyles;
+        document.head.appendChild(styleEl);
+    }
+
     // 1) 권한 이름 한글 변환 (두번째 로직 유지)
     let roleName = "일반 직원";
     let roleBadgeClass = "badge-staff"; // CSS 클래스 (기존 디자인 CSS가 이 클래스를 사용한다고 가정)
@@ -58,13 +88,7 @@ export function renderClientSidebar(currentPage, userData) {
             <div class="user-name">${userData.managerName} 님</div>
             <div class="user-email">${userData.email}</div>
             <div class="user-role ${roleBadgeClass}">${roleName}</div>
-        </div>
-
-        <div class="user-profile-area">
-            <div class="user-name">${userData.managerName} 님</div>
-            <div class="user-email">${userData.email}</div>
-            <div class="user-role ${roleBadgeClass}">${roleName}</div>
-            <div class="logout-btn" id="logoutBtn">로그아웃</div>
+            <button class="logout-btn" id="logoutBtn">로그아웃</button>
         </div>
 
         <ul class="menu-list">
