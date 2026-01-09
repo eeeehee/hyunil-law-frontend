@@ -260,22 +260,18 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const statusFilter = urlParams.get('status') || '';
 
-                console.log('--- 📋 자문 내역 로드 시작 ---');
                 const postsResponse = await posts.getAll({
                     status: statusFilter,
                     limit: 100
                 });
-                console.log('1. API 응답 (posts.getAll):', postsResponse);
                 
                 // 자문내역과 관련 없는 카테고리 제외
                 let postsData = (postsResponse.posts || []).filter(post => {
                     return !['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin'].includes(post.category);
                 });
-                console.log('2. 자문 관련 게시글 필터링 후:', postsData);
 
                 // 승인 대기중인 요청 가져오기
                 const approvalData = await approvalRequests.getRequests({ status: 'Pending' });
-                console.log('3. API 응답 (approvalRequests.getRequests):', approvalData);
                 const approvalList = approvalData?.requests || [];
 
                 // 승인 요청 데이터를 게시글 데이터 형식과 유사하게 매핑 (자문/전화상담 요청만)
@@ -291,18 +287,15 @@
                         authorUid: req.uid,
                         status: '승인요청' // 사용자 정의 상태
                     }));
-                console.log('4. 매핑된 승인요청:', mappedApprovals);
                 
                 // 두 리스트 병합
                 let allItems = [...postsData, ...mappedApprovals];
-                console.log('5. 병합된 전체 목록:', allItems);
 
                 // ✅ 부서 권한 필터: 일반 직원은 본인 부서 자문만 열람 가능
                 if (userData.role !== 'owner') {
                     const myDept = (userData.department || '').trim();
                     if (myDept && myDept !== '전사') {
                         allItems = allItems.filter(p => ((p.userDepartment || '').trim() === myDept));
-                        console.log(`6. 부서 필터링 (${myDept}) 후:`, allItems);
                     }
                 }
 
