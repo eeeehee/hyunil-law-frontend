@@ -872,13 +872,11 @@
         const reversedEmployees = [...comp.employees].reverse();
 
         const rowsHtml = reversedEmployees.map(emp => {
-            const isSuspended = emp.status === 'Suspended';
+            const isSuspended = emp.isActive === 0;
 
             let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
             if (isSuspended) {
                 statusBadge = `<span style="color:#ff4d4f; font-weight:bold;">권한중지</span>`;
-            } else if (emp.status === 'Pending') {
-                 statusBadge = `<span style="color:#faad14;">승인대기</span>`;
             }
 
             const actionBtn = `
@@ -1182,10 +1180,10 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
             const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
             if (comp) {
                 const emp = comp.employees.find(e => e.uid === uid);
-                if (emp) emp.status = 'Suspended';
+                if (emp) emp.isActive = 0;
             }
             // 팝업 즉시 재렌더링
-            openPopup(currentCompId); 
+            openPopup(currentCompId);
         }
     }
 
@@ -1196,7 +1194,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
             const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
             if (comp) {
                 const emp = comp.employees.find(e => e.uid === uid);
-                if (emp) emp.status = 'Active';
+                if (emp) emp.isActive = 1;
             }
             // 팝업 즉시 재렌더링
             openPopup(currentCompId);
