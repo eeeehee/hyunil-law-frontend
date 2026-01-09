@@ -8,8 +8,8 @@ export function renderClientSidebar(currentPage, userData) {
     // 로그아웃 버튼 스타일 추가
     const newStyles = `
         .user-profile-area .logout-btn {
-            width: 100%;
-            margin-top: 12px;
+            width: calc(100% - 40px); /* Reduced width, assuming 20px padding on each side of parent */
+            margin: 12px auto 0 auto; /* Centered with top margin */
             padding: 9px 0;
             background: #2c2c45; /* Darker background */
             color: #ccc; /* Lighter text color */
