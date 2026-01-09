@@ -893,35 +893,27 @@
             if(emp.role === 'manager') roleText = "부서장";
             if(emp.role === 'owner') roleText = "총괄(CEO)";
 
-            const hasAllDeptAccess = emp.departments && ( (Array.isArray(emp.departments) && emp.departments.length > 0) || (typeof emp.departments === 'string' && emp.departments.trim() !== '' && emp.departments.trim() !== '[]') );
-            const checkboxChecked = hasAllDeptAccess ? 'checked' : '';
-            const accessBadge = hasAllDeptAccess ? '<span style="color:#52c41a; font-size:12px;">✓ 전사 권한</span>' : '<span style="color:#999; font-size:12px;">부서 제한</span>';
-
             return `
                 <tr style="${isSuspended ? 'background-color: #fafafa; opacity: 0.6;' : ''}">
                     <td>${emp.managerName || '-'}</td>
                     <td>${emp.department||'-'}</td>
-                    <td>${emp.email}</td>
-                    <td>${emp.phone || '-'}</td>
                     <td>
-                        <select class="role-select" data-uid="${emp.uid}" data-current-role="${emp.role}">
+                        <select class="role-select" onchange="changeRole('${emp.uid}', this.value)" data-uid="${emp.uid}" style="width:100%; padding:4px 8px; border:1px solid #d9d9d9; border-radius:4px; font-size:13px;">
                             <option value="owner" ${emp.role === 'owner' ? 'selected' : ''}>대표 (CEO)</option>
-                            <option value="manager" ${emp.role === 'manager' ? 'selected' : ''}>부서장 (Manager)</option>
+                            <option value="manager" ${emp.role === 'manager' ? 'selected' : ''}>부서장</option>
                             <option value="user" ${emp.role === 'user' || emp.role === 'staff' || emp.role === 'employee' ? 'selected' : ''}>일반 직원</option>
                         </select>
-                        <button class="btn-act ok" onclick="changeRole('${emp.uid}', this.previousElementSibling.value)">변경</button>
                     </td>
+                    <td>${emp.email}</td>
+                    <td style="color:#666; font-size:11px;">${joinDate}</td>
+                    <td>${statusBadge}</td>
                     <td>
-                        <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
-                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-                                <input type="checkbox" ${checkboxChecked} onchange="toggleAllDeptAccess('${emp.uid}', this.checked)" style="cursor:pointer;">
-                                ${accessBadge}
-                            </label>
+                        <div style="display:flex; gap:4px; flex-wrap:nowrap;">
+                            <button class="btn-mini" onclick="openEditModal('${emp.uid}')" style="white-space:nowrap; font-size:11px; padding:4px 8px;">수정</button>
+                            ${isSuspended
+                                ? `<button class="btn-mini" onclick="restoreMember('${emp.uid}')" style="white-space:nowrap; font-size:11px; padding:4px 8px;">재활성화</button>`
+                                : `<button class="btn-mini btn-stop" onclick="suspendMember('${emp.uid}')" style="white-space:nowrap; font-size:11px; padding:4px 8px;">권한중지</button>`}
                         </div>
-                    </td>
-                    <td>
-                        ${actionBtn}
-                        <button class="btn-act no" onclick="deleteMember('${emp.uid}', '${emp.managerName}')">삭제</button>
                     </td>
                 </tr>
             `;
@@ -1008,6 +1000,32 @@ alert(`✅ 등록 완료: ${name}`);
             await loadMemberData();
             setTimeout(() => openPopup(currentCompId), 500);
         } catch(e) { alert("오류: " + e.message); }
+    }
+
+    // 권한 변경 (셀렉트박스 onChange)
+    window.changeRole = async function(uid, newRole) {
+        try {
+            const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
+            if (!comp) return;
+
+            const emp = comp.employees.find(e => e.uid === uid);
+            if (!emp) return;
+
+            await admin.updateEmployee(uid, { role: newRole });
+
+            // 로컬 데이터 업데이트
+            emp.role = newRole;
+
+            await logHistory(currentCompId, `[권한변경] ${emp.managerName || emp.email} → ${newRole}`);
+
+            // 팝업 재렌더링
+            renderEmpTable(comp);
+        } catch(e) {
+            alert("권한 변경 실패: " + e.message);
+            // 실패 시 페이지 새로고침
+            await loadMemberData();
+            setTimeout(() => openPopup(currentCompId), 500);
+        }
     }
 
     // 8. 기업 수동 등록
