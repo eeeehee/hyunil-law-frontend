@@ -60,6 +60,13 @@ export function renderClientSidebar(currentPage, userData) {
             <div class="user-role ${roleBadgeClass}">${roleName}</div>
         </div>
 
+        <div class="user-profile-area">
+            <div class="user-name">${userData.managerName} 님</div>
+            <div class="user-email">${userData.email}</div>
+            <div class="user-role ${roleBadgeClass}">${roleName}</div>
+            <div class="logout-btn" id="logoutBtn">로그아웃</div>
+        </div>
+
         <ul class="menu-list">
             <li><a href="${menuPrefix}dashboard.html" class="menu-link ${currentPage === 'dashboard' ? 'active' : ''}">대시보드</a></li>
             <li><a href="${menuPrefix}board_list.html" class="menu-link ${currentPage === 'board_list' ? 'active' : ''}">나의 자문 내역</a></li>
@@ -68,8 +75,6 @@ export function renderClientSidebar(currentPage, userData) {
             <li><a href="${userGuideLink}" class="menu-link ${currentPage === 'user_guide' ? 'active' : ''}">📘 이용 가이드 (FAQ)</a></li>
             ${ceoMenu}
         </ul>
-
-        <div class="logout-btn" id="logoutBtn">로그아웃</div>
     </nav>
     `;
 
