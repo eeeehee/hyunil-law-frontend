@@ -603,20 +603,35 @@
             inactiveCompanies = [];
             const today = new Date();
 
-            for (const comp of companiesData) {
-                // 직원 목록 가져오기
-                if (comp.bizNum) {
-                    try {
-                        const empResponse = await admin.getEmployees(comp.bizNum);
-                        console.log(`[디버깅] ${comp.bizNum} 직원 목록 API 응답:`, empResponse); // 디버깅 로그 추가
-                        comp.employees = empResponse.employees || [];
-                    } catch (err) {
-                        console.error(`직원 로드 실패 (${comp.bizNum}):`, err);
-                        comp.employees = [];
+            // ✅ 성능 최적화: 모든 회사의 직원 목록을 한 번에 조회
+            const bizNums = companiesData.filter(c => c.bizNum).map(c => c.bizNum);
+            let employeesByBizNum = {};
+
+            if (bizNums.length > 0) {
+                try {
+                    const batchResponse = await admin.getEmployeesBatch(bizNums);
+                    console.log(`✅ 일괄 직원 목록 로드 완료 (${bizNums.length}개 회사)`);
+                    employeesByBizNum = batchResponse.employeesByBizNum || {};
+                } catch (err) {
+                    console.error('일괄 직원 로드 실패, 개별 조회로 폴백:', err);
+                    // 실패 시 기존 방식으로 폴백
+                    for (const comp of companiesData) {
+                        if (comp.bizNum) {
+                            try {
+                                const empResponse = await admin.getEmployees(comp.bizNum);
+                                employeesByBizNum[comp.bizNum] = empResponse.employees || [];
+                            } catch (err2) {
+                                console.error(`직원 로드 실패 (${comp.bizNum}):`, err2);
+                                employeesByBizNum[comp.bizNum] = [];
+                            }
+                        }
                     }
-                } else {
-                    comp.employees = [];
                 }
+            }
+
+            for (const comp of companiesData) {
+                // 직원 목록 할당
+                comp.employees = employeesByBizNum[comp.bizNum] || [];
 
                 // logs 파싱 (JSON 문자열인 경우)
                 if (typeof comp.logs === 'string') {

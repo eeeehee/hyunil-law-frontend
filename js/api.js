@@ -519,6 +519,14 @@ export const admin = {
         return await apiRequest(`/admin/companies/${bizNum}/employees`);
     },
 
+    // ✅ 여러 회사의 직원 목록 일괄 조회 (성능 최적화)
+    getEmployeesBatch: async (bizNums) => {
+        return await apiRequest('/admin/employees/batch', {
+            method: 'POST',
+            body: JSON.stringify({ bizNums })
+        });
+    },
+
     // 직원 생성 (관리자)
     createEmployee: async (data) => {
         return await apiRequest('/admin/employees', {
