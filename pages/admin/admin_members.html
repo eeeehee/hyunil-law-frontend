@@ -375,11 +375,12 @@
                 <table>
                     <thead>
                         <tr>
-                            <th width="15%">이름</th>
-                            <th width="15%">부서</th>
-                            <th width="15%">권한(Role)</th>
-                            <th width="20%">이메일</th>
-                            <th width="15%">가입일시</th>
+                            <th width="12%">이름</th>
+                            <th width="12%">부서</th>
+                            <th width="13%">권한(Role)</th>
+                            <th width="18%">이메일</th>
+                            <th width="12%">휴대폰</th>
+                            <th width="13%">가입일시</th>
                             <th width="10%">상태</th>
                             <th width="10%">관리</th>
                         </tr>
@@ -864,7 +865,7 @@
         tbody.innerHTML = '';
 
         if (!comp || !comp.employees) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">직원 정보를 불러올 수 없습니다.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px; color:#999;">직원 정보를 불러올 수 없습니다.</td></tr>';
             return;
         }
 
@@ -905,6 +906,7 @@
                         </select>
                     </td>
                     <td>${emp.email}</td>
+                    <td>${emp.phone || '-'}</td>
                     <td style="color:#666; font-size:11px;">${joinDate}</td>
                     <td>${statusBadge}</td>
                     <td>
@@ -920,7 +922,7 @@
         }).join('');
 
         if (rowsHtml.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">등록된 직원이 없습니다.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px; color:#999;">등록된 직원이 없습니다.</td></tr>';
         } else {
             tbody.innerHTML = rowsHtml;
         }
