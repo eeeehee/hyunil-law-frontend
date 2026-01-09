@@ -576,7 +576,12 @@
                 }
 
                 // 요청 내용을 클릭 가능한 링크로
-                const titleHtml = `<a href="javascript:void(0)" onclick="showRequestDetail('${r.docId}')" style="color:#2c5bf2; text-decoration:underline; cursor:pointer;">${escapeHtml(String(title))}</a>`;
+                let titleHtml = '';
+                if (status === '승인요청') {
+                    titleHtml = escapeHtml(String(title));
+                } else {
+                    titleHtml = `<a href="javascript:void(0)" onclick="showRequestDetail('${r.docId}')" style="color:#2c5bf2; text-decoration:underline; cursor:pointer;">${escapeHtml(String(title))}</a>`;
+                }
 
                 const requesterName = r.authorName || r.userManagerName || r.userCompanyName || '-';
 
@@ -858,14 +863,23 @@ function renderPaymentHistory(items) {
                     // 승인 요청 데이터를 게시글 데이터 형식과 유사하게 매핑
                     const mappedApprovals = approvalList
                         .filter(req => ['추가이용문의', '요금제변경신청'].includes(req.requestType))
-                        .map(req => ({
-                            docId: `approval_${req.id}`,
-                            createdAt: req.createdAt,
-                            title: req.requestData.title || `[${req.requestType}]`,
-                            content: req.requestData.content,
-                            authorName: req.requesterName,
-                            status: '승인요청' // 사용자 정의 상태
-                        }));
+                        .map(req => {
+                            let category = '';
+                            if (req.requestType === '추가이용문의') {
+                                category = 'extra_usage_quote';
+                            } else if (req.requestType === '요금제변경신청') {
+                                category = 'plan_change';
+                            }
+                            return {
+                                docId: `approval_${req.id}`,
+                                createdAt: req.createdAt,
+                                title: req.requestData.title || `[${req.requestType}]`,
+                                content: req.requestData.content,
+                                authorName: req.requesterName,
+                                status: '승인요청', // 사용자 정의 상태
+                                category: category
+                            };
+                        });
 
                     let allRequests = [...postsList, ...mappedApprovals];
                     
