@@ -523,7 +523,8 @@
                     archived: '완료',
                     archive: '완료',
                     admin_cancelled: '관리자 취소',
-                    auto_cancelled: '자동 취소'
+                    auto_cancelled: '자동 취소',
+                    승인요청: '승인 대기중'
                 };
                 const statusLabel = statusLabelMap[String(status)] || String(status);
 
@@ -539,7 +540,9 @@
 
                 // 상태별 액션 버튼
                 let actionHtml = "";
-                if (status === 'quoted') {
+                if (status === '승인요청') {
+                    actionHtml = `<span style="color:#fa8c16; font-weight:700;">승인 대기중</span>`;
+                } else if (status === 'quoted') {
                     actionHtml = `
                         <button class="btn-approve" onclick="approveQuote('${r.docId}')" style="background:#52c41a; color:#fff; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:700; margin-right:4px;">승인</button>
                         <button class="btn-reject" onclick="rejectQuote('${r.docId}')" style="background:#fff; border:1px solid #ddd; color:#555; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:600;">거절</button>
@@ -825,38 +828,49 @@ function renderPaymentHistory(items) {
                 try {
                     // 1. 결제 내역 (billing_logs 테이블) - owner에게만 로드
                     if (userData.role === 'owner') {
-                        console.log('📊 결제내역 조회 시작...');
                         const billingData = await billing.getMyLogs();
                         const billingLogs = billingData?.logs || [];
-                        console.log(`✅ 결제내역 조회 완료: ${billingLogs.length}건`, billingLogs);
                         renderPaymentHistory(billingLogs);
                     }
 
-                    // 2. 요청 내역 (posts 테이블: payment_method, plan_change, extra_usage_quote)
-                    console.log('📋 요청내역 조회 시작...');
+                    // 2. 요청 내역 (posts + approval_requests)
                     const requestsData = await posts.getAll({ category: 'payment_method,plan_change,extra_usage_quote' });
-                    let requests = requestsData?.posts || [];
-                    console.log(`✅ 요청내역 조회 완료: ${requests.length}건`, requests);
+                    const postsList = requestsData?.posts || [];
+                    
+                    const approvalData = await approvalRequests.getRequests({ status: 'Pending' });
+                    const approvalList = approvalData?.requests || [];
 
-                    // [요청사항 1] 역할(role)에 따른 요청내역 필터링
+                    // 승인 요청 데이터를 게시글 데이터 형식과 유사하게 매핑
+                    const mappedApprovals = approvalList
+                        .filter(req => ['추가이용문의', '요금제변경신청'].includes(req.requestType))
+                        .map(req => ({
+                            docId: `approval_${req.id}`,
+                            createdAt: req.createdAt,
+                            title: req.requestData.title || `[${req.requestType}]`,
+                            content: req.requestData.content,
+                            authorName: req.requesterName,
+                            status: '승인요청' // 사용자 정의 상태
+                        }));
+
+                    let allRequests = [...postsList, ...mappedApprovals];
+                    
+                    // 역할(role)에 따른 필터링 (기존 로직 유지)
                     if (userData.role === 'manager') {
-                        // 부서장은 자신의 부서 요청만 확인
-                        requests = requests.filter(r => r.userDepartment === userData.department);
+                        allRequests = allRequests.filter(r => r.userDepartment === userData.department || r.authorName === userData.managerName);
                     } else if (userData.role === 'user' || userData.role === 'staff') {
-                        // 일반 직원은 자신의 요청만 확인
-                        requests = requests.filter(r => r.authorUid === userData.uid);
+                        allRequests = allRequests.filter(r => r.authorUid === userData.uid || r.authorName === userData.managerName);
                     }
-                    // owner는 모든 요청 확인 (별도 필터링 없음)
 
-                    // 'cancelled' 상태인 요청을 필터링하여 제외
-                    const visibleRequests = requests.filter(r => r.status !== 'cancelled');
+                    // 날짜순으로 정렬
+                    allRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    
+                    const visibleRequests = allRequests.filter(r => r.status !== 'cancelled');
                     renderRequestList(visibleRequests);
 
                     // ✅ usage(남은 수량/총량) 표시
                     renderUsageBadges(userData);
                 } catch (err) {
                     console.error('❌ 결제/요청 내역 로드 실패:', err);
-                    // 에러 발생 시에도 기본 UI는 표시
                     renderPaymentHistory([]);
                     renderRequestList([]);
                 }

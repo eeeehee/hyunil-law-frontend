@@ -260,38 +260,55 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const statusFilter = urlParams.get('status') || '';
 
-                const response = await posts.getAll({
+                const postsResponse = await posts.getAll({
                     status: statusFilter,
                     limit: 100
                 });
-
-                // 결제수단/요금제 변경/부서변경 관련 게시글 제외 (자문내역에서만)
-                let postsData = (response.posts || []).filter(post => {
-                    return post.category !== 'payment_method'
-                        && post.category !== 'plan_change'
-                        && post.category !== 'extra_usage_quote'
-                        && post.category !== 'member_req_internal'
-                        && post.category !== 'member_req_admin';
+                
+                // 자문내역과 관련 없는 카테고리 제외
+                let postsData = (postsResponse.posts || []).filter(post => {
+                    return !['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin'].includes(post.category);
                 });
 
+                // 승인 대기중인 요청 가져오기
+                const approvalData = await approvalRequests.getRequests({ status: 'Pending' });
+                const approvalList = approvalData?.requests || [];
+
+                // 승인 요청 데이터를 게시글 데이터 형식과 유사하게 매핑 (자문/전화상담 요청만)
+                const mappedApprovals = approvalList
+                    .filter(req => ['자문요청', '전화상담'].includes(req.requestType))
+                    .map(req => ({
+                        docId: `approval_${req.id}`,
+                        createdAt: req.createdAt,
+                        category: req.requestData.category || 'etc',
+                        title: req.requestData.title || `[${req.requestType}]`,
+                        userDepartment: req.requesterDepartment,
+                        userManagerName: req.requesterName,
+                        authorUid: req.uid,
+                        status: '승인요청' // 사용자 정의 상태
+                    }));
+                
+                // 두 리스트 병합
+                let allItems = [...postsData, ...mappedApprovals];
+
                 // ✅ 부서 권한 필터: 일반 직원은 본인 부서 자문만 열람 가능
-                // - owner는 전체 열람 가능
-                // - 그 외(예: manager/staff/user 등)는 본인 department와 일치하는 건만 노출
                 if (userData.role !== 'owner') {
                     const myDept = (userData.department || '').trim();
-                    // 부서가 '전사'면 전체 열람
                     if (myDept && myDept !== '전사') {
-                        postsData = postsData.filter(p => ((p.userDepartment || '').trim() === myDept));
+                        allItems = allItems.filter(p => ((p.userDepartment || '').trim() === myDept));
                     }
                 }
 
-                gAllPosts = postsData;
+                // 날짜순으로 정렬
+                allItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                gAllPosts = allItems;
                 gCurrentPage = 1;
-                renderPosts(postsData);
+                renderPosts(gAllPosts);
 
                 // owner일 경우 부서 목록 로드
                 if (userData.role === 'owner') {
-                    loadDepartments(postsData);
+                    loadDepartments(gAllPosts);
                 }
 
             } catch (error) {
@@ -340,6 +357,8 @@
                 // 상태 매핑 (데이터베이스 값 -> 표시)
                 let statusClass = 'status-done';
                 let statusText = '답변 완료';
+                let rowClickAction = `location.href='board_view.html?id=${post.docId}'`;
+                let cursorStyle = 'pointer';
 
                 // 카테고리 매핑
                 const categoryMap = {
@@ -348,7 +367,7 @@
                     'debt': '채권/미수금',
                     'ip': '지식재산권',
                     'etc': '기타 자문',
-                    'guest': '비회원 상담', // posts.getAll 필터링으로 걸러지지만, 혹시 모르니 추가
+                    'guest': '비회원 상담',
                     'plan_change': '요금제 변경',
                     'payment_method': '결제수단 등록',
                     'extra_usage_quote': '추가 이용 견적',
@@ -358,9 +377,13 @@
                     'phone_log': '전화상담 기록'
                 };
                 const displayCategory = categoryMap[post.category] || post.category || '-';
-
-                // 추가 질문이 있고 아직 답변이 analyzing 상태면 "추가질문"으로 표시
-                if (hasFollowup && (post.status === 'analyzing' || post.status === 'processing')) {
+                
+                if (post.status === '승인요청') {
+                    statusClass = 'status-waiting';
+                    statusText = '승인 대기중';
+                    rowClickAction = ''; // 승인 대기중에는 상세 페이지 이동 불가
+                    cursorStyle = 'default';
+                } else if (hasFollowup && (post.status === 'analyzing' || post.status === 'processing')) {
                     statusClass = 'status-progress';
                     statusText = '추가질문';
                 } else if (post.status === 'pending' || post.status === 'waiting') {
@@ -382,7 +405,7 @@
                 const deptCell = isOwner ? `<td>${displayDept}</td>` : '';
 
                 return `
-                    <tr onclick="location.href='board_view.html?id=${post.docId}'" style="cursor:pointer;">
+                    <tr onclick="${rowClickAction}" style="cursor:${cursorStyle};">
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>${displayCategory}</td>
                         <td class="title-cell">${post.title || '(제목 없음)'}</td>
