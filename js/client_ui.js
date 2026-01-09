@@ -8,23 +8,24 @@ export function renderClientSidebar(currentPage, userData) {
     // 로그아웃 버튼 스타일 추가
     const newStyles = `
         .user-profile-area .logout-btn {
-            width: calc(100% - 40px); /* Reduced width, assuming 20px padding on each side of parent */
-            margin: 12px auto 0 auto; /* Centered with top margin */
-            padding: 9px 0;
-            background: #2c2c45; /* Darker background */
-            color: #ccc; /* Lighter text color */
-            border: 1px solid #3a3a5e; /* Darker border */
-            border-radius: 6px;
+            width: auto;
+            margin: 12px auto 0 auto;
+            padding: 0;
+            background: none;
+            color: #ccc;
+            border: none;
+            border-radius: 0;
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
             transition: 0.2s;
             text-align: center;
+            display: block;
         }
         .user-profile-area .logout-btn:hover {
-            background: #ff4d4f;
-            color: #fff;
-            border-color: #ff4d4f;
+            background: none;
+            color: #ff4d4f;
+            border-color: none;
         }
     `;
 
