@@ -877,10 +877,14 @@ function renderPaymentHistory(items) {
 
         // ✅ 저장된 결제수단 정보 불러오기
         async function loadSavedPaymentInfo() {
+            console.log('--- 💳 loadSavedPaymentInfo 실행 ---');
             try {
                 // payment_method 카테고리의 가장 최근 데이터 조회
                 const requestsData = await posts.getAll({ category: 'payment_method' });
+                console.log('API 응답 (posts.getAll):', requestsData);
+
                 const paymentMethods = requestsData?.posts || [];
+                console.log('필터링된 결제수단 목록:', paymentMethods);
 
                 if (paymentMethods.length === 0) {
                     console.log('저장된 결제수단 정보가 없습니다.');
