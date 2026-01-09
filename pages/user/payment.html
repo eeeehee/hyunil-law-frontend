@@ -493,8 +493,23 @@
 
             tbody.innerHTML = currentPageRequests.map(r => {
                 const createdAt = r.createdAt || r.requestedAt || r.date || "";
-                const title = r.title || r.content || r.reason || "-";
+                let title = r.title || r.content || r.reason || "-";
                 let amount = (r.quotedPrice ?? r.amount ?? r.quoteAmount ?? r.price);
+
+                if (r.category === 'extra_usage_quote' && r.content) {
+                    const lines = r.content.split('\n');
+                    let inquiryType = '';
+                    let inquiryContent = '';
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('[유형]')) {
+                            inquiryType = line.replace('[유형]', '').trim();
+                        } else if (line.startsWith('[내용]')) {
+                            inquiryContent = line.replace('[내용]', '').trim();
+                        }
+                    }
+                    title = `[${inquiryType}] ${inquiryContent}`;
+                }
 
                 // 요금제 변경 신청인 경우 요금제 금액 자동 계산
                 if (r.category === 'plan_change' && !amount) {
