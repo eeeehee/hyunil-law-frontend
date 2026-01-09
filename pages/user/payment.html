@@ -468,23 +468,18 @@
             if (!tbody) return;
 
             if (!Array.isArray(requests) || requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#888;">내역이 없습니다.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">내역이 없습니다.</td></tr>`;
                 document.getElementById('requestPaginationContainer').style.display = 'none';
                 return;
             }
 
-            // 전체 요청 목록 저장
             gAllRequests = requests;
-
-            // 페이지네이션 계산
             const totalPages = Math.ceil(requests.length / REQUEST_ITEMS_PER_PAGE);
             const startIndex = (gCurrentRequestPage - 1) * REQUEST_ITEMS_PER_PAGE;
-            const endIndex = startIndex + REQUEST_ITEMS_PER_PAGE;
             const currentPageRequests = requests.slice(startIndex, endIndex);
 
-            // 5개 이상일 때만 페이지네이션 표시
             const paginationContainer = document.getElementById('requestPaginationContainer');
-            if (requests.length >= 5) {
+            if (requests.length > REQUEST_ITEMS_PER_PAGE) {
                 paginationContainer.style.display = 'flex';
                 updateRequestPaginationUI(totalPages);
             } else {
@@ -493,96 +488,69 @@
 
             tbody.innerHTML = currentPageRequests.map(r => {
                 const createdAt = r.createdAt || r.requestedAt || r.date || "";
-                let title = r.title || r.content || r.reason || "-";
                 let amount = (r.quotedPrice ?? r.amount ?? r.quoteAmount ?? r.price);
-
-                if (r.category === 'extra_usage_quote' && r.content) {
-                    const lines = r.content.split('\n');
-                    let inquiryType = '';
-                    let inquiryContent = '';
-                    
-                    for (const line of lines) {
-                        if (line.startsWith('[유형]')) {
-                            inquiryType = line.replace('[유형]', '').trim();
-                        } else if (line.startsWith('[내용]')) {
-                            inquiryContent = line.replace('[내용]', '').trim();
-                        }
-                    }
-                    title = `[${inquiryType}] ${inquiryContent}`;
-                }
-
-                // 요금제 변경 신청인 경우 요금제 금액 자동 계산
-                if (r.category === 'plan_change' && !amount) {
-                    const match = (r.title || '').match(/\(([^)]+)\)/);
-                    const planName = match ? match[1] : null;
-                    if (planName && PLANS[planName]) {
-                        amount = PLANS[planName].price;
-                    }
-                }
-
-                // 결제수단 등록인 경우 금액 없음
-                if (r.category === 'payment_method') {
-                    amount = '-';
-                }
-
                 const status = r.status || r.state || "-";
 
+                // --- 1. 요청 내용 포맷팅 ---
+                let formattedTitle = r.title || r.content || r.reason || "-";
+                try {
+                    const category = r.category || '';
+                    const requestType = r.requestType || '';
+
+                    if (category === 'extra_usage_quote' || requestType === '추가이용문의') {
+                        const contentString = r.content || (r.requestData ? r.requestData.content : '') || '';
+                        const typeMatch = contentString.match(/\[유형\]\s*(.*)/);
+                        let typeText = typeMatch ? typeMatch[1].trim() : '추가 문의';
+                        if(typeText === 'qa_extra') typeText = '서면 자문 추가';
+                        if(typeText === 'phone_extra') typeText = '전화 상담 추가';
+                        if(typeText === 'case_quote') typeText = '건별 견적 요청';
+                        
+                        const contentMatch = contentString.match(/\[내용\]\n([\s\S]*)/);
+                        const mainContent = contentMatch ? contentMatch[1].trim() : contentString;
+                        formattedTitle = `[${typeText}] ${mainContent}`;
+
+                    } else if (category === 'plan_change' || requestType === '요금제변경신청') {
+                        const newPlanMatch = (r.title || '').match(/\(([^)]+)\)/);
+                        const newPlan = newPlanMatch ? newPlanMatch[1] : '플랜';
+                        formattedTitle = `[요금제 변경 신청] ${newPlan}`;
+
+                    } else if (category === 'payment_method') {
+                        const paymentInfo = JSON.parse(r.content);
+                        const type = paymentInfo.type === 'card' ? '신용카드' : 'CMS/계좌이체';
+                        formattedTitle = `[결제수단등록] ${type} 정보`;
+                    }
+                } catch (e) { /* 파싱 오류 시 기본값 사용 */ }
+
+                // --- 2. 상태 및 액션 버튼 ---
                 const statusLabelMap = {
-                    waiting: '접수',
-                    pending: '접수',
-                    quoted: '견적 도착',
-                    approved: '승인됨',
-                    accepted: '승인 완료',
-                    done: '처리 완료',
-                    completed: '처리 완료',
-                    archived: '완료',
-                    archive: '완료',
-                    admin_cancelled: '관리자 취소',
-                    auto_cancelled: '자동 취소',
-                    승인요청: '승인 대기중'
+                    waiting: '접수', pending: '접수', quoted: '견적 도착', approved: '승인됨', accepted: '승인 완료',
+                    done: '처리 완료', completed: '처리 완료', archived: '완료', archive: '완료',
+                    admin_cancelled: '관리자 취소', auto_cancelled: '자동 취소', 승인요청: '승인 대기중'
                 };
                 const statusLabel = statusLabelMap[String(status)] || String(status);
-
-                // 금액 표시 처리
-                let amountDisplay = "-";
-                if (amount === "-") {
-                    amountDisplay = "-";
-                } else if (typeof amount === 'number' && amount > 0) {
-                    amountDisplay = Number(amount).toLocaleString() + "원";
-                } else if (amount !== undefined && amount !== null && amount !== 0) {
-                    amountDisplay = Number(amount).toLocaleString() + "원";
-                }
-
-                // 상태별 액션 버튼
+                
                 let actionHtml = "";
                 if (status === '승인요청') {
                     actionHtml = `<span style="color:#fa8c16; font-weight:700;">승인 대기중</span>`;
                 } else if (status === 'quoted') {
-                    actionHtml = `
-                        <button class="btn-approve" onclick="approveQuote('${r.docId}')" style="background:#52c41a; color:#fff; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:700; margin-right:4px;">승인</button>
-                        <button class="btn-reject" onclick="rejectQuote('${r.docId}')" style="background:#fff; border:1px solid #ddd; color:#555; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:600;">거절</button>
-                    `;
+                    actionHtml = `<button class="btn-approve" onclick="approveQuote('${r.docId}')" style="background:#52c41a;">승인</button> <button class="btn-reject" onclick="rejectQuote('${r.docId}')">거절</button>`;
                 } else if (status === 'approved' || status === 'accepted') {
                     actionHtml = `<span style="color:#52c41a; font-weight:700;">✓ 승인됨</span>`;
                 } else if (status === 'done' || status === 'completed' || status === 'archived' || status === 'archive') {
                     actionHtml = `<span style="color:#999;">완료</span>`;
                 } else if (status === 'waiting' || status === 'pending') {
-                    actionHtml = `<button class="btn-cancel" onclick="cancelRequest('${r.docId}')" style="background:#ff4d4f; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:700; cursor:pointer; font-size:12px;">취소</button>`;
+                    actionHtml = `<button class="btn-cancel" onclick="cancelRequest('${r.docId}')" style="background:#ff4d4f;">취소</button>`;
                 } else if (status === 'admin_cancelled' || status === 'auto_cancelled') {
                     actionHtml = `<span style="color:#ff4d4f; font-weight:700;">취소</span>`;
-                }
-                else {
+                } else {
                     actionHtml = `<span style="color:#888;">${escapeHtml(String(statusLabel))}</span>`;
                 }
+                
+                // --- 3. 금액 표시 ---
+                let amountDisplay = (typeof amount === 'number' && amount > 0) ? `${Number(amount).toLocaleString()}원` : "-";
 
-                // 요청 내용을 클릭 가능한 링크로
-                let titleHtml = '';
-                if (status === '승인요청') {
-                    titleHtml = escapeHtml(String(title));
-                } else {
-                    titleHtml = `<a href="javascript:void(0)" onclick="showRequestDetail('${r.docId}')" style="color:#2c5bf2; text-decoration:underline; cursor:pointer;">${escapeHtml(String(title))}</a>`;
-                }
-
+                // --- 4. 최종 HTML ---
+                const titleHtml = `<a href="javascript:void(0)" onclick="showRequestDetail('${r.docId}')" style="color:#2c5bf2; text-decoration:underline; cursor:pointer;">${escapeHtml(String(formattedTitle))}</a>`;
                 const requesterName = r.authorName || r.userManagerName || r.userCompanyName || '-';
 
                 return `
@@ -1359,7 +1327,23 @@ window.handleLogout = async function() {
         // 요청 상세 내용 팝업
         window.showRequestDetail = async function(docId) {
             try {
-                const post = await window.posts.getById(docId);
+                let post;
+                if (String(docId).startsWith('approval_')) {
+                    const request = window.gAllRequests.find(r => r.docId === docId);
+                    if (!request) {
+                        alert('요청 정보를 찾을 수 없습니다.');
+                        return;
+                    }
+                    post = {
+                        title: request.title,
+                        content: request.content,
+                        createdAt: request.createdAt,
+                        status: request.status,
+                        quotedPrice: null
+                    };
+                } else {
+                    post = await window.posts.getById(docId);
+                }
 
                 const modal = document.getElementById('requestDetailModal');
                 const modalTitle = document.getElementById('requestDetailTitle');
@@ -1374,7 +1358,6 @@ window.handleLogout = async function() {
                             <strong style="color:#555;">상태:</strong> ${post.status || '-'}<br>
                 `;
 
-                // 견적 금액이 있으면 표시
                 if (post.quotedPrice) {
                     detailHtml += `<strong style="color:#555;">견적 금액:</strong> <span style="color:#2c5bf2; font-weight:700; font-size:16px;">${Number(post.quotedPrice).toLocaleString()}원</span><br>`;
                     if (post.quotedAt) {
@@ -1383,8 +1366,6 @@ window.handleLogout = async function() {
                 }
 
                 detailHtml += `</div>`;
-
-                // 요청 내용
                 detailHtml += `
                     <div style="margin-top:20px;">
                         <strong style="color:#333; font-size:15px;">📝 요청 내용:</strong>
