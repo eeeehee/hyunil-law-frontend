@@ -505,17 +505,17 @@
 
             gAllRequests = requests;
             
+            const totalPages = Math.ceil(requests.length / REQUEST_ITEMS_PER_PAGE);
+            const startIndex = (gCurrentRequestPage - 1) * REQUEST_ITEMS_PER_PAGE;
+            const endIndex = startIndex + REQUEST_ITEMS_PER_PAGE;
+            const currentPageRequests = requests.slice(startIndex, endIndex);
+
             // 진단용 로그 추가: 어떤 값이 들어오는지 확인
             console.log('--- renderRequestList Debug ---');
             currentPageRequests.forEach(r => {
                 console.log(`DocId: ${r.docId}, quotedPrice: ${r.quotedPrice}, Status: ${r.status}`);
             });
             console.log('--- End Debug ---');
-
-            const totalPages = Math.ceil(requests.length / REQUEST_ITEMS_PER_PAGE);
-            const startIndex = (gCurrentRequestPage - 1) * REQUEST_ITEMS_PER_PAGE;
-            const endIndex = startIndex + REQUEST_ITEMS_PER_PAGE;
-            const currentPageRequests = requests.slice(startIndex, endIndex);
 
             const paginationContainer = document.getElementById('requestPaginationContainer');
             if (requests.length > REQUEST_ITEMS_PER_PAGE) {
