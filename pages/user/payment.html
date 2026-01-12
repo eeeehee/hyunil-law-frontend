@@ -580,7 +580,7 @@
                 }
                 
                 // --- 3. 금액 표시 ---
-                let amountDisplay = (typeof amount === 'number' && amount > 0) ? `${Number(amount).toLocaleString()}원` : "-";
+                let amountDisplay = (typeof amount === 'number' && amount >= 0) ? `${Number(amount).toLocaleString()}원` : "-";
 
                 // --- 4. 최종 HTML ---
                 const titleHtml = `<a href="javascript:void(0)" onclick="showRequestDetail('${r.docId}')" style="color:#2c5bf2; text-decoration:underline; cursor:pointer;">${escapeHtml(String(formattedTitle))}</a>`;
