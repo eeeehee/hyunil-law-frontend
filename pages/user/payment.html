@@ -1138,6 +1138,11 @@
                         detailHtml += `<strong style="color:#555;">견적 발송일:</strong> ${new Date(post.quotedAt).toLocaleString('ko-KR')}<br>`;
                     }
                 }
+                
+                // 거절 사유 표시 (추가)
+                if (post.status === 'rejected' && post.rejectReason) {
+                    detailHtml += `<strong style="color:#ff4d4f;">거절 사유:</strong> <span style="color:#ff4d4f; font-weight:700;">${post.rejectReason}</span><br>`;
+                }
 
                 detailHtml += `</div>`;
                 detailHtml += `
