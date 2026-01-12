@@ -598,7 +598,7 @@
             `;
 
             let quotaHtml = "";
-            if (meta.plan !== 'none') {
+            // if (meta.plan !== 'none') { // <- 이 조건 제거
                 let entEditBtn = "";
                 if(meta.plan === 'Enterprise') {
                     entEditBtn = `<button class="btn-deduct" onclick="editEnterpriseLimit('${comp.bizNum}', ${qaLimit}, ${phoneLimit})" style="margin-left:5px; background:#1a1a2e; color:white; border:none;">⚙️ 한도설정</button>`;
@@ -617,7 +617,7 @@
                         ${entEditBtn}
                     </div>
                 `;
-            }
+            // }
 
             let badges = "";
             let alertClass = "";
