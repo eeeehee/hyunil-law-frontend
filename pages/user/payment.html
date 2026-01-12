@@ -556,7 +556,9 @@
                 const statusLabelMap = {
                     waiting: '접수', pending: '접수', quoted: '견적 도착', approved: '승인됨', accepted: '승인 완료',
                     done: '처리 완료', completed: '처리 완료', archived: '완료', archive: '완료',
-                    admin_cancelled: '관리자 취소', auto_cancelled: '자동 취소', 승인요청: '승인 대기중'
+                    admin_cancelled: '관리자 취소', auto_cancelled: '자동 취소', 승인요청: '승인 대기중',
+                    rejected: '거절됨',
+                    cancelled: '사용자 취소'
                 };
                 const statusLabel = statusLabelMap[String(status)] || String(status);
                 
@@ -565,10 +567,14 @@
                     actionHtml = `<span style="color:#fa8c16; font-weight:700;">승인 대기중</span>`;
                 } else if (status === 'quoted') {
                     actionHtml = `<button class="btn-action btn-action-approve" onclick="approveQuote('${r.docId}')">승인</button> <button class="btn-action btn-action-danger" onclick="rejectQuote('${r.docId}')">거절</button>`;
+                } else if (status === 'approved' || status === 'accepted') {
+                    actionHtml = `<span style="color:#52c41a; font-weight:700;">✓ 승인됨</span>`;
                 } else if (status === 'waiting' || status === 'pending') {
                     actionHtml = `<button class="btn-action btn-action-danger" onclick="cancelRequest('${r.docId}')">취소</button>`;
-                } else if (status === 'admin_cancelled' || status === 'auto_cancelled') {
-                    actionHtml = `<span style="color:#ff4d4f; font-weight:700;">취소</span>`;
+                } else if (status === 'admin_cancelled' || status === 'auto_cancelled' || status === 'cancelled') {
+                    actionHtml = `<span style="color:#ff4d4f; font-weight:700;">취소됨</span>`;
+                } else if (status === 'rejected') {
+                    actionHtml = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`;
                 } else {
                     actionHtml = `<span style="color:#888;">${escapeHtml(String(statusLabel))}</span>`;
                 }
