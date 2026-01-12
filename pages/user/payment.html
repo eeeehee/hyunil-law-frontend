@@ -504,6 +504,14 @@
             }
 
             gAllRequests = requests;
+            
+            // 진단용 로그 추가: 어떤 값이 들어오는지 확인
+            console.log('--- renderRequestList Debug ---');
+            currentPageRequests.forEach(r => {
+                console.log(`DocId: ${r.docId}, quotedPrice: ${r.quotedPrice}, Status: ${r.status}`);
+            });
+            console.log('--- End Debug ---');
+
             const totalPages = Math.ceil(requests.length / REQUEST_ITEMS_PER_PAGE);
             const startIndex = (gCurrentRequestPage - 1) * REQUEST_ITEMS_PER_PAGE;
             const endIndex = startIndex + REQUEST_ITEMS_PER_PAGE;
@@ -557,7 +565,7 @@
                     waiting: '접수', pending: '접수', quoted: '견적 도착', approved: '승인됨', accepted: '승인 완료',
                     done: '처리 완료', completed: '처리 완료', archived: '완료', archive: '완료',
                     admin_cancelled: '관리자 취소', auto_cancelled: '자동 취소', 승인요청: '승인 대기중',
-                    rejected: '거절됨',
+                    rejected: '처리 완료', // 변경: 거절 시 '처리 완료'로 표시
                     cancelled: '사용자 취소'
                 };
                 const statusLabel = statusLabelMap[String(status)] || String(status);
@@ -574,7 +582,7 @@
                 } else if (status === 'admin_cancelled' || status === 'auto_cancelled' || status === 'cancelled') {
                     actionHtml = `<span style="color:#ff4d4f; font-weight:700;">취소됨</span>`;
                 } else if (status === 'rejected') {
-                    actionHtml = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`;
+                    actionHtml = `<span style="color:#ff4d4f; font-weight:700;">거절 완료</span>`; // 변경: 거절 시 '거절 완료'로 표시
                 } else {
                     actionHtml = `<span style="color:#888;">${escapeHtml(String(statusLabel))}</span>`;
                 }
