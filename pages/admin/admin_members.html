@@ -378,6 +378,7 @@
                             <th width="12%">이름</th>
                             <th width="12%">부서</th>
                             <th width="13%">권한(Role)</th>
+                            <th width="10%">플랜</th>
                             <th width="18%">이메일</th>
                             <th width="12%">휴대폰</th>
                             <th width="13%">가입일시</th>
@@ -612,6 +613,15 @@
                     const batchResponse = await admin.getEmployeesBatch(bizNums);
                     console.log(`✅ 일괄 직원 목록 로드 완료 (${bizNums.length}개 회사)`);
                     employeesByBizNum = batchResponse.employeesByBizNum || {};
+                    const ownerPlans = batchResponse.ownerPlans || {};
+
+                    // 각 회사 객체에 대표 플랜 정보 주입
+                    companiesData.forEach(c => {
+                        if (ownerPlans[c.bizNum]) {
+                            c.plan = ownerPlans[c.bizNum];
+                        }
+                    });
+
                 } catch (err) {
                     console.error('일괄 직원 로드 실패, 개별 조회로 폴백:', err);
                     // 실패 시 기존 방식으로 폴백
@@ -907,6 +917,8 @@
             if(emp.role === 'manager') roleText = "부서장";
             if(emp.role === 'owner') roleText = "총괄(CEO)";
 
+            const planName = comp.plan || 'none';
+
             return `
                 <tr style="${isSuspended ? 'background-color: #fafafa; opacity: 0.6;' : ''}">
                     <td>${emp.managerName || '-'}</td>
@@ -918,6 +930,7 @@
                             <option value="user" ${emp.role === 'user' || emp.role === 'staff' || emp.role === 'employee' ? 'selected' : ''}>일반 직원</option>
                         </select>
                     </td>
+                    <td><span class="badge ${planName}">${planName}</span></td>
                     <td>${emp.email}</td>
                     <td>${emp.phone || '-'}</td>
                     <td style="color:#666; font-size:11px;">${joinDate}</td>
