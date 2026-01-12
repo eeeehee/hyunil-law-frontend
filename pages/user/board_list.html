@@ -243,7 +243,7 @@
                     document.getElementById('pageTitleText').innerText = '우리 회사 자문 내역 (전체)';
                     document.getElementById('deptSearchWrapper').style.display = 'block';
                     const tableHeader = document.getElementById('tableHeader');
-                    if (tableHeader) {
+                    if (tableHeader.children.length === 5) {
                         const deptTh = document.createElement('th');
                         deptTh.style.width = '12%';
                         deptTh.textContent = '부서';
@@ -251,26 +251,16 @@
                     }
                 }
 
-                // 자문 목록 및 승인요청 목록 가져오기
+                // --- 데이터 로딩 시작 ---
                 const urlParams = new URLSearchParams(window.location.search);
                 const statusFilter = urlParams.get('status') || '';
 
-                                const postsResponse = await posts.getAll({
+                const postsResponse = await posts.getAll({ status: statusFilter, limit: 100 });
+                
+                let postsData = (postsResponse.posts || []).filter(post => 
+                    !['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin'].includes(post.category));
 
-                                    status: statusFilter,
-
-                                    limit: 100
-
-                                });
-
-                                console.log('1. API 응답 (posts.getAll):', postsResponse);
-                                let postsData = (postsResponse.posts || []).filter(post => {
-                                    return !['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin'].includes(post.category);
-                                });
-                                console.log('2. 자문 관련 게시글 필터링 후:', postsData);
-                // 승인 대기중인 요청 가져오기
                 const approvalData = await approvalRequests.getRequests({ status: 'Pending' });
-                console.log('3. API 응답 (approvalRequests.getRequests):', approvalData);
                 const approvalList = approvalData?.requests || [];
 
                 const mappedApprovals = approvalList
@@ -283,13 +273,10 @@
                         userDepartment: req.requesterDepartment,
                         userManagerName: req.requesterName,
                         authorUid: req.uid,
-                        status: '승인요청' // 사용자 정의 상태
+                        status: '승인요청'
                     }));
-                console.log('4. 매핑된 승인요청:', mappedApprovals);
                 
-                // 두 리스트 병합
                 let allItems = [...postsData, ...mappedApprovals];
-                console.log('5. 병합된 전체 목록:', allItems);
 
                 if (userData.role !== 'owner') {
                     const myDept = (userData.department || '').trim();
@@ -310,10 +297,7 @@
 
             } catch (error) {
                 console.error('데이터 로드 에러:', error);
-                const tbody = document.getElementById('postListBody');
-                if (tbody) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
-                }
+                document.getElementById('postListBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
             }
         })();
 
@@ -374,7 +358,7 @@
                 } else if (post.status === 'analyzing' || post.status === 'processing' || post.status === 'InProgress') {
                     statusClass = 'status-progress';
                     statusText = '검토중';
-                } else if (post.status === 'done' || post.status === 'completed' || post.status === 'Completed') {
+                } else if (['done', 'completed', 'Completed'].includes(post.status)) {
                     statusClass = 'status-done';
                     statusText = '답변 완료';
                 }
@@ -413,9 +397,7 @@
 
         // 검색 기능
         window.triggerSearch = async function() {
-            // ... (기존 검색 로직은 유지, 단 allItems을 기준으로 필터링해야 함)
-            // 이 부분은 이번 수정 범위에서 제외
-            location.reload(); // 간단하게 새로고침으로 대체
+            location.reload(); 
         };
 
         // 페이지네이션 UI 업데이트
