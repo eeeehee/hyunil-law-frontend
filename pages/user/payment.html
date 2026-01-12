@@ -67,6 +67,37 @@
         .btn-approve { background: #2c5bf2; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 12px; }
         .btn-approve:hover { background: #1b42c4; }
 
+        /* 기본 액션 버튼 스타일 */
+        .btn-action {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            color: #fff; /* 기본 텍스트 색상 */
+            transition: background-color 0.2s;
+        }
+        .btn-action:hover {
+            opacity: 0.9; /* 호버 시 약간 어둡게 */
+        }
+
+        /* 승인 버튼 (파랑) */
+        .btn-action-approve {
+            background: #2c5bf2;
+        }
+        .btn-action-approve:hover {
+            background: #1b42c4;
+        }
+
+        /* 거절/취소 버튼 (빨강) */
+        .btn-action-danger {
+            background: #ff4d4f;
+        }
+        .btn-action-danger:hover {
+            background: #cf1322;
+        }
+
         /* 결제수단 탭 */
         .payment-tabs { display: flex; border-bottom: 1px solid #eee; margin-bottom: 20px; }
         .tab-btn { padding: 12px 20px; cursor: pointer; font-size: 14px; font-weight: 600; color: #888; border-bottom: 2px solid transparent; transition: 0.2s; }
@@ -533,13 +564,9 @@
                 if (status === '승인요청') {
                     actionHtml = `<span style="color:#fa8c16; font-weight:700;">승인 대기중</span>`;
                 } else if (status === 'quoted') {
-                    actionHtml = `<button class="btn-approve" onclick="approveQuote('${r.docId}')" style="background:#52c41a;">승인</button> <button class="btn-reject" onclick="rejectQuote('${r.docId}')">거절</button>`;
-                } else if (status === 'approved' || status === 'accepted') {
-                    actionHtml = `<span style="color:#52c41a; font-weight:700;">✓ 승인됨</span>`;
-                } else if (['done', 'completed', 'archived', 'archive'].includes(status)) {
-                    actionHtml = `<span style="color:#999;">완료</span>`;
+                    actionHtml = `<button class="btn-action btn-action-approve" onclick="approveQuote('${r.docId}')">승인</button> <button class="btn-action btn-action-danger" onclick="rejectQuote('${r.docId}')">거절</button>`;
                 } else if (status === 'waiting' || status === 'pending') {
-                    actionHtml = `<button class="btn-cancel" onclick="cancelRequest('${r.docId}')" style="background:#ff4d4f;">취소</button>`;
+                    actionHtml = `<button class="btn-action btn-action-danger" onclick="cancelRequest('${r.docId}')">취소</button>`;
                 } else if (status === 'admin_cancelled' || status === 'auto_cancelled') {
                     actionHtml = `<span style="color:#ff4d4f; font-weight:700;">취소</span>`;
                 } else {
