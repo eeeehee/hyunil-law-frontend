@@ -737,8 +737,7 @@
                         allRequests = allRequests.filter(r => r.authorUid === userData.uid || r.authorName === userData.managerName);
                     }
                     allRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    const visibleRequests = allRequests.filter(r => r.status !== 'cancelled');
-                    renderRequestList(visibleRequests);
+                    renderRequestList(allRequests);
                     renderUsageBadges(userData);
                 } catch (err) {
                     console.error('❌ 결제/요청 내역 로드 실패:', err);
