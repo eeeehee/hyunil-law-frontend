@@ -258,71 +258,60 @@
         window.reqToCEO = async function() {
             const newDept = prompt("변경하고 싶은 부서명을 입력하세요:");
             if (!newDept) return;
-            if (!confirm("대표님께 승인 요청을 보내시겠습니까?")) return;
+            if (!confirm(`'${newDept}' 부서로 변경을 대표님께 요청하시겠습니까?`)) return;
 
             try {
-                console.log('🔔 부서변경 요청 시작');
-                console.log('👤 현재 사용자:', gUserData);
-
-                // 부서 변경 승인 요청 생성 (새로운 approvalRequests API 사용)
-                const requestData = {
-                    requestType: '부서변경',
-                    requestData: {
+                // ✅ [REVISED] posts.create를 사용하여 표준 요청 생성
+                await posts.create({
+                    category: "member_req_internal",
+                    title: "부서 변경 요청 (대표 승인)",
+                    content: JSON.stringify({
                         fromDepartment: gUserData.department || '미지정',
-                        toDepartment: newDept
-                    }
-                };
+                        newDepartment: newDept,
+                        requesterName: gUserData.managerName,
+                        requestTo: 'ceo'
+                    }),
+                    status: 'pending' // 관리자/대표 확인 필요
+                });
 
-                console.log('📤 전송할 데이터:', requestData);
-
-                const response = await approvalRequests.createRequest(requestData);
-                console.log('✅ API 응답:', response);
-
-                alert("✅ 대표자에게 승인 요청이 전송되었습니다.\n승인 완료 시 부서가 자동으로 변경됩니다.");
+                alert("✅ 대표자에게 승인 요청이 전송되었습니다.\n'결제/구독 관리' 메뉴에서 현황을 확인하세요.");
                 closeChangeModal();
             } catch (error) {
-                console.error('❌ 승인 요청 오류:', error);
-                console.error('에러 상세:', error.message);
-                console.error('에러 스택:', error.stack);
+                console.error('❌ 대표에게 요청 오류:', error);
                 alert("오류가 발생했습니다: " + (error.message || '알 수 없는 오류'));
             }
         }
 
         window.showAdminForm = function() {
-            document.getElementById('opt-ceo').style.display = 'none';
-            document.getElementById('opt-admin').style.display = 'none';
-            document.getElementById('admin-form-area').style.display = 'block';
+            // 부서명 직접 입력 받기
+            const newDept = prompt("변경하고 싶은 부서명을 입력하세요:");
+            if (!newDept) return;
+
+            // ✅ [REVISED] 바로 관리자에게 요청 제출
+            submitToAdmin(newDept);
         }
 
-        window.submitToAdmin = async function() {
-            const content = document.getElementById('req-content').value;
-            const fileInput = document.getElementById('req-file');
-
-            if (!content) {
-                return alert("변경 요청 내용을 입력해주세요.");
-            }
-
-            if (!fileInput.files || fileInput.files.length === 0) {
-                return alert("증빙 서류를 첨부해주세요.");
-            }
+        window.submitToAdmin = async function(newDept) {
+            if (!confirm(`'${newDept}' 부서로 변경을 사이트 관리자에게 요청하시겠습니까?\n(별도 증빙서류가 필요할 수 있습니다.)`)) return;
 
             try {
-                // 관리자에게 변경 요청 게시글 생성
-                const postData = {
-                    category: "member_req_admin",
-                    title: `회원 정보 변경 요청 - ${gUserData.managerName}`,
-                    content: content,
-                    requestType: "change_info",
-                    status: 'pending',
-                    // 파일 업로드는 별도 구현 필요 (현재는 텍스트만)
-                    note: "파일 업로드 기능은 추후 구현 예정"
-                };
+                // ✅ [REVISED] posts.create를 사용하여 표준 요청 생성
+                await posts.create({
+                    category: "member_req_internal",
+                    title: "부서 변경 요청 (관리자 승인)",
+                    content: JSON.stringify({
+                        fromDepartment: gUserData.department || '미지정',
+                        newDepartment: newDept,
+                        requesterName: gUserData.managerName,
+                        requestTo: 'admin'
+                    }),
+                    status: 'pending' // 관리자 확인 필요
+                });
 
-                await posts.create(postData);
-                alert("관리자에게 요청이 전송되었습니다.");
+                alert("✅ 관리자에게 요청이 전송되었습니다.\n'결제/구독 관리' 메뉴에서 현황을 확인하세요.");
                 closeChangeModal();
             } catch (error) {
-                console.error('관리자 요청 오류:', error);
+                console.error('❌ 관리자에게 요청 오류:', error);
                 alert("오류가 발생했습니다: " + (error.message || '알 수 없는 오류'));
             }
         }

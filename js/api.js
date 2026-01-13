@@ -374,6 +374,13 @@ export const posts = {
     // 카운트 조회 (답변대기중/답변완료)
     getCounts: async () => {
         return await apiRequest('/posts/counts');
+    },
+
+    // [NEW] 부서 변경 요청 승인
+    approveDepartmentChange: async (docId) => {
+        return await apiRequest(`/posts/${docId}/approve-department-change`, {
+            method: 'PUT'
+        });
     }
 };
 
