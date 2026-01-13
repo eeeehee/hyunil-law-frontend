@@ -1208,7 +1208,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
             const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
             if (comp) {
                 const emp = comp.employees.find(e => e.uid === uid);
-                if (emp) emp.isActive = 0;
+                if (emp) emp.status = 'Suspended';
             }
             // 팝업 즉시 재렌더링
             openPopup(currentCompId);
@@ -1222,7 +1222,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
             const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
             if (comp) {
                 const emp = comp.employees.find(e => e.uid === uid);
-                if (emp) emp.isActive = 1;
+                if (emp) emp.status = 'Active';
             }
             // 팝업 즉시 재렌더링
             openPopup(currentCompId);
