@@ -283,32 +283,67 @@
         }
 
         window.showAdminForm = function() {
-            // 부서명 직접 입력 받기
-            const newDept = prompt("변경하고 싶은 부서명을 입력하세요:");
-            if (!newDept) return;
-
-            // ✅ [REVISED] 바로 관리자에게 요청 제출
-            submitToAdmin(newDept);
+            // ✅ 파일 업로드 폼 표시
+            document.getElementById('opt-ceo').style.display = 'none';
+            document.getElementById('opt-admin').style.display = 'none';
+            document.getElementById('admin-form-area').style.display = 'block';
+            document.getElementById('req-content').value = '';
+            document.getElementById('req-file').value = '';
         }
 
-        window.submitToAdmin = async function(newDept) {
-            if (!confirm(`'${newDept}' 부서로 변경을 사이트 관리자에게 요청하시겠습니까?\n(별도 증빙서류가 필요할 수 있습니다.)`)) return;
+        window.submitToAdmin = async function() {
+            const reqContent = document.getElementById('req-content').value.trim();
+            const reqFile = document.getElementById('req-file').files[0];
+
+            if (!reqContent) {
+                alert("변경 요청 내용을 입력해주세요.");
+                return;
+            }
+
+            if (!reqFile) {
+                alert("증빙서류를 첨부해주세요.\n(재직증명서, 인사발령서 등)");
+                return;
+            }
+
+            if (!confirm(`'${reqContent}'(으)로 변경을 사이트 관리자에게 요청하시겠습니까?`)) return;
 
             try {
-                // ✅ [REVISED] posts.create를 사용하여 표준 요청 생성
-                await posts.create({
-                    category: "member_req_internal",
-                    title: "부서 변경 요청 (관리자 승인)",
-                    content: JSON.stringify({
-                        fromDepartment: gUserData.department || '미지정',
-                        newDepartment: newDept,
-                        requesterName: gUserData.managerName,
-                        requestTo: 'admin'
-                    }),
-                    status: 'pending' // 관리자 확인 필요
+                // 1. 파일 업로드
+                const formData = new FormData();
+                formData.append('file', reqFile);
+
+                const uploadRes = await fetch(`${window.API_BASE}/api/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: formData
                 });
 
-                alert("✅ 관리자에게 요청이 전송되었습니다.\n'결제/구독 관리' 메뉴에서 현황을 확인하세요.");
+                if (!uploadRes.ok) {
+                    const errData = await uploadRes.json();
+                    throw new Error(errData.message || '파일 업로드 실패');
+                }
+
+                const uploadData = await uploadRes.json();
+                const fileUrl = uploadData.fileUrl;
+
+                // 2. posts.create로 요청 생성 (fileUrl을 content JSON에 포함)
+                await posts.create({
+                    category: "member_req_admin",
+                    title: "부서 변경 요청 (관리자 승인 - 증빙서류 첨부)",
+                    content: JSON.stringify({
+                        fromDepartment: gUserData.department || '미지정',
+                        newDepartment: reqContent,
+                        requesterName: gUserData.managerName,
+                        requestTo: 'admin',
+                        fileUrl: fileUrl, // ✅ 파일 URL 포함
+                        fileName: reqFile.name
+                    }),
+                    status: 'pending'
+                });
+
+                alert("✅ 관리자에게 요청이 전송되었습니다.\n증빙서류와 함께 승인 요청이 접수되었습니다.");
                 closeChangeModal();
             } catch (error) {
                 console.error('❌ 관리자에게 요청 오류:', error);
