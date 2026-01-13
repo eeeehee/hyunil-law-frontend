@@ -897,7 +897,7 @@
         const reversedEmployees = [...comp.employees].reverse();
 
         const rowsHtml = reversedEmployees.map(emp => {
-            const isSuspended = emp.isActive === 0;
+            const isSuspended = emp.status === 'Suspended';
 
             let statusBadge = `<span style="color:#00b894; font-weight:bold;">Active</span>`;
             if (isSuspended) {
