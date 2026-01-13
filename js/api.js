@@ -559,10 +559,10 @@ export const admin = {
     },
 
     // 활성화 상태 변경
-    updateCompanyStatus: async (uid, data) => {
+    updateCompanyStatus: async (uid, isActive) => {
         return await apiRequest(`/admin/companies/${uid}/status`, {
             method: 'PUT',
-            body: JSON.stringify(data)
+            body: JSON.stringify({ isActive })
         });
     },
 
