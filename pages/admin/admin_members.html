@@ -1169,7 +1169,8 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
         const comp = allCompanies.find(c => c.uid === currentCompId);
         if(!comp) return;
 
-        await admin.updateCompanyInfo(comp.uid, { status: 'Archived' });
+        const response = await admin.updateCompanyInfo(comp.uid, { status: 'Archived' });
+        console.log('Archive response:', response);
         comp.status = 'Archived';
         comp.isActive = 0;
 
@@ -1188,7 +1189,8 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
         const comp = inactiveCompanies.find(c => c.uid === uid);
         if(!comp) return;
 
-        await admin.updateCompanyInfo(uid, { status: 'Active' });
+        const response = await admin.updateCompanyInfo(uid, { status: 'Active' });
+        console.log('Restore response:', response);
         comp.status = 'Active';
         comp.isActive = 1;
 
