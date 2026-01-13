@@ -700,11 +700,26 @@
             }
         }
 
-        // 3. 직원 권한 요청 로드 (member_req, member_req_internal, member_req_admin 포함)
+        // 3. 직원 권한 요청 로드 (member_req, member_req_admin만 - 대표자 승인 요청 제외)
         async function loadMemberRequests() {
             try {
+                // ✅ member_req_internal은 관리자 승인 요청만 필터링 필요, member_req_admin은 모두 관리자 승인
                 const result = await posts.getAll({ category: 'member_req,member_req_internal,member_req_admin', limit: 200 });
                 let list = result.posts || [];
+
+                // ✅ member_req_internal 중 대표자 승인 요청(requestTo: 'ceo')은 제외
+                list = list.filter(d => {
+                    if (d.category === 'member_req_internal') {
+                        try {
+                            const parsed = JSON.parse(d.content || '{}');
+                            // requestTo가 'admin'인 경우만 표시 (대표자 승인은 제외)
+                            return parsed.requestTo === 'admin';
+                        } catch (e) {
+                            return true; // JSON 파싱 실패 시 표시
+                        }
+                    }
+                    return true; // member_req, member_req_admin은 모두 표시
+                });
 
                 // ✅ 숨긴 내역 모드에 따라 필터링
                 if (showArchivedMode) {
