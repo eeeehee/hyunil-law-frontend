@@ -277,17 +277,18 @@
             </div>
         </div>
 
-        <div id="approvalAlertSection" style="display:none;">
+        <!-- 승인 요청 알림 섹션 - CEO 페이지(company_members.html)로 이동됨 -->
+        <!-- <div id="approvalAlertSection" style="display:none;">
             <div class="approval-alert">
                 <div class="approval-alert-header">
-                    ⚠️ 부서 변경/권한 요청이 <span id="pendingCount">0</span>건 있습니다.
+                    ⚠️ 승인 대기 중인 요청이 <span id="pendingCount">0</span>건 있습니다.
                 </div>
                 <div class="approval-table-container">
                     <table class="approval-table">
                         <thead>
                             <tr>
                                 <th width="15%">요청자</th>
-                                <th width="12%">요청 유형</th>
+                                <th width="12%">승인요청</th>
                                 <th width="35%">요청 내용</th>
                                 <th width="20%">요청일시</th>
                                 <th width="18%">관리</th>
@@ -298,7 +299,7 @@
                     </table>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div id="loadingMsg" style="text-align:center; padding:50px; color:#666;">데이터를 불러오는 중...</div>
         <div class="member-list" id="companyList"></div>
@@ -575,7 +576,8 @@
 
             // 데이터 로드 시작
             await loadMemberData(true);
-            await loadDeptChangeRequests();
+            // 승인 요청은 CEO 페이지(company_members.html)에서만 표시
+            // await loadApprovalRequests();
 
         } catch (error) {
             console.error('권한 체크 에러:', error);

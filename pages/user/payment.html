@@ -572,10 +572,15 @@
                     rejected: '거절됨', // 변경: 초기 거절 시 '거절됨'으로 표시
                     cancelled: '사용자 취소'
                 };
-                const statusLabel = statusLabelMap[String(status)] || String(status);
-                
+                let statusLabel = statusLabelMap[String(status)] || String(status);
                 let actionHtml = "";
-                if (status === '승인요청') {
+
+                // ✅ [CORRECTED] 부서 변경 요청의 경우, 'pending' 상태를 '승인요청'으로 표시
+                if (r.category === 'member_req_internal' && status === 'pending') {
+                    statusLabel = '승인요청';
+                    actionHtml = `<span style="color:#888;">대기중</span>`;
+                }
+                else if (status === '승인요청') {
                     actionHtml = `<span style="color:#fa8c16; font-weight:700;">승인 대기중</span>`;
                 } else if (status === 'quoted') {
                     actionHtml = `<button class="btn-action btn-action-approve" onclick="approveQuote('${r.docId}')">승인</button> <button class="btn-action btn-action-danger" onclick="rejectQuote('${r.docId}')">거절</button>`;
@@ -586,7 +591,7 @@
                 } else if (status === 'admin_cancelled' || status === 'auto_cancelled' || status === 'cancelled') {
                     actionHtml = `<span style="color:#ff4d4f; font-weight:700;">취소됨</span>`;
                 } else if (status === 'rejected') {
-                    actionHtml = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`; // 변경: 초기 거절 시 '거절됨'으로 표시
+                    actionHtml = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`;
                 } else {
                     actionHtml = `<span style="color:#888;">${escapeHtml(String(statusLabel))}</span>`;
                 }
