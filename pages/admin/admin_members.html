@@ -1188,7 +1188,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
         const comp = inactiveCompanies.find(c => c.uid === uid);
         if(!comp) return;
 
-        await admin.updateCompany(uid, { status: 'Active', isActive: true });
+        await admin.updateCompanyInfo(uid, { status: 'Active' });
         comp.status = 'Active';
         comp.isActive = 1;
 
