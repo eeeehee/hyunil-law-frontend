@@ -1169,7 +1169,7 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
         const comp = allCompanies.find(c => c.uid === currentCompId);
         if(!comp) return;
 
-        await admin.updateCompanyInfo(comp.uid, { status: 'Archived', isActive: false });
+        await admin.updateCompanyInfo(comp.uid, { status: 'Archived' });
         comp.status = 'Archived';
         comp.isActive = 0;
 
