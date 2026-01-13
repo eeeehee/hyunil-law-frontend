@@ -254,6 +254,7 @@
         </div>
         <input type="hidden" id="logOwnerUid">
         <input type="hidden" id="logCompanyName">
+        <input type="hidden" id="logBizNum">
 
         <textarea id="logContent" class="a-input" style="height:150px;" placeholder="상담 내용을 기록해주세요.&#13;&#10;(내용은 해당 회사의 자문 이력에 자동 저장됩니다)"></textarea>
 
@@ -710,6 +711,7 @@
 
         document.getElementById('logOwnerUid').value = meta.ownerUid;
         document.getElementById('logCompanyName').value = compName;
+        document.getElementById('logBizNum').value = bizNum; // 사업자번호 저장
         document.getElementById('logContent').value = "";
         document.getElementById('phoneLogModal').style.display = 'flex';
     }
@@ -719,6 +721,7 @@
     window.savePhoneLog = async function() {
         const ownerUid = document.getElementById('logOwnerUid').value;
         const compName = document.getElementById('logCompanyName').value;
+        const bizNum = document.getElementById('logBizNum').value; // 사업자번호 가져오기
         const content = document.getElementById('logContent').value;
 
         if(!content) return alert("상담 내용을 입력해주세요.");
@@ -729,6 +732,7 @@
                 title: "[전화상담] 상담 기록",
                 content: content,
                 companyName: compName,
+                authorBizNum: bizNum, // ✨ 사업자번호 명시
                 category: "phone_log",
                 status: "done"
             });
@@ -738,7 +742,7 @@
 
             alert("저장 및 차감되었습니다.");
             closeLogModal();
-            loadData();
+            await loadData();
         } catch(e) {
             console.error(e);
             alert("오류 발생: " + e.message);
