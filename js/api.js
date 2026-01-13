@@ -381,6 +381,14 @@ export const posts = {
         return await apiRequest(`/posts/${docId}/approve-department-change`, {
             method: 'PUT'
         });
+    },
+
+    // [NEW] 부서 변경 요청 거절
+    rejectDepartmentChange: async (docId, reason) => {
+        return await apiRequest(`/posts/${docId}/reject-department-change`, {
+            method: 'PUT',
+            body: JSON.stringify({ reason })
+        });
     }
 };
 

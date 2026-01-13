@@ -585,7 +585,7 @@
                             <td>${requestContentHtml}</td>
                             <td>
                                 <button class="btn-act ok" onclick="handleDeptChangeApproval('${req.docId}')">✓ 승인</button>
-                                <button class="btn-act no" onclick="alert('거절 기능은 구현 예정입니다.')">✕ 거절</button>
+                                <button class="btn-act no" onclick="handleDeptChangeRejection('${req.docId}')">✕ 거절</button>
                             </td>
                         </tr>
                     `;
@@ -597,7 +597,7 @@
             }
         }
 
-        // [REVISED] 개별 승인/거절 처리
+        // [REVISED] 개별 승인 처리
         window.handleDeptChangeApproval = async function(docId) {
             try {
                 if (!confirm('이 부서 변경 요청을 승인하시겠습니까?')) return;
@@ -609,6 +609,23 @@
                 await loadMembers();
             } catch (error) {
                 console.error('승인 처리 에러:', error);
+                alert('처리 중 오류가 발생했습니다: ' + error.message);
+            }
+        };
+
+        // [NEW] 부서 변경 거절 처리
+        window.handleDeptChangeRejection = async function(docId) {
+            try {
+                const reason = prompt('거절 사유를 입력하세요. (입력하지 않으면 "사유 없음"으로 처리됩니다)');
+                if (reason === null) return; // 사용자가 취소 버튼을 누른 경우
+
+                await posts.rejectDepartmentChange(docId, reason);
+                alert('❌ 요청이 거절되었습니다.');
+
+                // 목록 새로고침
+                await loadApprovalRequests();
+            } catch (error) {
+                console.error('거절 처리 에러:', error);
                 alert('처리 중 오류가 발생했습니다: ' + error.message);
             }
         };
