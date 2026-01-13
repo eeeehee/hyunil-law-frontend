@@ -83,6 +83,7 @@
         .st-waiting { background: #fff7e6; color: #fa8c16; border: 1px solid #ffe7ba; }
         .st-quoted { background: #e6f7ff; color: #096dd9; border: 1px solid #91d5ff; }
         .st-approved { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+        .st-rejected { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
         .st-change { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
         .st-member { background: #f0f5ff; color: #2f54eb; border: 1px solid #adc6ff; }
         .st-dept { background: #fff0f6; color: #c41d7f; border: 1px solid #ffadd2; }
@@ -768,10 +769,22 @@
                             contentDisplay = d.content || '내용 없음';
                         }
 
-                        actionButtons = `
-                            <button class="btn-action btn-approve" onclick="approveDepartmentChange('${d.docId}')">부서변경 승인</button>
-                            <button class="btn-action btn-reject" onclick="rejectDepartmentChange('${d.docId}')">거절</button>
-                        `;
+                        // ✅ 상태에 따른 배지 및 버튼 분기
+                        if (d.status === 'completed') {
+                            badge = '✅ 처리완료';
+                            badgeClass = 'st-approved';
+                            actionButtons = `<span style="color:#52c41a; font-weight:700;">승인됨</span>`;
+                        } else if (d.status === 'rejected') {
+                            badge = '❌ 거절완료';
+                            badgeClass = 'st-rejected';
+                            actionButtons = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`;
+                        } else {
+                            // pending 상태
+                            actionButtons = `
+                                <button class="btn-action btn-approve" onclick="approveDepartmentChange('${d.docId}')">부서변경 승인</button>
+                                <button class="btn-action btn-reject" onclick="rejectDepartmentChange('${d.docId}')">거절</button>
+                            `;
+                        }
                     } else {
                         // member_req: 기존 정보변경 요청
                         actionButtons = `
