@@ -571,7 +571,8 @@
 
                 requests.forEach(req => {
                     const requestData = JSON.parse(req.content || '{}');
-                    const requestContentHtml = `${requestData.fromDepartment || '미지정'} → <span class="req-highlight">${requestData.toDepartment || '미지정'}</span>`;
+                    // ✅ newDepartment 필드 사용 (member_info.html에서 저장하는 필드명)
+                    const requestContentHtml = `${requestData.fromDepartment || '미지정'} → <span class="req-highlight">${requestData.newDepartment || '미지정'}</span>`;
                     const dateStr = new Date(req.createdAt).toLocaleString('ko-KR');
 
                     tbody.innerHTML += `
