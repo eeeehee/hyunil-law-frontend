@@ -1022,19 +1022,37 @@
                     }
 
                     // 상태별 관리 컬럼 내용 구성
-                    if (d.status === 'completed' || d.status === 'approved') {
+                    if (d.status === 'completed' || d.status === 'approved' || d.status === 'rejected' || d.status === 'done') {
                         statusDisplayHtml = `<span style="color:#52c41a; font-weight:700;">승인됨</span>`;
-                        managementColumnContent = statusDisplayHtml + `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
-                    } else if (d.status === 'rejected') {
-                        statusDisplayHtml = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`;
-                        managementColumnContent = statusDisplayHtml + `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
-                    } else { // pending
+                        if (d.status === 'rejected') {
+                            statusDisplayHtml = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`;
+                        } else if (d.status === 'done' || d.status === 'completed') {
+                            statusDisplayHtml = `<span style="color:#52c41a; font-weight:700;">처리완료</span>`;
+                        }
+                        managementColumnContent = statusDisplayHtml;
+                        // 숨김 모드가 아닐 때만 숨기기 버튼 추가
+                        if (!showArchivedMode) {
+                            managementColumnContent += `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')" style="margin-left: 5px;">숨기기</button>`;
+                        }
+                    } else { // pending (대기중)
                         statusDisplayHtml = `<span style="color:#fa8c16; font-weight:700;">대기중</span>`;
-                        actionButtonsHtml = `
-                            <button class="btn-action btn-approve" onclick="approveDepartmentChange('${d.docId}')">승인</button>
-                            <button class="btn-action btn-reject" onclick="rejectDepartmentChange('${d.docId}')">거절</button>
-                        `;
-                        managementColumnContent = statusDisplayHtml + '<br>' + actionButtonsHtml + ` <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        actionButtonsHtml = ``; // 초기화
+
+                        if (d.category === 'member_req_internal' || d.category === 'member_req_admin') {
+                            actionButtonsHtml = `
+                                <button class="btn-action btn-approve" onclick="approveDepartmentChange('${d.docId}')">승인</button>
+                                <button class="btn-action btn-reject" onclick="rejectDepartmentChange('${d.docId}')">거절</button>
+                            `;
+                        } else { // 'member_req'
+                            actionButtonsHtml = `
+                                <button class="btn-action btn-approve" onclick="approveAndClear('${d.docId}', '${d.targetUid || d.authorUid}')">승인(정보변경)</button>
+                            `;
+                        }
+                        managementColumnContent = statusDisplayHtml + '<br>' + actionButtonsHtml;
+                        // 숨김 모드가 아닐 때만 숨기기 버튼 추가
+                        if (!showArchivedMode) {
+                            managementColumnContent += ` <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        }
                     }
 
                 } else { // 'member_req' (일반 정보변경 요청)
@@ -1053,13 +1071,19 @@
                     // 상태별 관리 컬럼 내용 구성
                     if (d.status === 'completed' || d.status === 'approved' || d.status === 'done') {
                          statusDisplayHtml = `<span style="color:#52c41a; font-weight:700;">처리완료</span>`;
-                         managementColumnContent = statusDisplayHtml + `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                         managementColumnContent = statusDisplayHtml;
+                         if (!showArchivedMode) { // 숨김 모드가 아닐 때만 숨기기 버튼 추가
+                            managementColumnContent += `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')" style="margin-left: 5px;">숨기기</button>`;
+                         }
                     } else { // pending
                         statusDisplayHtml = `<span style="color:#fa8c16; font-weight:700;">대기중</span>`;
                         actionButtonsHtml = `
                             <button class="btn-action btn-approve" onclick="approveAndClear('${d.docId}', '${d.targetUid || d.authorUid}')">승인(정보변경)</button>
                         `;
-                        managementColumnContent = statusDisplayHtml + '<br>' + actionButtonsHtml + ` <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        managementColumnContent = statusDisplayHtml + '<br>' + actionButtonsHtml;
+                        if (!showArchivedMode) { // 숨김 모드가 아닐 때만 숨기기 버튼 추가
+                            managementColumnContent += ` <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        }
                     }
                 }
 
