@@ -961,7 +961,7 @@
             }
         }
         
-        // ✅ 3. 직원 권한 요청 페이지 렌더링 함수 (기존 UI 복원)
+        // ✅ 3. 직원 권한 요청 페이지 렌더링 함수 (유형-상태 분리 및 UI 개선)
         function renderMemberPage() {
             const pageData = getCurrentPageData('member');
             const tbody = document.getElementById('list-member');
@@ -990,67 +990,88 @@
                     `;
                 }
 
-                let badge, badgeClass, contentDisplay, actionButtons;
-                let parsedFileUrl = null, parsedFileName = null;
+                let typeBadgeText, typeBadgeClass, contentDisplay; // 유형 관련
+                let actionButtonsHtml = ''; // 액션 버튼
+                let statusDisplayHtml = ''; // 상태 표시
+                let managementColumnContent = ''; // 최종 '승인 관리' 컬럼 내용
 
-                // 카테고리별 분기 (기존 로직 복원)
+                // 카테고리별 분기 (유형 결정 및 내용 파싱)
                 if (d.category === 'member_req_internal' || d.category === 'member_req_admin') {
-                    badge = '부서/직급 변경';
-                    badgeClass = 'st-dept';
+                    typeBadgeText = '부서/직급 변경';
+                    typeBadgeClass = 'st-dept';
                     try {
-                        const parsed = JSON.parse(d.content);
-                        contentDisplay = `${parsed.fromDepartment || '미지정'} &rarr; ${parsed.newDepartment || '미지정'}<br><small style="color:#666;">요청자: ${parsed.requesterName || '미지정'} / 대상: ${parsed.requestTo === 'ceo' ? '대표' : '관리자'}</small>`;
+                        const parsed = JSON.parse(d.content || '{}');
+                        contentDisplay = `
+                            <strong>[From]</strong> ${parsed.fromDepartment || '미지정'} &rarr; ${parsed.newDepartment || '미지정'}<br>
+                            <small style="color:#666;">요청자: ${parsed.requesterName || '미지정'} / 대상: ${parsed.requestTo === 'ceo' ? '대표' : '관리자'}</small>
+                        `;
+                        // 파일 첨부 링크 처리 (기존 로직 유지)
+                        let parsedFileUrl = null, parsedFileName = null;
                         if (parsed.fileUrl) {
                             parsedFileUrl = parsed.fileUrl;
                             parsedFileName = parsed.fileName || '증빙서류';
                         }
+                        const finalFileUrl = parsedFileUrl || d.fileUrl;
+                        if (finalFileUrl) {
+                            const displayName = parsedFileName || '증빙서류';
+                            contentDisplay += `<br><a href="${getApiBaseUrl().replace('/api', '')}${finalFileUrl}" target="_blank" style="color:#2c5bf2; font-weight:700; text-decoration:underline;">[📄 ${displayName}]</a>`;
+                        }
+
                     } catch (e) {
                         contentDisplay = d.content || '내용 없음';
                     }
 
+                    // 상태별 관리 컬럼 내용 구성
                     if (d.status === 'completed' || d.status === 'approved') {
-                        badge = '처리완료';
-                        badgeClass = 'st-approved';
-                        actionButtons = `<span style="color:#52c41a; font-weight:700;">승인됨</span>`;
+                        statusDisplayHtml = `<span style="color:#52c41a; font-weight:700;">승인됨</span>`;
+                        managementColumnContent = statusDisplayHtml + `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                     } else if (d.status === 'rejected') {
-                        badge = '거절됨';
-                        badgeClass = 'st-rejected';
-                        actionButtons = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`;
+                        statusDisplayHtml = `<span style="color:#ff4d4f; font-weight:700;">거절됨</span>`;
+                        managementColumnContent = statusDisplayHtml + `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                     } else { // pending
-                        actionButtons = `
+                        statusDisplayHtml = `<span style="color:#fa8c16; font-weight:700;">대기중</span>`;
+                        actionButtonsHtml = `
                             <button class="btn-action btn-approve" onclick="approveDepartmentChange('${d.docId}')">승인</button>
                             <button class="btn-action btn-reject" onclick="rejectDepartmentChange('${d.docId}')">거절</button>
                         `;
+                        managementColumnContent = statusDisplayHtml + '<br>' + actionButtonsHtml + ` <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                     }
-                } else { // 'member_req'
-                    badge = '정보변경 요청';
-                    badgeClass = 'st-member';
-                    contentDisplay = d.content || '내용 없음';
-                    actionButtons = `
-                        <button class="btn-action btn-approve" onclick="approveAndClear('${d.docId}', '${d.targetUid || d.authorUid}')">승인(정보변경)</button>
-                    `;
-                }
 
-                // 공통적으로 숨기기 버튼 추가
-                actionButtons += ` <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                } else { // 'member_req' (일반 정보변경 요청)
+                    typeBadgeText = '정보변경 요청';
+                    typeBadgeClass = 'st-member';
+                    try {
+                        const parsed = JSON.parse(d.content || '{}');
+                        contentDisplay = `
+                            <strong>[요청]</strong> ${parsed.name || ''} (${parsed.email || ''})<br>
+                            <strong style="color:#2c5bf2;">[권한]</strong> ${parsed.role || '직원'}
+                        `;
+                    } catch (e) {
+                        contentDisplay = d.content || '내용 없음';
+                    }
 
-                let fileLink = "";
-                const finalFileUrl = parsedFileUrl || d.fileUrl;
-                if (finalFileUrl) {
-                    const displayName = parsedFileName || '증빙서류';
-                    fileLink = `<a href="${getApiBaseUrl().replace('/api', '')}${finalFileUrl}" target="_blank" style="color:#2c5bf2; font-weight:700; text-decoration:underline;">[📄 ${displayName}]</a>`;
+                    // 상태별 관리 컬럼 내용 구성
+                    if (d.status === 'completed' || d.status === 'approved' || d.status === 'done') {
+                         statusDisplayHtml = `<span style="color:#52c41a; font-weight:700;">처리완료</span>`;
+                         managementColumnContent = statusDisplayHtml + `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                    } else { // pending
+                        statusDisplayHtml = `<span style="color:#fa8c16; font-weight:700;">대기중</span>`;
+                        actionButtonsHtml = `
+                            <button class="btn-action btn-approve" onclick="approveAndClear('${d.docId}', '${d.targetUid || d.authorUid}')">승인(정보변경)</button>
+                        `;
+                        managementColumnContent = statusDisplayHtml + '<br>' + actionButtonsHtml + ` <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                    }
                 }
 
                 return `
                     <tr>
-                        <td><span class="st-badge ${badgeClass}">${badge}</span></td>
+                        <td><span class="st-badge ${typeBadgeClass}">${typeBadgeText}</span></td> <!-- 유형 표시 -->
                         <td>${companyName}<br>(${authorName})</td>
                         <td>
-                            <strong>${contentDisplay}</strong><br>
-                            ${fileLink}
+                            ${contentDisplay}
                         </td>
                         <td>${date}</td>
-                        <td>${actionButtons}</td>
+                        <td>${managementColumnContent}</td> <!-- 상태 및 관리 버튼 -->
                     </tr>`;
             }).join('');
 
