@@ -102,13 +102,6 @@
         /* 탭 컨텐츠 제어 */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-
-        /* 페이지네이션 스타일 */
-        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; }
-        .pagination-btn { padding: 8px 16px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; transition: 0.2s; }
-        .pagination-btn:hover:not(:disabled) { background: #f0f0f0; border-color: #bbb; }
-        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .pagination-info { font-size: 14px; color: #666; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -155,7 +148,6 @@
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
             </table>
-            <div id="pagination-consult" class="pagination-container" style="display:none; justify-content:center; gap:10px; margin-top:20px;"></div>
         </div>
 
         <div id="tab-payment" class="tab-content">
@@ -173,7 +165,6 @@
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
             </table>
-            <div id="pagination-payment" class="pagination-container" style="display:none; justify-content:center; gap:10px; margin-top:20px;"></div>
         </div>
 
         <div id="tab-member" class="tab-content">
@@ -191,7 +182,6 @@
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
             </table>
-            <div id="pagination-member" class="pagination-container" style="display:none; justify-content:center; gap:10px; margin-top:20px;"></div>
         </div>
 
         <div id="tab-guest" class="tab-content">
@@ -201,7 +191,6 @@
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
             </table>
-            <div id="pagination-guest" class="pagination-container" style="display:none; justify-content:center; gap:10px; margin-top:20px;"></div>
         </div>
 
     </main>
@@ -211,13 +200,6 @@
 
         // ✅ 숨긴 내역 보기 상태 관리
         let showArchivedMode = false;
-
-        // ✅ 페이지네이션 전역 변수
-        const ITEMS_PER_PAGE = 10;
-        let gConsultRequests = [], gCurrentConsultPage = 1;
-        let gPaymentRequests = [], gCurrentPaymentPage = 1;
-        let gMemberRequests = [], gCurrentMemberPage = 1;
-        let gGuestRequests = [], gCurrentGuestPage = 1;
 
         // ✅ 숨긴 내역 보기 토글 함수
         window.toggleArchivedView = async function() {
@@ -332,24 +314,386 @@
             ]);
         }
 
-        // 1. 자문 신청 로드
-        async function loadConsultRequests() {
+        // 1. 결제/요금제 변경 요청 로드
+        async function loadPaymentRequests() {
             try {
-                const excludeCategories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote', 'member_req', 'member_req_internal', 'member_req_admin', 'guest'];
-                const result = await posts.getAll({ limit: 200 });
-                let list = (result.posts || []).filter(p => !excludeCategories.includes(p.category));
+                // ✅ 백엔드 posts.getAll은 category를 1개만 지원 (AND p.category = ?)
+                // 그래서 결제/요금제 관련 카테고리는 개별 조회 후 합칩니다.
+                const categories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote'];
 
-                // 숨긴 내역 모드에 따라 필터링
-                if (showArchivedMode) {
-                    list = list.filter(d => d.status === 'archived');
-                } else {
-                    list = list.filter(d => d.status !== 'archived');
+                const results = await Promise.all(
+                    categories.map(cat => posts.getAll({ category: cat, limit: 200 }))
+                );
+
+                // 합치기 + 중복 제거(docId 기준)
+                const map = new Map();
+                results.forEach(r => (r.posts || []).forEach(p => {
+                    // ✅ 숨긴 내역 모드에 따라 필터링
+                    if (showArchivedMode) {
+                        // 숨긴 내역 모드: archived 상태만 표시
+                        if (p.status === 'archived') {
+                            map.set(p.docId, p);
+                        }
+                    } else {
+                        // 일반 모드: archived만 제외 (done, completed는 표시)
+                        if (p.status !== 'archived') {
+                            map.set(p.docId, p);
+                        }
+                    }
+                }));
+                const list = Array.from(map.values())
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                // 자동 취소 로직
+                const now = new Date();
+                const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
+                const autoCancelPromises = [];
+
+                list.forEach(item => {
+                    if (item.status === 'quoted' && item.quotedAt && new Date(item.quotedAt) < tenDaysAgo) {
+                        console.log(`⏳ 10일 초과된 견적 자동 취소 처리: ${item.docId}`);
+                        autoCancelPromises.push(
+                            posts.update(item.docId, { status: 'auto_cancelled' })
+                        );
+                        // 화면 즉시 반영을 위해 상태 변경
+                        item.status = 'auto_cancelled';
+                    }
+                });
+
+                if (autoCancelPromises.length > 0) {
+                    await Promise.all(autoCancelPromises);
+                    console.log(`✅ 총 ${autoCancelPromises.length}건 자동 취소 완료`);
                 }
 
-                gConsultRequests = list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                document.getElementById('cnt-consult').innerText = gConsultRequests.length;
-                gCurrentConsultPage = 1;
-                renderConsultPage();
+                document.getElementById('cnt-payment').innerText = list.length;
+                const tbody = document.getElementById('list-payment');
+
+                if (list.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#999; padding:30px;">요청 내역이 없습니다.</td></tr>`;
+                    return;
+                }
+
+                // 요금제 금액 매핑
+                const PLANS = {
+                    'Basic': { price: 290000 },
+                    'Standard': { price: 390000 },
+                    'Premium': { price: 590000 },
+                    'Business': { price: 990000 }
+                };
+
+                tbody.innerHTML = list.map(d => {
+                    let badge = '';
+                    let descHtml = '';
+                    let priceText = '-';
+                    let statusHtml = '';
+                    let actionHtml = '';
+
+                    // ✅ 숨긴 내역인 경우 복원 버튼만 표시
+                    if (showArchivedMode && d.status === 'archived') {
+                        badge = '<span class="st-badge" style="background:#e0e0e0; color:#666;">📦 숨김</span>';
+                        descHtml = d.title || d.content || '(내용 없음)';
+
+                        // 원래 상태 표시
+                        const originalStatus = d.previousStatus || d.status;
+                        const statusLabel = originalStatus === 'done' ? '완료' :
+                                          originalStatus === 'completed' ? '처리완료' :
+                                          originalStatus === 'approved' ? '승인됨' :
+                                          originalStatus === 'quoted' ? '견적발송' :
+                                          originalStatus === 'pending' ? '접수' : originalStatus;
+                        statusHtml = `<span style="color:#888;">원래: ${statusLabel}</span>`;
+
+                        // 디버깅: previousStatus 값을 콘솔에 출력
+                        console.log(`📦 숨긴 항목 - docId: ${d.docId}, status: ${d.status}, previousStatus: ${d.previousStatus || 'null'}`);
+
+                        actionHtml = `<button class="btn-action btn-approve" onclick="unarchiveRequest('${d.docId}')">복원</button>`;
+
+                        const userName = d.userManagerName || d.managerName || '-';
+                        const company = d.companyName || d.userCompanyName || '-';
+                        const created = d.createdAt ? new Date(d.createdAt).toLocaleString() : '-';
+
+                        return `
+                            <tr style="opacity:0.6;">
+                                <td>${badge}</td>
+                                <td>
+                                    <div style="font-weight:700;">${company}</div>
+                                    <div style="color:#888; font-size:12px;">담당: ${userName}</div>
+                                </td>
+                                <td>${descHtml}</td>
+                                <td>
+                                    <div>${priceText}</div>
+                                    <div style="font-size:12px; color:#888;">${created}</div>
+                                    ${statusHtml}
+                                </td>
+                                <td>${actionHtml}</td>
+                            </tr>
+                        `;
+                    }
+
+                    // 유형 배지/설명
+                    if (d.category === 'plan_change') {
+                        badge = '<span class="st-badge st-change">요금제 변경</span>';
+
+                        // title 또는 content에서 목표 요금제 추출
+                        let targetPlan = '';
+                        const m = (d.title || '').match(/변경\s*:\s*(.+)$/);
+                        targetPlan = m ? m[1] : (d.title || '');
+
+                        descHtml = `요금제 변경: <strong>${targetPlan || '알 수 없음'}</strong>`;
+                        const planPrice = PLANS[targetPlan]?.price || 0;
+                        priceText = planPrice > 0 ? `${planPrice.toLocaleString()}원` : '-';
+
+                        if (d.status === 'done' || d.status === 'completed') {
+                            statusHtml = `<span style="color:#52c41a; font-weight:700;">변경완료</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">사용자 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else {
+                            statusHtml = `<span style="color:#722ed1; font-weight:700;">승인 대기</span>`;
+                            actionHtml = `
+                                <button class="btn-action btn-approve" onclick="approvePlanChange('${d.docId}', '${d.authorUid}', '${targetPlan}')">승인</button>
+                                <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
+                            `;
+                        }
+                    } else if (d.category === 'payment_method') {
+                        badge = '<span class="st-badge st-pay">결제수단</span>';
+                        descHtml = `결제수단 등록 요청`;
+
+                        if (d.status === 'done' || d.status === 'completed') {
+                            statusHtml = `<span style="color:#52c41a; font-weight:700;">처리완료</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">사용자 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else {
+                            statusHtml = `<span style="color:#1890ff; font-weight:700;">접수</span>`;
+                            actionHtml = `
+                                <button class="btn-action btn-approve" onclick="markAsCompleted('${d.docId}')">처리완료</button>
+                                <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
+                            `;
+                        }
+                    } else if (d.category === 'extra_usage_quote') {
+                        badge = '<span class="st-badge st-change">💸 추가이용견적</span>';
+                        descHtml = `추가 이용/견적 요청`;
+                        // 견적 금액 표시 (관리자 발송 후)
+                        const quoted = (d.quotedPrice ?? d.quotePrice);
+                        priceText = quoted ? `${Number(quoted).toLocaleString()}원` : '-';
+
+                        // 상태별 표시
+                        if (d.status === 'done' || d.status === 'completed') {
+                            statusHtml = `<span style="color:#52c41a; font-weight:700;">처리완료</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'quoted') {
+                            statusHtml = `<span style="color:#fa8c16; font-weight:700;">견적 확인중</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="cancelQuoteByAdmin('${d.docId}')">취소</button>`;
+                        } else if (d.status === 'approved') {
+                            statusHtml = `<span style="color:#52c41a; font-weight:700;">✓ 승인됨</span>`;
+                            actionHtml = `
+                                <button class="btn-action btn-approve" onclick="markAsCompleted('${d.docId}')">처리완료</button>
+                                <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
+                            `;
+                        } else if (d.status === 'rejected') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">✗ 거절됨</span>`;
+                            actionHtml = `
+                                <button class="btn-action btn-approve" onclick="markAsCompleted('${d.docId}')">확인완료</button>
+                                <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
+                            `;
+                        } else if (d.status === 'cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">사용자 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'auto_cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">자동 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else if (d.status === 'admin_cancelled') {
+                            statusHtml = `<span style="color:#ff4d4f; font-weight:700;">관리자 취소</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else {
+                            statusHtml = `<span style="color:#1890ff; font-weight:700;">접수</span>`;
+                            actionHtml = `<button class="btn-action btn-approve" onclick="openQuoteModal('${d.docId}')">견적 발송</button>`;
+                        }
+                    } else {
+                        // payment_request 등
+                        badge = '<span class="st-badge st-pay">결제요청</span>';
+                        descHtml = d.title || '결제 요청';
+
+                        if (d.status === 'done' || d.status === 'completed') {
+                            statusHtml = `<span style="color:#52c41a; font-weight:700;">처리완료</span>`;
+                            actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
+                        } else {
+                            statusHtml = `<span style="color:#1890ff; font-weight:700;">접수</span>`;
+                            actionHtml = `
+                                <button class="btn-action btn-approve" onclick="markAsCompleted('${d.docId}')">처리완료</button>
+                                <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
+                            `;
+                        }
+                    }
+
+                    const userName = d.userManagerName || d.managerName || '-';
+                    const company = d.companyName || d.userCompanyName || '-';
+                    const created = d.createdAt ? new Date(d.createdAt).toLocaleString() : '-';
+
+                    return `
+                        <tr>
+                            <td>${badge}</td>
+                            <td>
+                                <div style="font-weight:700;">${company}</div>
+                                <div style="color:#888; font-size:12px;">담당: ${userName}</div>
+                            </td>
+                            <td><a href="#" onclick="showRequestDetail('${d.docId}'); return false;" style="color:#1890ff; text-decoration:underline; cursor:pointer;">${descHtml}</a></td>
+                            <td>
+                                <div>${priceText}</div>
+                                <div style="font-size:12px; color:#888;">${created}</div>
+                                ${statusHtml}
+                            </td>
+                            <td>${actionHtml}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('결제/요금제 요청 로드 실패:', error);
+                document.getElementById('list-payment').innerHTML =
+                    `<tr><td colspan="5" style="text-align:center; color:red; padding:30px;">데이터 로드 실패</td></tr>`;
+            }
+        }
+
+
+
+        // (FIX) 중복/깨진 결제요청 렌더링 블록 제거됨
+
+        async function loadConsultRequests() {
+            try {
+                // ✅ 숨긴 내역 모드에 따라 다른 상태 조회
+                const result = await posts.getAll({ limit: 200 });
+                let list = result.posts || [];
+
+                // 결제/요금제/부서변경 관련 카테고리 제외 (전화상담 요청은 포함)
+                const excludeCategories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote', 'member_req', 'member_req_internal', 'member_req_admin'];
+                list = list.filter(d => !excludeCategories.includes(d.category));
+
+                // ✅ 숨긴 내역 모드에 따라 필터링
+                if (showArchivedMode) {
+                    // 숨긴 내역 모드: archived만
+                    list = list.filter(d => d.status === 'archived');
+                } else {
+                    // 일반 모드: pending, waiting 상태 + 추가질문이 있는 analyzing 상태
+                    list = list.filter(d => {
+                        // pending, waiting은 무조건 표시
+                        if (d.status === 'pending' || d.status === 'waiting') {
+                            return true;
+                        }
+
+                        // analyzing 상태 중에서 추가질문이 있는 경우만 표시
+                        if (d.status === 'analyzing' || d.status === 'processing') {
+                            const hasFollowup = d.content && d.content.includes('[FOLLOWUP_SEPARATOR]');
+                            if (!hasFollowup) return false;
+
+                            // 추가질문과 추가답변 개수 확인
+                            const questions = d.content.split('[FOLLOWUP_SEPARATOR]');
+                            const followupCount = questions.length - 1;
+
+                            let answerCount = 0;
+                            if (d.answer && d.answer.includes('[FOLLOWUP_ANSWER_SEPARATOR]')) {
+                                answerCount = d.answer.split('[FOLLOWUP_ANSWER_SEPARATOR]').length;
+                            } else if (d.answer) {
+                                answerCount = 1;
+                            }
+
+                            // 추가질문이 추가답변보다 많으면 답변 대기중
+                            return followupCount > (answerCount - 1);
+                        }
+
+                        return false;
+                    });
+                }
+
+                document.getElementById('cnt-consult').innerText = list.length;
+                const tbody = document.getElementById('list-consult');
+
+                if (list.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#999; padding:30px;">대기 중인 자문 요청이 없습니다.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = list.map(d => {
+                    // ✅ 숨긴 내역인 경우 복원 버튼만 표시
+                    if (showArchivedMode && d.status === 'archived') {
+                        const companyName = d.userCompanyName || d.companyName || '알 수 없음';
+                        const authorName = d.userManagerName || d.managerName || '알 수 없음';
+                        const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ko-KR') : '-';
+
+                        return `
+                            <tr style="opacity:0.6;">
+                                <td><span class="st-badge" style="background:#e0e0e0; color:#666;">📦 숨김</span></td>
+                                <td>${companyName} (${authorName})</td>
+                                <td>${d.title || '제목 없음'}</td>
+                                <td>${date}</td>
+                                <td><button class="btn-action btn-approve" onclick="unarchiveRequest('${d.docId}')">복원</button></td>
+                            </tr>
+                        `;
+                    }
+
+                    // ✅ 추가질문 여부 확인
+                    const hasFollowup = d.content && d.content.includes('[FOLLOWUP_SEPARATOR]');
+                    let isFollowupWaiting = false;
+
+                    if (hasFollowup) {
+                        const questions = d.content.split('[FOLLOWUP_SEPARATOR]');
+                        const followupCount = questions.length - 1;
+
+                        let answerCount = 0;
+                        if (d.answer && d.answer.includes('[FOLLOWUP_ANSWER_SEPARATOR]')) {
+                            answerCount = d.answer.split('[FOLLOWUP_ANSWER_SEPARATOR]').length;
+                        } else if (d.answer) {
+                            answerCount = 1;
+                        }
+
+                        isFollowupWaiting = followupCount > (answerCount - 1);
+                    }
+
+                    // 카테고리와 상태에 따른 배지
+                    let badge;
+                    if (isFollowupWaiting) {
+                        badge = '<span class="st-badge st-progress">💬 추가질문</span>';
+                    } else if (d.category === 'phone_log') {
+                        badge = '<span class="st-badge st-change">📞 전화상담 기록</span>';
+                    } else if (d.category === 'phone_request') {
+                        badge = '<span class="st-badge st-change">📞 전화상담 요청</span>';
+                    } else if (d.category === 'debt') {
+                        badge = '<span class="st-badge st-waiting">💼 채무</span>';
+                    } else if (d.category === 'contract') {
+                        badge = '<span class="st-badge st-waiting">📄 계약</span>';
+                    } else {
+                        badge = '<span class="st-badge st-waiting">📝 서면자문</span>';
+                    }
+
+                    const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ko-KR') : '-';
+
+                    // 작성자 정보 (userCompanyName과 userManagerName 사용)
+                    const companyName = d.userCompanyName || d.companyName || '알 수 없음';
+                    const authorName = d.userManagerName || d.managerName || '알 수 없음';
+
+                    // 버튼 결정: 추가질문이면 "답변작성", pending/waiting이면 "접수 승인"
+                    let actionButton = '';
+                    if (isFollowupWaiting) {
+                        actionButton = `<button class="btn-action btn-approve" onclick="goToAdminPage('${d.docId}')">답변작성</button>`;
+                    } else if (d.status === 'pending' || d.status === 'waiting') {
+                        actionButton = `<button class="btn-action btn-approve" onclick="acceptConsult('${d.docId}')">접수 승인</button>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td>${badge}</td>
+                            <td>${companyName} (${authorName})</td>
+                            <td><a href="#" onclick="showRequestDetail('${d.docId}'); return false;" style="color:#1890ff; text-decoration:underline; cursor:pointer;">${d.title || '제목 없음'}</a></td>
+                            <td>${date}</td>
+                            <td>
+                                ${actionButton}
+                                <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
+                            </td>
+                        </tr>`;
+                }).join('');
+
             } catch (error) {
                 console.error('자문 요청 로드 실패:', error);
                 document.getElementById('list-consult').innerHTML =
@@ -357,168 +701,26 @@
             }
         }
 
-        function renderConsultPage() {
-            const tbody = document.getElementById('list-consult');
-            const paginationContainer = document.getElementById('pagination-consult');
-            
-            if (gConsultRequests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#999; padding:30px;">요청 내역이 없습니다.</td></tr>`;
-                paginationContainer.style.display = 'none';
-                return;
-            }
-
-            const totalPages = Math.ceil(gConsultRequests.length / ITEMS_PER_PAGE);
-            const startIndex = (gCurrentConsultPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-            const pagedItems = gConsultRequests.slice(startIndex, endIndex);
-
-            tbody.innerHTML = pagedItems.map(d => {
-                let badge;
-                if (d.content && d.content.includes('[FOLLOWUP_SEPARATOR]')) {
-                    badge = '<span class="st-badge st-progress">💬 추가질문</span>';
-                } else {
-                    badge = '<span class="st-badge st-waiting">📝 서면자문</span>';
-                }
-                const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ko-KR') : '-';
-                const companyName = d.userCompanyName || d.companyName || '알 수 없음';
-                const authorName = d.userManagerName || d.managerName || '알 수 없음';
-                let actionButton = `<button class="btn-action btn-approve" onclick="acceptConsult('${d.docId}')">접수 승인</button>`;
-
-                return `
-                    <tr>
-                        <td>${badge}</td>
-                        <td>${companyName} (${authorName})</td>
-                        <td><a href="#" onclick="showRequestDetail('${d.docId}'); return false;" style="color:#1890ff; text-decoration:underline; cursor:pointer;">${d.title || '제목 없음'}</a></td>
-                        <td>${date}</td>
-                        <td>
-                            ${actionButton}
-                            <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
-                        </td>
-                    </tr>`;
-            }).join('');
-            
-            if (totalPages > 1) {
-                paginationContainer.style.display = 'flex';
-                let paginationHtml = `
-                    <button class="pagination-btn" onclick="goToConsultPage(1)" ${gCurrentConsultPage === 1 ? 'disabled' : ''}>처음</button>
-                    <button class="pagination-btn" onclick="goToConsultPage(${gCurrentConsultPage - 1})" ${gCurrentConsultPage === 1 ? 'disabled' : ''}>이전</button>
-                    <span class="pagination-info">${gCurrentConsultPage} / ${totalPages}</span>
-                    <button class="pagination-btn" onclick="goToConsultPage(${gCurrentConsultPage + 1})" ${gCurrentConsultPage === totalPages ? 'disabled' : ''}>다음</button>
-                    <button class="pagination-btn" onclick="goToConsultPage(${totalPages})" ${gCurrentConsultPage === totalPages ? 'disabled' : ''}>마지막</button>
-                `;
-                paginationContainer.innerHTML = paginationHtml;
-            } else {
-                paginationContainer.style.display = 'none';
-            }
-        }
-        
-        window.goToConsultPage = function(page) {
-            const totalPages = Math.ceil(gConsultRequests.length / ITEMS_PER_PAGE);
-            if (page >= 1 && page <= totalPages) {
-                gCurrentConsultPage = page;
-                renderConsultPage();
-            }
-        }
-
-        async function loadPaymentRequests() {
-            try {
-                const categories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote'];
-                const results = await Promise.all(
-                    categories.map(cat => posts.getAll({ category: cat, limit: 200 }))
-                );
-                const map = new Map();
-                results.forEach(r => (r.posts || []).forEach(p => {
-                    if (showArchivedMode) {
-                        if (p.status === 'archived') map.set(p.docId, p);
-                    } else {
-                        if (p.status !== 'archived') map.set(p.docId, p);
-                    }
-                }));
-                gPaymentRequests = Array.from(map.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                
-                document.getElementById('cnt-payment').innerText = gPaymentRequests.length;
-                gCurrentPaymentPage = 1;
-                renderPaymentPage();
-            } catch (error) {
-                console.error('결제/요금제 요청 로드 실패:', error);
-                document.getElementById('list-payment').innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:30px;">데이터 로드 실패</td></tr>`;
-            }
-        }
-
-        function renderPaymentPage() {
-            const tbody = document.getElementById('list-payment');
-            const paginationContainer = document.getElementById('pagination-payment');
-
-            if (gPaymentRequests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#999; padding:30px;">요청 내역이 없습니다.</td></tr>`;
-                paginationContainer.style.display = 'none';
-                return;
-            }
-
-            const totalPages = Math.ceil(gPaymentRequests.length / ITEMS_PER_PAGE);
-            const startIndex = (gCurrentPaymentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-            const pagedItems = gPaymentRequests.slice(startIndex, endIndex);
-
-            tbody.innerHTML = pagedItems.map(d => {
-                let badge = '', descHtml = '', priceText = '-', statusHtml = '', actionHtml = '';
-                if (d.category === 'plan_change') {
-                    badge = '<span class="st-badge st-change">요금제 변경</span>';
-                    let targetPlan = (d.title || '').match(/변경\s*:\s*(.+)$/)?.[1] || d.title || '';
-                    descHtml = `요금제 변경: <strong>${targetPlan}</strong>`;
-                } else if (d.category === 'extra_usage_quote') {
-                    badge = '<span class="st-badge st-quoted">💸 추가견적</span>';
-                    descHtml = `추가 이용/견적 요청`;
-                } else {
-                    badge = '<span class="st-badge st-pay">결제요청</span>';
-                    descHtml = d.title || '결제 요청';
-                }
-                const userName = d.userManagerName || d.managerName || '-';
-                const company = d.companyName || d.userCompanyName || '-';
-
-                return `
-                    <tr>
-                        <td>${badge}</td>
-                        <td>
-                            <div style="font-weight:700;">${company}</div>
-                            <div style="color:#888; font-size:12px;">담당: ${userName}</div>
-                        </td>
-                        <td>${descHtml}</td>
-                        <td>...</td>
-                        <td>...</td>
-                    </tr>
-                `;
-            }).join('');
-
-            if (totalPages > 1) {
-                paginationContainer.style.display = 'flex';
-                let paginationHtml = `
-                    <button class="pagination-btn" onclick="goToPaymentPage(1)" ${gCurrentPaymentPage === 1 ? 'disabled' : ''}>처음</button>
-                    <button class="pagination-btn" onclick="goToPaymentPage(${gCurrentPaymentPage - 1})" ${gCurrentPaymentPage === 1 ? 'disabled' : ''}>이전</button>
-                    <span class="pagination-info">${gCurrentPaymentPage} / ${totalPages}</span>
-                    <button class="pagination-btn" onclick="goToPaymentPage(${gCurrentPaymentPage + 1})" ${gCurrentPaymentPage === totalPages ? 'disabled' : ''}>다음</button>
-                    <button class="pagination-btn" onclick="goToPaymentPage(${totalPages})" ${gCurrentPaymentPage === totalPages ? 'disabled' : ''}>마지막</button>
-                `;
-                paginationContainer.innerHTML = paginationHtml;
-            } else {
-                paginationContainer.style.display = 'none';
-            }
-        }
-
-        window.goToPaymentPage = function(page) {
-            const totalPages = Math.ceil(gPaymentRequests.length / ITEMS_PER_PAGE);
-            if (page >= 1 && page <= totalPages) {
-                gCurrentPaymentPage = page;
-                renderPaymentPage();
-            }
-        }
-
-        // 3. 직원 권한 요청 로드
+        // 3. 직원 권한 요청 로드 (member_req, member_req_admin만 - 대표자 승인 요청 제외)
         async function loadMemberRequests() {
             try {
-                // ✅ [REVISED] 'member_req_internal' 카테고리를 조회 목록에서 제외
-                const result = await posts.getAll({ category: 'member_req,member_req_admin', limit: 200 });
+                // ✅ member_req_internal은 관리자 승인 요청만 필터링 필요, member_req_admin은 모두 관리자 승인
+                const result = await posts.getAll({ category: 'member_req,member_req_internal,member_req_admin', limit: 200 });
                 let list = result.posts || [];
+
+                // ✅ member_req_internal 중 대표자 승인 요청(requestTo: 'ceo')은 제외
+                list = list.filter(d => {
+                    if (d.category === 'member_req_internal') {
+                        try {
+                            const parsed = JSON.parse(d.content || '{}');
+                            // requestTo가 'admin'인 경우만 표시 (대표자 승인은 제외)
+                            return parsed.requestTo === 'admin';
+                        } catch (e) {
+                            return true; // JSON 파싱 실패 시 표시
+                        }
+                    }
+                    return true; // member_req, member_req_admin은 모두 표시
+                });
 
                 // ✅ 숨긴 내역 모드에 따라 필터링
                 if (showArchivedMode) {
