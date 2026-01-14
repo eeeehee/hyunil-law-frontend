@@ -321,6 +321,31 @@
             ]);
         }
 
+        // 1. 자문 신청 로드
+        async function loadConsultRequests() {
+            try {
+                const excludeCategories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote', 'member_req', 'member_req_internal', 'member_req_admin', 'guest'];
+                const result = await posts.getAll({ limit: 200 });
+                let list = (result.posts || []).filter(p => !excludeCategories.includes(p.category));
+
+                // 숨긴 내역 모드에 따라 필터링
+                if (showArchivedMode) {
+                    list = list.filter(d => d.status === 'archived');
+                } else {
+                    list = list.filter(d => d.status !== 'archived');
+                }
+
+                gConsultRequests = list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                document.getElementById('cnt-consult').innerText = gConsultRequests.length;
+                gCurrentConsultPage = 1;
+                renderConsultPage();
+            } catch (error) {
+                console.error('자문 요청 로드 실패:', error);
+                document.getElementById('list-consult').innerHTML =
+                    `<tr><td colspan="5" style="text-align:center; color:red; padding:30px;">데이터 로드 실패</td></tr>`;
+            }
+        }
+
         function renderConsultPage() {
             const tbody = document.getElementById('list-consult');
             const paginationContainer = document.getElementById('pagination-consult');
