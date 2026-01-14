@@ -919,7 +919,22 @@
                         if (p.status !== 'archived') map.set(p.docId, p);
                     }
                 }));
-                const list = Array.from(map.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                let list = Array.from(map.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                // ✅ 회사 내부 처리 (대표에게 요청된 건)는 이 관리자 페이지에 미노출
+                list = list.filter(p => {
+                    if (p.category === 'member_req_internal') {
+                        try {
+                            const parsedContent = JSON.parse(p.content || '{}');
+                            // 요청 대상이 'ceo'인 경우 미노출
+                            return parsedContent.requestTo !== 'ceo';
+                        } catch (e) {
+                            console.warn('Failed to parse content for member_req_internal:', p.docId, e);
+                            return true; // 파싱 실패 시 일단 노출 (안전하게)
+                        }
+                    }
+                    return true; // 다른 카테고리는 모두 노출
+                });
 
                 paginationState.member.data = list;
                 document.getElementById('cnt-member').innerText = list.length;
