@@ -102,6 +102,13 @@
         /* 탭 컨텐츠 제어 */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        /* 페이지네이션 스타일 */
+        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; }
+        .pagination-btn { padding: 8px 16px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .pagination-btn:hover:not(:disabled) { background: #f0f0f0; border-color: #bbb; }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination-info { font-size: 14px; color: #666; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -148,6 +155,7 @@
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
             </table>
+            <div id="pagination-consult" class="pagination-container" style="display:none; justify-content:center; gap:10px; margin-top:20px;"></div>
         </div>
 
         <div id="tab-payment" class="tab-content">
@@ -165,6 +173,7 @@
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
             </table>
+            <div id="pagination-payment" class="pagination-container" style="display:none; justify-content:center; gap:10px; margin-top:20px;"></div>
         </div>
 
         <div id="tab-member" class="tab-content">
@@ -182,6 +191,7 @@
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
             </table>
+            <div id="pagination-member" class="pagination-container" style="display:none; justify-content:center; gap:10px; margin-top:20px;"></div>
         </div>
 
         <div id="tab-guest" class="tab-content">
@@ -191,6 +201,7 @@
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
             </table>
+            <div id="pagination-guest" class="pagination-container" style="display:none; justify-content:center; gap:10px; margin-top:20px;"></div>
         </div>
 
     </main>
