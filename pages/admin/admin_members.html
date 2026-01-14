@@ -1204,28 +1204,16 @@ alert(`✅ 계정 생성 완료!\nID: ${email}\nPW: ${password}`);
     window.suspendMember = async function(uid) {
         if(confirm("권한을 중지하시겠습니까?")) {
             await admin.suspendEmployee(uid, true);
-            // 로컬 데이터 직접 수정
-            const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
-            if (comp) {
-                const emp = comp.employees.find(e => e.uid === uid);
-                if (emp) emp.status = 'Suspended';
-            }
-            // 팝업 즉시 재렌더링
-            openPopup(currentCompId);
+            await loadMemberData(); // Reload all data
+            openPopup(currentCompId); // Re-open popup with fresh data
         }
     }
 
     window.restoreMember = async function(uid) {
         if(confirm("재활성화하시겠습니까?")) {
             await admin.suspendEmployee(uid, false);
-            // 로컬 데이터 직접 수정
-            const comp = allCompanies.find(c => c.uid === currentCompId) || inactiveCompanies.find(c => c.uid === currentCompId);
-            if (comp) {
-                const emp = comp.employees.find(e => e.uid === uid);
-                if (emp) emp.status = 'Active';
-            }
-            // 팝업 즉시 재렌더링
-            openPopup(currentCompId);
+            await loadMemberData(); // Reload all data
+            openPopup(currentCompId); // Re-open popup with fresh data
         }
     }
 
