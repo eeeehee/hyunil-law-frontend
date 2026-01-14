@@ -722,18 +722,92 @@
                     });
                 }
 
-                // ✅ 페이지네이션: 데이터 저장 및 렌더링
-                paginationState.consult.data = list;
                 document.getElementById('cnt-consult').innerText = list.length;
+                const tbody = document.getElementById('list-consult');
 
                 if (list.length === 0) {
-                    document.getElementById('list-consult').innerHTML = `<tr><td colspan="5" style="text-align:center; color:#999; padding:30px;">대기 중인 자문 요청이 없습니다.</td></tr>`;
-                    document.getElementById('pagination-consult').innerHTML = '';
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#999; padding:30px;">대기 중인 자문 요청이 없습니다.</td></tr>`;
                     return;
                 }
 
-                renderConsultPage();
-                renderPagination('consult', list.length);
+                tbody.innerHTML = list.map(d => {
+                    // ✅ 숨긴 내역인 경우 복원 버튼만 표시
+                    if (showArchivedMode && d.status === 'archived') {
+                        const companyName = d.userCompanyName || d.companyName || '알 수 없음';
+                        const authorName = d.userManagerName || d.managerName || '알 수 없음';
+                        const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ko-KR') : '-';
+
+                        return `
+                            <tr style="opacity:0.6;">
+                                <td><span class="st-badge" style="background:#e0e0e0; color:#666;">📦 숨김</span></td>
+                                <td>${companyName} (${authorName})</td>
+                                <td>${d.title || '제목 없음'}</td>
+                                <td>${date}</td>
+                                <td><button class="btn-action btn-approve" onclick="unarchiveRequest('${d.docId}')">복원</button></td>
+                            </tr>
+                        `;
+                    }
+
+                    // ✅ 추가질문 여부 확인
+                    const hasFollowup = d.content && d.content.includes('[FOLLOWUP_SEPARATOR]');
+                    let isFollowupWaiting = false;
+
+                    if (hasFollowup) {
+                        const questions = d.content.split('[FOLLOWUP_SEPARATOR]');
+                        const followupCount = questions.length - 1;
+
+                        let answerCount = 0;
+                        if (d.answer && d.answer.includes('[FOLLOWUP_ANSWER_SEPARATOR]')) {
+                            answerCount = d.answer.split('[FOLLOWUP_ANSWER_SEPARATOR]').length;
+                        } else if (d.answer) {
+                            answerCount = 1;
+                        }
+
+                        isFollowupWaiting = followupCount > (answerCount - 1);
+                    }
+
+                    // 카테고리와 상태에 따른 배지
+                    let badge;
+                    if (isFollowupWaiting) {
+                        badge = '<span class="st-badge st-progress">💬 추가질문</span>';
+                    } else if (d.category === 'phone_log') {
+                        badge = '<span class="st-badge st-change">📞 전화상담 기록</span>';
+                    } else if (d.category === 'phone_request') {
+                        badge = '<span class="st-badge st-change">📞 전화상담 요청</span>';
+                    } else if (d.category === 'debt') {
+                        badge = '<span class="st-badge st-waiting">💼 채무</span>';
+                    } else if (d.category === 'contract') {
+                        badge = '<span class="st-badge st-waiting">📄 계약</span>';
+                    } else {
+                        badge = '<span class="st-badge st-waiting">📝 서면자문</span>';
+                    }
+
+                    const date = d.createdAt ? new Date(d.createdAt).toLocaleDateString('ko-KR') : '-';
+
+                    // 작성자 정보 (userCompanyName과 userManagerName 사용)
+                    const companyName = d.userCompanyName || d.companyName || '알 수 없음';
+                    const authorName = d.userManagerName || d.managerName || '알 수 없음';
+
+                    // 버튼 결정: 추가질문이면 "답변작성", pending/waiting이면 "접수 승인"
+                    let actionButton = '';
+                    if (isFollowupWaiting) {
+                        actionButton = `<button class="btn-action btn-approve" onclick="goToAdminPage('${d.docId}')">답변작성</button>`;
+                    } else if (d.status === 'pending' || d.status === 'waiting') {
+                        actionButton = `<button class="btn-action btn-approve" onclick="acceptConsult('${d.docId}')">접수 승인</button>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td>${badge}</td>
+                            <td>${companyName} (${authorName})</td>
+                            <td><a href="#" onclick="showRequestDetail('${d.docId}'); return false;" style="color:#1890ff; text-decoration:underline; cursor:pointer;">${d.title || '제목 없음'}</a></td>
+                            <td>${date}</td>
+                            <td>
+                                ${actionButton}
+                                <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
+                            </td>
+                        </tr>`;
+                }).join('');
 
             } catch (error) {
                 console.error('자문 요청 로드 실패:', error);
