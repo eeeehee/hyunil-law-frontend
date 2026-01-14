@@ -832,19 +832,26 @@
         // 3. 직원 권한 요청 로드 (member_req, member_req_admin만 - 대표자 승인 요청 제외)
         async function loadMemberRequests() {
             try {
-                const result = await posts.getAll({ category: 'member_req,member_req_admin,member_req_internal', limit: 200 });
-                let list = result.posts || [];
-                if (showArchivedMode) {
-                    list = list.filter(d => d.status === 'archived');
-                } else {
-                    list = list.filter(d => d.status !== 'archived');
-                }
-                
-                paginationState.member.data = list.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-                document.getElementById('cnt-member').innerText = paginationState.member.data.length;
+                const categories = ['member_req', 'member_req_admin', 'member_req_internal'];
+                const results = await Promise.all(
+                    categories.map(cat => posts.getAll({ category: cat, limit: 200 }))
+                );
+
+                const map = new Map();
+                results.forEach(r => (r.posts || []).forEach(p => {
+                     if (showArchivedMode) {
+                        if (p.status === 'archived') map.set(p.docId, p);
+                    } else {
+                        if (p.status !== 'archived') map.set(p.docId, p);
+                    }
+                }));
+                const list = Array.from(map.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                paginationState.member.data = list;
+                document.getElementById('cnt-member').innerText = list.length;
                 paginationState.member.currentPage = 1;
                 renderMemberPage();
-                renderPagination('member', paginationState.member.data.length);
+                renderPagination('member', list.length);
 
             } catch (error) {
                 console.error('직원 권한 요청 로드 실패:', error);
@@ -856,20 +863,23 @@
         // 4. 비회원 상담 로드
         async function loadGuestRequests() {
             try {
-                const result = await posts.getAll({ category: 'guest', limit: 200 });
-                let list = result.posts || [];
-                if (showArchivedMode) {
-                    list = list.filter(d => d.status === 'archived');
-                } else {
-                    list = list.filter(d => d.status !== 'archived');
-                }
-                
-                paginationState.guest.data = list.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-                document.getElementById('cnt-guest').innerText = paginationState.guest.data.length;
+                const results = await Promise.all([posts.getAll({ category: 'guest', limit: 200 })]);
+                const map = new Map();
+                results.forEach(r => (r.posts || []).forEach(p => {
+                    if (showArchivedMode) {
+                        if (p.status === 'archived') map.set(p.docId, p);
+                    } else {
+                        if (p.status !== 'archiced') map.set(p.docId, p);
+                    }
+                }));
+                const list = Array.from(map.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                paginationState.guest.data = list;
+                document.getElementById('cnt-guest').innerText = list.length;
                 paginationState.guest.currentPage = 1;
                 renderGuestPage();
-                renderPagination('guest', paginationState.guest.data.length);
-                
+                renderPagination('guest', list.length);
+
             } catch (error) {
                 console.error('비회원 상담 로드 실패:', error);
                 document.getElementById('list-guest').innerHTML =
