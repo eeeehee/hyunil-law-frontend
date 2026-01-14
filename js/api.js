@@ -340,8 +340,11 @@ export const posts = {
         if (filters.limit) params.append('limit', filters.limit);
         if (filters.offset) params.append('offset', filters.offset);
         if (filters.bizNum) params.append('bizNum', filters.bizNum); // bizNum 필터 추가
+
+        const url = `/posts?${params.toString()}`;
+        console.log("✅ [TEST] Fetching posts with URL:", url); // URL 로깅
         
-        return await apiRequest(`/posts?${params.toString()}`);
+        return await apiRequest(url);
     },
 
     // 게시글 상세 조회
