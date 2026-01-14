@@ -349,10 +349,11 @@ export const posts = {
     },
 
     // 게시글 생성
-    create: async (data) => {
+    create: async (data, skipAuth = false) => {
         return await apiRequest('/posts', {
             method: 'POST',
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            skipAuth: skipAuth
         });
     },
 
