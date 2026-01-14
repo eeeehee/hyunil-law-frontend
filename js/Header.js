@@ -1,14 +1,19 @@
 // Header.js
 import { auth } from './api.js';
 
+// GitHub Pages와 로컬 환경 모두 지원하는 Base URL
+const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? ''
+    : '/hyunil-law-frontend';
+
 // 2. 이 함수 안에 HTML 내용이 가득 들어있습니다! (빈 게 아님)
 export function loadHeader() {
     const headerHtml = `
     <header>
-        <div class="logo"><a href="/"><img src="/assets/img/logo.png" alt="법무그룹 현일"></a></div>
+        <div class="logo"><a href="${BASE_URL}/index.html"><img src="${BASE_URL}/assets/img/logo.png" alt="법무그룹 현일"></a></div>
         <nav class="nav-links">
-            <a href="/pages/public/service_intro.html">자문서비스 소개</a>
-            <a href="/pages/public/pricing.html">자문요금제</a>
+            <a href="${BASE_URL}/pages/public/service_intro.html">자문서비스 소개</a>
+            <a href="${BASE_URL}/pages/public/pricing.html">자문요금제</a>
             <a href="#" id="authBtn">로그인</a>
         </nav>
     </header>
@@ -31,7 +36,7 @@ export function loadHeader() {
 
     // 5. 로그인/로그아웃 버튼 로직
     const authBtn = document.getElementById("authBtn");
-    
+
     if (auth.isLoggedIn()) {
         authBtn.innerText = "로그아웃";
         authBtn.href = "#";
@@ -39,11 +44,11 @@ export function loadHeader() {
             e.preventDefault();
             auth.logout();
             alert("로그아웃 되었습니다.");
-            window.location.href = "/";
+            window.location.href = BASE_URL + "/index.html";
         };
     } else {
         authBtn.innerText = "로그인";
-        authBtn.href = "/pages/public/login.html";
+        authBtn.href = BASE_URL + "/pages/public/login.html";
         authBtn.onclick = null;
     }
 }
