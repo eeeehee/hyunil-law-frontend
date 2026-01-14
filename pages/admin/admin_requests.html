@@ -230,7 +230,7 @@
 
         <div id="tab-guest" class="tab-content">
             <table class="req-table">
-                <thead><tr><th>상태</th><th>신청자 (연락처)</th><th>문의 내용</th><th>신청일</th><th>관리</th></tr></thead>
+                <thead><tr><th>유형</th><th>신청자 (연락처)</th><th>문의 내용</th><th>신청일</th><th>관리</th></tr></thead>
                 <tbody id="list-guest">
                     <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
                 </tbody>
@@ -682,8 +682,8 @@
                 const result = await posts.getAll({ limit: 200 });
                 let list = result.posts || [];
 
-                // 결제/요금제/부서변경 관련 카테고리 제외 (전화상담 요청은 포함)
-                const excludeCategories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote', 'member_req', 'member_req_internal', 'member_req_admin'];
+                // 결제/요금제/부서변경/비회원 관련 카테고리 제외 (전화상담 요청은 포함)
+                const excludeCategories = ['payment_request', 'plan_change', 'payment_method', 'extra_usage_quote', 'member_req', 'member_req_internal', 'member_req_admin', 'guest'];
                 list = list.filter(d => !excludeCategories.includes(d.category));
 
                 // ✅ 숨긴 내역 모드에 따라 필터링
@@ -1130,7 +1130,7 @@
 
             tbody.innerHTML = pageData.map(d => {
                 const authorName = d.authorName || '이름없음';
-                const authorPhone = d.authorPhone || '연락처없음';
+                const authorPhone = d.contact || d.authorPhone || '연락처없음';
                 const created = d.createdAt ? new Date(d.createdAt).toLocaleString() : '-';
 
                 // 숨김 모드
@@ -1144,13 +1144,13 @@
                     </tr>`;
                 }
 
-                let statusBadge, actionHtml;
+                // 유형 배지 (도입 상담)
+                const typeBadge = '<span class="st-badge st-change">도입 상담</span>';
+                let actionHtml;
 
                 if (d.status === 'completed' || d.status === 'done') {
-                    statusBadge = '<span class="st-badge st-approved">답변완료</span>';
                     actionHtml = `<button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>`;
                 } else { // 'pending' 또는 기타 상태
-                    statusBadge = '<span class="st-badge st-waiting">접수대기</span>';
                     actionHtml = `
                         <button class="btn-action btn-approve" onclick="markAsCompleted('${d.docId}')">답변완료</button>
                         <button class="btn-action btn-reject" onclick="archiveRequest('${d.docId}')">숨기기</button>
@@ -1158,9 +1158,9 @@
                 }
 
                 return `<tr>
-                    <td>${statusBadge}</td>
+                    <td>${typeBadge}</td>
                     <td>${authorName} (${authorPhone})</td>
-                    <td><a href="#" onclick="showRequestDetail('${d.docId}'); return false;" style="color:#1890ff;">${d.title || d.content.substring(0, 30)}...</a></td>
+                    <td><a href="#" onclick="showGuestDetail('${d.docId}'); return false;" style="color:#1890ff;">${d.title || (d.content ? d.content.substring(0, 30) : '내용없음')}...</a></td>
                     <td>${created}</td>
                     <td>${actionHtml}</td>
                 </tr>`;
@@ -1547,6 +1547,44 @@
         // 모달 닫기
         window.closeDetailModal = function() {
             document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // ✅ 비회원 상담 상세 보기 (신청자 → 휴대폰번호로 변경)
+        window.showGuestDetail = async function(docId) {
+            try {
+                const post = await posts.getById(docId);
+
+                const modal = document.getElementById('detailModal');
+                const modalTitle = document.getElementById('detailModalTitle');
+                const modalBody = document.getElementById('detailModalBody');
+
+                modalTitle.textContent = post.title || '도입 상담 문의';
+
+                const authorName = post.authorName || '-';
+                const authorPhone = post.contact || post.authorPhone || '-';
+                const createdAt = post.createdAt ? new Date(post.createdAt).toLocaleString('ko-KR') : '-';
+
+                let detailHtml = `
+                    <div style="line-height:1.8;">
+                        <strong>문의 내용:</strong><br>
+                        <pre style="white-space:pre-wrap; word-break:break-all; margin-top:10px; padding:15px; background:#f9f9f9; border-radius:6px;">${post.content || '-'}</pre>
+                    </div>
+                    <hr style="margin:20px 0; border:none; border-top:1px solid #eee;">
+                    <div style="line-height:1.8; color:#666;">
+                        <strong>신청기업:</strong> ${authorName}<br>
+                        <strong>휴대폰번호:</strong> ${authorPhone}<br>
+                        <strong>신청일시:</strong> ${createdAt}<br>
+                        <strong>상태:</strong> ${post.status === 'completed' || post.status === 'done' ? '답변완료' : '접수대기'}
+                    </div>
+                `;
+
+                modalBody.innerHTML = detailHtml;
+                modal.style.display = 'block';
+
+            } catch (error) {
+                console.error('상세 내용 로드 실패:', error);
+                alert('상세 내용을 불러오는 중 오류가 발생했습니다.');
+            }
         }
 
         // 모달 외부 클릭 시 닫기
