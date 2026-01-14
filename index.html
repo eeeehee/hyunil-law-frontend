@@ -313,7 +313,7 @@
     <script src="js/channel-service.js"></script>
 
     <script type="module">
-        import { auth, consultationInquiries } from "./js/api.js";
+        import { auth, posts } from "./js/api.js";
 
         // 애니메이션 및 모달 관련
         document.addEventListener("DOMContentLoaded", function() {
@@ -377,21 +377,21 @@
             btn.disabled = true;
 
             try {
-                // 상담 문의 API로 제출
-                await consultationInquiries.create({
-                    category: 'introduction',
-                    clientName: company,
-                    phone: phone,
-                    email: '',
-                    content: "메인 페이지 도입 문의 신청입니다."
+                // '비회원 상담'으로 데이터 제출
+                await posts.create({
+                    title: `${company} - 도입 상담 문의`,
+                    content: "메인 페이지에서 접수된 도입 상담 문의입니다.",
+                    authorName: company,
+                    authorPhone: phone,
+                    category: 'guest'
                 });
                 
                 alert("문의가 접수되었습니다.\n담당자가 확인 후 연락드리겠습니다.");
                 closeModal();
-                location.reload();
                 
             } catch(e) {
                 console.error(e); alert("전송 중 오류가 발생했습니다.");
+            } finally {
                 btn.innerText = "작성"; btn.disabled = false;
             }
         }
