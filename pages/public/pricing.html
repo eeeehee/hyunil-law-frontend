@@ -290,7 +290,34 @@
         </div>
     </section>
 
-    <!-- Footer will be loaded by Footer.js -->
+    <footer>
+        <div class="footer-container">
+            <div class="social-icons">
+                <a href="https://blog.naver.com/lawgrouphyunil" target="_blank">
+                    <img src="../../assets/img/naver-blog.png" alt="네이버 블로그">
+                </a>
+                <a href="http://pf.kakao.com/_MxbdNn" target="_blank">
+                    <img src="../../assets/img/icon_kakao.png" alt="카카오">
+                </a>
+                <a href="https://www.instagram.com/hyunillaw_official?igsh=ZTN6MHM1NmU5NjR4" target="_blank">
+                    <img src="../../assets/img/icon_insta.png" alt="인스타">
+                </a>
+            </div>
+            <div class="footer-info">
+                <h2>법무그룹 현일 기업자문센터</h2>
+                <div class="info-row">
+                    대표변호사 : 신현정 <span>|</span> 주소 : 서울특별시 강남구 테헤란로 521 29층 suite 39-c <span>|</span> 대표번호 : 1533-6092
+                </div>
+                <div class="info-row">
+                    사업자등록번호 : 211-51-06741 <span>|</span> 통신판매업신고번호 : 2025-서울강남-04334
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href="terms.html">이용약관</a> <span>|</span> <a href="privacy.html" class="bold">개인정보처리방침</a>
+            </div>
+            <p class="copyright">Copyright ⓒ 2025 법무그룹 현일 기업자문센터 All rights reserved.</p>
+        </div>
+    </footer>
 
     <div id="paymentModal" class="modal-overlay">
         <div class="modal-content">
@@ -393,7 +420,7 @@
             const content = document.getElementById('inq_content').value;
             const agree = document.getElementById('inq_agree').checked;
             const catRadio = document.querySelector('input[name="inq_category"]:checked');
-            const category = catRadio ? catRadio.value : "기타";
+            const categoryType = catRadio ? catRadio.value : "기타";
 
             if (!p1 || !p2 || !p3 || !content) { alert("내용 입력 필요"); return; }
             if (!agree) { alert("동의 필요"); return; }
@@ -403,10 +430,27 @@
             btn.innerText = "전송 중..."; btn.disabled = true;
 
             try {
-                await posts.create({
-                    category: 'guest', title: `[일반상담] ${category} 문의`, content: content,
-                    authorName: "비회원", contact: phone, status: 'waiting'
-                });
+                const isLoggedIn = auth.isLoggedIn();
+
+                if (isLoggedIn) {
+                    // 로그인 상태: 회원 문의로 생성
+                    await posts.create({
+                        category: 'etc',
+                        title: `[일반상담] ${categoryType} 문의`,
+                        content: content,
+                        status: 'waiting'
+                    });
+                } else {
+                    // 비로그인 상태: 비회원 상담으로 생성
+                    await posts.create({
+                        category: 'guest',
+                        title: `[일반상담] ${categoryType} 문의`,
+                        content: content,
+                        authorName: "비회원",
+                        contact: phone,
+                        status: 'waiting'
+                    }, true); // skipAuth
+                }
                 alert("상담 신청 완료"); location.reload();
             } catch(e) { console.error(e); alert("오류"); btn.innerText = "제출"; btn.disabled = false; }
         }
@@ -417,7 +461,7 @@
             const p2 = document.getElementById('modal_phone_2').value;
             const p3 = document.getElementById('modal_phone_3').value;
             const agree = document.getElementById('modal_agree').checked;
-            let plan = ""; 
+            let plan = "";
             const hiddenType = document.getElementById('selectedPlanType').value;
 
             if (hiddenType === 'Single') plan = 'Single';
@@ -434,14 +478,27 @@
             btn.innerText = "처리 중..."; btn.disabled = true;
 
             try {
-                await posts.create({
-                    category: 'plan_change',
-                    title: `[가입문의] ${plan} 플랜`,
-                    content: `${company} 에서 ${plan} 가입 요청`,
-                    authorName: company,
-                    contact: phone,
-                    status: 'waiting'
-                });
+                const isLoggedIn = auth.isLoggedIn();
+
+                if (isLoggedIn) {
+                    // 로그인 상태: 회원 요금제 문의로 생성
+                    await posts.create({
+                        category: 'plan_change',
+                        title: `[가입문의] ${plan} 플랜`,
+                        content: `${company} 에서 ${plan} 가입 요청\n연락처: ${phone}`,
+                        status: 'waiting'
+                    });
+                } else {
+                    // 비로그인 상태: 비회원 상담으로 생성
+                    await posts.create({
+                        category: 'guest',
+                        title: `[가입문의] ${plan} 플랜`,
+                        content: `${company} 에서 ${plan} 가입 요청`,
+                        authorName: company,
+                        contact: phone,
+                        status: 'waiting'
+                    }, true); // skipAuth
+                }
                 alert("신청 접수 완료"); closeModal(); location.reload();
             } catch(e) { console.error(e); alert("오류"); btn.innerText = "작성"; btn.disabled = false; }
         }
@@ -449,11 +506,9 @@
 
     <script type="module">
         import { loadHeader } from "../../js/Header.js";
-        import { loadFooter } from "../../js/Footer.js";
-        
-        // 공통 헤더, 푸터 로드
+
+        // 공통 헤더 로드
         loadHeader();
-        loadFooter();
     </script>
 </body>
 </html>

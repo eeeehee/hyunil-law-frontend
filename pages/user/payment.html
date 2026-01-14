@@ -738,7 +738,8 @@
                         renderPaymentHistory(billingData?.logs || []);
                     }
                     const requestsData = await posts.getAll({ category: 'payment_method,plan_change,extra_usage_quote,member_req_internal' });
-                    const postsList = requestsData?.posts || [];
+                    // guest 카테고리 명시적 제외 (비회원 상담은 admin_requests.html에서만 표시)
+                    const postsList = (requestsData?.posts || []).filter(p => p.category !== 'guest');
                     
                     // ✅ [REVISED] 'approvalRequests' API 호출 제거. 이제 모든 요청은 'posts'를 통해 처리됩니다。
                     // const approvalData = await approvalRequests.getRequests({ status: 'Pending' });
