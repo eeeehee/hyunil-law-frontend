@@ -860,7 +860,13 @@
                     }
                 }
                 const title = payload.type === 'card' ? `결제수단 등록 (카드 - ${payload.cardCompany})` : `결제수단 등록 (CMS - ${payload.bank})`;
-                await posts.create({ category: 'payment_method', title: title, content: JSON.stringify(payload, null, 2), status: 'pending' });
+                await posts.create({ 
+                    category: 'payment_method', 
+                    title: title, 
+                    content: JSON.stringify(payload, null, 2), 
+                    status: 'pending',
+                    bizNum: window.gUserData.biz_num // bizNum 추가
+                });
                 alert('결제 수단 정보가 저장되었습니다.');
                 await loadSavedPaymentInfo();
             } catch (e) { console.error('결제수단 저장 실패:', e); alert('저장 중 오류가 발생했습니다.'); }
