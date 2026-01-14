@@ -89,6 +89,42 @@
     </div>
 </aside>
 
+    <!-- 리포트 생성 모달 -->
+    <div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center;">
+        <div style="background: #fff; padding: 30px; border-radius: 12px; width: 700px;">
+            <h3 style="margin-top:0; margin-bottom:20px;">리포트 생성: <span id="modalCompanyName"></span></h3>
+            <input type="hidden" id="targetUid">
+            <input type="hidden" id="targetBizNum">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label>리포트 제목</label>
+                    <input type="text" id="reportTitle" class="search-input" style="width:100%; height:40px;">
+                </div>
+                <div class="form-group">
+                    <label>리포트 유형</label>
+                    <select id="reportType" class="search-input" style="width:100%; height:40px;">
+                        <option value="month">월간 리포트</option>
+                        <option value="quarter">분기 리포트</option>
+                        <option value="year">연간 리포트</option>
+                        <option value="custom">기타</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>대상 기간 (YYYY-MM)</label>
+                <input type="month" id="reportPeriod" class="search-input" style="width:100%; height:40px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>주요 내용 (요약)</label>
+                <textarea id="reportContent" class="search-input" style="width:100%; height:120px; padding-top:10px; resize:vertical;"></textarea>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button onclick="closeReportModal()" style="background:#f0f0f0; color:#333; border:1px solid #ccc; padding:10px 20px; border-radius:6px; font-weight:600; cursor:pointer;">취소</button>
+                <button onclick="saveReport()" style="background:#2c5bf2; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-weight:700; cursor:pointer;">생성 및 저장</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../../js/admin_sidebar.js"></script>
     <script>
         // 사이드바 즉시 렌더링
@@ -150,7 +186,7 @@
                         <td>${company.managerName || '-'}</td>
                         <td>${company.employeeCount || 0}명</td>
                         <td>
-                            <button class="btn-gen-rep" onclick="openReportModal('${company.uid}', '${company.companyName}')">
+                            <button class="btn-gen-rep" onclick="openReportModal('${company.uid}', '${company.companyName}', '${company.bizNum}')">
                                 리포트 생성
                             </button>
                         </td>
@@ -220,8 +256,48 @@
         }
 
         // 리포트 모달 열기 (추후 구현)
-        window.openReportModal = function(uid, companyName) {
-            alert(`${companyName}의 리포트 생성 기능은 추후 구현 예정입니다.`);
+        window.openReportModal = function(uid, companyName, bizNum) {
+            document.getElementById('reportModal').style.display = 'flex';
+            document.getElementById('modalCompanyName').innerText = companyName;
+            document.getElementById('targetUid').value = uid;
+            document.getElementById('targetBizNum').value = bizNum;
+
+            // 폼 초기화
+            document.getElementById('reportTitle').value = '';
+            document.getElementById('reportType').value = 'month';
+            document.getElementById('reportPeriod').value = new Date().toISOString().slice(0, 7); // YYYY-MM 형식
+            document.getElementById('reportContent').value = '';
+        }
+
+        window.closeReportModal = function() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        // 리포트 저장
+        window.saveReport = async function() {
+            const payload = {
+                title: document.getElementById('reportTitle').value,
+                type: document.getElementById('reportType').value,
+                period: document.getElementById('reportPeriod').value,
+                content: document.getElementById('reportContent').value,
+                targetBizNum: document.getElementById('targetBizNum').value,
+                status: 'draft' // 초기 상태는 '초안'
+            };
+
+            if (!payload.title || !payload.period || !payload.targetBizNum) {
+                alert('제목, 대상 기간, 대상 기업 정보는 필수입니다.');
+                return;
+            }
+
+            try {
+                await reports.create(payload);
+                alert('리포트가 성공적으로 생성되었습니다.');
+                closeReportModal();
+                await loadReportHistory(); // 이력 새로고침
+            } catch (error) {
+                console.error('리포트 생성 실패:', error);
+                alert(`리포트 생성 중 오류가 발생했습니다: ${error.message}`);
+            }
         }
     </script>
 </body>
