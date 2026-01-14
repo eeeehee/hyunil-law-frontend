@@ -257,8 +257,8 @@
 
                 const postsResponse = await posts.getAll({ status: statusFilter, limit: 100 });
                 
-                let postsData = (postsResponse.posts || []).filter(post => 
-                    !['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin'].includes(post.category));
+                let postsData = (postsResponse.posts || []).filter(post =>
+                    !['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin', 'guest'].includes(post.category));
 
                 const approvalData = await approvalRequests.getRequests({ status: 'Pending' });
                 const approvalList = approvalData?.requests || [];
