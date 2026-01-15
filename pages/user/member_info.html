@@ -123,7 +123,10 @@
 
             <div class="form-group">
                 <label class="label">직급 (권한)</label>
-                <input type="text" id="role" class="input-box" readonly>
+                <div class="input-group">
+                    <input type="text" id="role" class="input-box" readonly>
+                    <button class="btn-change" onclick="openRankChangeModal()">변경 신청 ></button>
+                </div>
             </div>
 
             <div class="form-group">
@@ -140,21 +143,52 @@
         </div>
     </main>
 
+    <!-- 직급 변경 모달 -->
+    <div id="rankChangeModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">직급 변경 신청</h3>
+            <div class="form-group">
+                <label class="label">현재 직급</label>
+                <input type="text" id="currentRankDisplay" class="input-box" readonly>
+            </div>
+            <div class="form-group">
+                <label class="label">변경할 직급</label>
+                <select id="newRankSelect" class="input-box">
+                    <!-- Options will be populated by JS -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="label">변경 사유 (선택)</label>
+                <textarea id="rankChangeReason" class="input-box" rows="3" placeholder="변경 사유를 입력해주세요."></textarea>
+            </div>
+            <button class="btn-save" onclick="submitRankChange()">직급 변경 신청</button>
+            <button class="btn-close-modal" onclick="closeRankChangeModal()">닫기</button>
+        </div>
+    </div>
+
     <div id="changeModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 class="modal-title">부서/정보 변경 신청</h3>
-            <div id="opt-ceo">
-                <button class="option-btn" onclick="reqToCEO()">
-                    <span class="opt-title">🏢 대표자에게 승인 요청 (추천)</span>
-                    <span class="opt-desc">별도 서류 없이 대표님 승인으로 즉시 변경됩니다.</span>
-                </button>
+            <h3 class="modal-title">부서 변경 신청</h3>
+            <div id="deptChangeFormArea">
+                <div class="form-group">
+                    <label class="label">현재 부서</label>
+                    <input type="text" id="currentDepartmentDisplay" class="input-box" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="label">변경할 부서</label>
+                    <select id="newDepartmentSelect" class="input-box">
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="label">변경 사유 (선택)</label>
+                    <textarea id="departmentChangeReason" class="input-box" rows="3" placeholder="변경 사유를 입력해주세요."></textarea>
+                </div>
+                <button class="btn-save" onclick="submitDepartmentChange()">대표자에게 변경 요청</button>
+                <hr style="border:0; border-top:1px dashed #ddd; margin:20px 0;">
+                <button class="btn-save" onclick="showAdminForm()" style="background-color:#555; margin-top:0;">👩‍💻 관리자에게 서류 첨부 요청</button>
             </div>
-            <div id="opt-admin">
-                <button class="option-btn" onclick="showAdminForm()">
-                    <span class="opt-title">👩‍💻 사이트 관리자에게 문의</span>
-                    <span class="opt-desc">재직증명서 등 <strong>증빙서류 첨부</strong>가 필요합니다.</span>
-                </button>
-            </div>
+
             <div id="admin-form-area" style="display:none; margin-top:10px; border-top:1px solid #eee; padding-top:15px;">
                 <label class="label" style="font-size:13px;">변경 요청 내용</label>
                 <input type="text" id="req-content" class="input-box" style="height:40px; margin-bottom:10px;" placeholder="예: 인사팀으로 부서 이동">
@@ -171,6 +205,9 @@
         import { renderClientSidebar } from "../../js/client_ui.js";
 
         let gUserData = null;
+
+        const RANKS = ['사원', '대리', '과장', '차장', '부장', '이사', '대표'];
+        const DEPARTMENTS = ['영업팀', '마케팅팀', '개발팀', '인사팀', '재무팀', '법무팀', '기타']; // Placeholder departments
 
         // 페이지 로드 시 사용자 정보 가져오기
         (async () => {
@@ -198,9 +235,8 @@
                 let roleName = "일반 직원";
                 if (gUserData.role === 'owner' || gUserData.role === 'CEO') {
                     roleName = "👑 총괄 관리자 (대표)";
-                    // 대표는 부서변경 신청 버튼 숨김 (직접 수정 가능)
-                    document.querySelector('.btn-change').style.display = 'none';
-                    document.querySelector('.help-text').style.display = 'none';
+                    // 대표는 부서 직접 변경 가능
+                    document.querySelector('.btn-change[onclick="openChangeModal()"]').style.display = 'none'; // 부서 변경 버튼 숨김
                     document.getElementById('department').readOnly = false;
                 } else if (gUserData.role === 'manager') {
                     roleName = "💼 부서 관리자";
@@ -209,7 +245,9 @@
                 } else if (gUserData.role === 'staff') {
                     roleName = "👤 일반 직원";
                 }
-                document.getElementById('role').value = roleName;
+                document.getElementById('role').value = roleName; // display current role name
+                gUserData.roleName = roleName; // Store display name for later use in rank change
+
             } catch (error) {
                 console.error('사용자 정보 로드 오류:', error);
                 alert('사용자 정보를 불러오는 중 오류가 발생했습니다.');
@@ -246,36 +284,51 @@
             }
         }
 
-        // 모달 관련 함수들
-        window.openChangeModal = function() { 
-            document.getElementById('changeModal').style.display = 'flex'; 
-            document.getElementById('opt-ceo').style.display = 'block';
-            document.getElementById('opt-admin').style.display = 'block';
-            document.getElementById('admin-form-area').style.display = 'none';
+        // --- 부서 변경 모달 관련 함수들 ---
+        window.openChangeModal = function() {
+            document.getElementById('changeModal').style.display = 'flex';
+            document.getElementById('deptChangeFormArea').style.display = 'block'; // 부서 변경 폼 표시
+            document.getElementById('admin-form-area').style.display = 'none'; // 관리자 폼 숨김
+
+            // 현재 부서 표시
+            document.getElementById('currentDepartmentDisplay').value = gUserData.department || '미지정';
+
+            // 변경할 부서 드롭다운 채우기
+            const newDepartmentSelect = document.getElementById('newDepartmentSelect');
+            newDepartmentSelect.innerHTML = DEPARTMENTS.map(dept => 
+                `<option value="${dept}" ${dept === gUserData.department ? 'selected' : ''}>${dept}</option>`
+            ).join('');
+            document.getElementById('departmentChangeReason').value = ''; // 사유 초기화
         }
         window.closeChangeModal = function() { document.getElementById('changeModal').style.display = 'none'; }
         
-        window.reqToCEO = async function() {
-            const newDept = prompt("변경하고 싶은 부서명을 입력하세요:");
-            if (!newDept) return;
-            if (!confirm(`'${newDept}' 부서로 변경을 대표님께 요청하시겠습니까?`)) return;
+        window.submitDepartmentChange = async function() {
+            const newDept = document.getElementById('newDepartmentSelect').value;
+            const reason = document.getElementById('departmentChangeReason').value.trim();
+            
+            if (!newDept) {
+                alert("변경할 부서를 선택해주세요.");
+                return;
+            }
+            if (!confirm(`'${newDept}' 부서로 변경을 대표님께 요청하시겠습니까?\n사유: ${reason || '없음'}`)) return;
 
             try {
-                // ✅ [REVISED] posts.create를 사용하여 표준 요청 생성
                 await posts.create({
                     category: "member_req_internal",
-                    title: "부서 변경 요청 (대표 승인)",
+                    title: `부서 변경 요청 (${gUserData.department || '미지정'} → ${newDept})`,
                     content: JSON.stringify({
                         fromDepartment: gUserData.department || '미지정',
                         newDepartment: newDept,
+                        reason: reason,
                         requesterName: gUserData.managerName,
                         requestTo: 'ceo'
                     }),
                     status: 'pending' // 관리자/대표 확인 필요
                 });
 
-                alert("✅ 대표자에게 승인 요청이 전송되었습니다.\n'결제/구독 관리' 메뉴에서 현황을 확인하세요.");
+                alert("✅ 대표자에게 승인 요청이 전송되었습니다.\n'나의 자문 내역'에서 현황을 확인하세요.");
                 closeChangeModal();
+                location.reload();
             } catch (error) {
                 console.error('❌ 대표에게 요청 오류:', error);
                 alert("오류가 발생했습니다: " + (error.message || '알 수 없는 오류'));
@@ -283,11 +336,9 @@
         }
 
         window.showAdminForm = function() {
-            // ✅ 파일 업로드 폼 표시
-            document.getElementById('opt-ceo').style.display = 'none';
-            document.getElementById('opt-admin').style.display = 'none';
-            document.getElementById('admin-form-area').style.display = 'block';
-            document.getElementById('req-content').value = '';
+            document.getElementById('deptChangeFormArea').style.display = 'none'; // 부서 변경 폼 숨김
+            document.getElementById('admin-form-area').style.display = 'block'; // 관리자 폼 표시
+            document.getElementById('req-content').value = `부서 변경 (${gUserData.department || '미지정'} → )`; // 기본 내용 설정
             document.getElementById('req-file').value = '';
         }
 
@@ -336,10 +387,10 @@
                 // 2. posts.create로 요청 생성 (fileUrl을 content JSON에 포함)
                 await posts.create({
                     category: "member_req_admin",
-                    title: "부서 변경 요청 (관리자 승인 - 증빙서류 첨부)",
+                    title: `회원 정보 변경 요청 (관리자 승인 - ${reqContent.substring(0, 20)}...)`, // 제목 간소화
                     content: JSON.stringify({
-                        fromDepartment: gUserData.department || '미지정',
-                        newDepartment: reqContent,
+                        currentDepartment: gUserData.department || '미지정',
+                        newInfoRequest: reqContent, // 요청 내용
                         requesterName: gUserData.managerName,
                         requestTo: 'admin',
                         fileUrl: fileUrl, // ✅ 파일 URL 포함
@@ -350,11 +401,73 @@
 
                 alert("✅ 관리자에게 요청이 전송되었습니다.\n증빙서류와 함께 승인 요청이 접수되었습니다.");
                 closeChangeModal();
+                location.reload();
             } catch (error) {
                 console.error('❌ 관리자에게 요청 오류:', error);
                 alert("오류가 발생했습니다: " + (error.message || '알 수 없는 오류'));
             }
         }
+        // --- 부서 변경 모달 관련 함수 끝 ---
+
+
+        // --- 직급 변경 모달 관련 함수들 ---
+        window.openRankChangeModal = function() {
+            document.getElementById('rankChangeModal').style.display = 'flex';
+            document.getElementById('currentRankDisplay').value = gUserData.roleName || '미지정';
+
+            const newRankSelect = document.getElementById('newRankSelect');
+            newRankSelect.innerHTML = RANKS.filter(rank => rank !== gUserData.roleName).map(rank =>
+                `<option value="${rank}">${rank}</option>`
+            ).join('');
+            if (newRankSelect.options.length > 0) {
+                newRankSelect.value = newRankSelect.options[0].value; // 첫 번째 옵션 기본 선택
+            }
+            document.getElementById('rankChangeReason').value = ''; // 사유 초기화
+        }
+
+        window.closeRankChangeModal = function() {
+            document.getElementById('rankChangeModal').style.display = 'none';
+        }
+
+        window.submitRankChange = async function() {
+            const currentRank = document.getElementById('currentRankDisplay').value;
+            const newRank = document.getElementById('newRankSelect').value;
+            const reason = document.getElementById('rankChangeReason').value.trim();
+
+            if (!newRank) {
+                alert("변경할 직급을 선택해주세요.");
+                return;
+            }
+            if (newRank === currentRank) {
+                alert("현재 직급과 동일한 직급으로는 변경할 수 없습니다.");
+                return;
+            }
+            if (!confirm(`'${currentRank}'에서 '${newRank}'(으)로 직급 변경을 대표님께 요청하시겠습니까?\n사유: ${reason || '없음'}`)) return;
+
+            try {
+                await posts.create({
+                    category: "member_req_internal", // 내부 요청으로 처리
+                    title: `직급 변경 요청 (${currentRank} → ${newRank})`,
+                    content: JSON.stringify({
+                        fromRank: currentRank,
+                        newRank: newRank,
+                        reason: reason,
+                        requesterName: gUserData.managerName,
+                        requestTo: 'ceo'
+                    }),
+                    status: 'pending'
+                });
+
+                alert("✅ 대표자에게 직급 변경 승인 요청이 전송되었습니다.\n'나의 자문 내역'에서 현황을 확인하세요.");
+                closeRankChangeModal();
+                location.reload();
+            } catch (error) {
+                console.error('❌ 직급 변경 요청 오류:', error);
+                alert("오류가 발생했습니다: " + (error.message || '알 수 없는 오류'));
+            }
+        }
+        // --- 직급 변경 모달 관련 함수 끝 ---
+
 
         window.handleLogout = function() {
             auth.logout();
