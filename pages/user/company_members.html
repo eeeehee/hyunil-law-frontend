@@ -196,14 +196,6 @@
         'etc': '기타 자문',
     };
 
-    const requestTypeKoreanMap = {
-        '자문요청': '자문 요청',
-        '부서변경': '부서 변경 요청',
-        '전화상담': '전화 상담 요청',
-        '추가이용문의': '추가 이용 문의',
-        '요금제변경신청': '요금제 변경 신청'
-    };
-
     const ROLE_MAP = {
         'owner': '대표',
         'manager': '부서장',
@@ -214,6 +206,7 @@
     let inactiveCompanies = [];
     let gOwnerData = null; // 대표 정보
     let gCompanyDepartments = []; // 부서 목록
+    let gPendingRequests = []; // 승인 대기중인 요청 목록
 
         (async () => {
             if (!requireAuth()) {
@@ -562,20 +555,20 @@
                 }
 
                 const response = await posts.getAll(filters);
-                const requests = response.posts || [];
+                gPendingRequests = response.posts || []; // 전역 변수에 저장
 
-                if (requests.length === 0) {
+                if (gPendingRequests.length === 0) {
                     document.getElementById('approvalSection').style.display = 'none';
                     return;
                 }
 
                 document.getElementById('approvalSection').style.display = 'block';
-                document.getElementById('reqCount').textContent = requests.length;
+                document.getElementById('reqCount').textContent = gPendingRequests.length;
 
                 const tbody = document.getElementById('reqListBody');
                 tbody.innerHTML = '';
 
-                requests.forEach(req => {
+                gPendingRequests.forEach(req => {
                     const requestData = JSON.parse(req.content || '{}');
                     let requestTypeHtml = '부서 변경';
                     let requestContentHtml = '내용 없음';
@@ -618,9 +611,9 @@
         // [REVISED] 개별 승인 처리
         window.handleDeptChangeApproval = async function(docId) {
             try {
-                if (!confirm('이 부서 변경 요청을 승인하시겠습니까?')) return;
+                if (!confirm('이 요청을 승인하시겠습니까?')) return;
                 await posts.approveDepartmentChange(docId);
-                alert('✅ 요청이 승인되었습니다. 직원의 부서가 변경되었습니다.');
+                alert('✅ 요청이 승인되었습니다.');
 
                 // 목록 새로고침
                 await loadApprovalRequests();
@@ -650,7 +643,39 @@
 
         // 전체 일괄 승인
         window.approveAll = async function() {
-            alert('일괄 승인 기능은 현재 비활성화되어 있습니다.');
+            if (!gPendingRequests || gPendingRequests.length === 0) {
+                alert('승인 대기 중인 요청이 없습니다.');
+                return;
+            }
+
+            if (!confirm(`총 ${gPendingRequests.length}건의 요청을 전체 일괄 승인하시겠습니까?`)) {
+                return;
+            }
+
+            const approvalPromises = gPendingRequests.map(req => posts.approveDepartmentChange(req.docId));
+
+            try {
+                const results = await Promise.allSettled(approvalPromises);
+                
+                const successCount = results.filter(r => r.status === 'fulfilled').length;
+                const failureCount = results.filter(r => r.status === 'rejected').length;
+
+                let alertMessage = `총 ${gPendingRequests.length}건 중 ${successCount}건이 성공적으로 승인되었습니다.`;
+                if (failureCount > 0) {
+                    alertMessage += `\n${failureCount}건은 실패했습니다.`;
+                    console.error('일괄 승인 실패 항목:', results.filter(r => r.status === 'rejected'));
+                }
+                
+                alert(alertMessage);
+
+            } catch (error) {
+                console.error('일괄 승인 중 예외 발생:', error);
+                alert('일괄 승인 처리 중 오류가 발생했습니다.');
+            } finally {
+                // 목록 새로고침
+                await loadApprovalRequests();
+                await loadMembers();
+            }
         };
 
         window.handleLogout = async () => {
