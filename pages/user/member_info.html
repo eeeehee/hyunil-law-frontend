@@ -316,6 +316,7 @@
                     category: "member_req_internal",
                     title: `부서 변경 요청 (대표 승인)`,
                     content: JSON.stringify({
+                        type: 'department', // 구분자 추가
                         fromDepartment: gUserData.department || '미지정',
                         newDepartment: newDept,
                         requesterName: gUserData.managerName,
@@ -403,6 +404,7 @@
                     category: "member_req_internal",
                     title: `직급 변경 요청 (${gUserData.roleName} → ${newRankName})`,
                     content: JSON.stringify({
+                        type: 'rank', // 구분자 추가
                         fromRank: gUserData.role, // 실제 role value 전송
                         newRank: newRankValue,    // 실제 role value 전송
                         reason, requesterName: gUserData.managerName, requestTo: 'ceo'

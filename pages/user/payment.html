@@ -455,6 +455,12 @@
             'Enterprise': { qa: 999, phone: 999, label: '🏢 Enterprise' }
         };
 
+        const ROLE_MAP = {
+            'owner': '대표',
+            'manager': '부서장',
+            'staff': '사원'
+        };
+
         function renderUsageBadges(userData, paymentsData) {
             if (!userData) userData = {};
 
@@ -555,8 +561,13 @@
 
                     } else if (category === 'member_req_internal') {
                         const reqData = JSON.parse(r.content || '{}');
-                        formattedTitle = `[부서 변경 요청] ${reqData.fromDepartment || ''} ➡️ ${reqData.newDepartment || ''}`;
-
+                        if (reqData.type === 'rank') {
+                            const fromRankName = ROLE_MAP[reqData.fromRank] || reqData.fromRank || '미지정';
+                            const newRankName = ROLE_MAP[reqData.newRank] || reqData.newRank || '미지정';
+                            formattedTitle = `[직급 변경 요청] ${fromRankName} → ${newRankName}`;
+                        } else { // 기본값은 부서 변경으로 처리
+                            formattedTitle = `[부서 변경 요청] ${reqData.fromDepartment || '미지정'} → ${reqData.newDepartment || '미지정'}`;
+                        }
                     } else if (category === 'payment_method') {
                         const paymentInfo = JSON.parse(r.content);
                         const type = paymentInfo.type === 'card' ? '신용카드' : 'CMS/계좌이체';
