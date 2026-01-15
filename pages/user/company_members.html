@@ -8,7 +8,8 @@
     <style>
         /* [기본 스타일] */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Pretendard Variable", Pretendard, sans-serif; }
-        body { background-color: #f5f7fa; color: #333; display: flex; min-height: 100vh; }
+        body { background-color: #f5f7fa; color: #333; min-height: 100vh; }
+        #app-container { display: flex; min-height: 100vh; }
         a { text-decoration: none; color: inherit; }
         ul, li { list-style: none; }
 
@@ -89,7 +90,7 @@
 </head>
 <body>
 
-    
+    <div id="app-container">
     <!-- Sidebar Skeleton (깜빡임 방지) -->
     <nav class="sidebar">
         <div class="sidebar-logo">
@@ -174,6 +175,7 @@
             </table>
         </div>
     </main>
+    </div>
 
 
 
