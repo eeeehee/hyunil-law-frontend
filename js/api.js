@@ -143,6 +143,11 @@ export const users = {
         return await apiRequest('/users/me');
     },
 
+    // [NEW] 회사 부서 목록 조회
+    async getDepartments() {
+        return await apiRequest('/users/departments');
+    },
+
     // 사용자 목록 조회 (관리자)
     async getAll(filters = {}) {
         const params = new URLSearchParams(filters);

@@ -246,24 +246,12 @@
         // 회사 부서 목록 로드 (대표가 등록한 부서 목록)
         async function loadCompanyDepartments() {
             try {
-                if (!gUserData || !gUserData.bizNum) return;
-
-                // 같은 회사 직원들 가져와서 owner의 departments 찾기
-                const response = await admin.getEmployees(gUserData.bizNum);
-                const employees = response?.employees || response || [];
-
-                // owner 찾기
-                const owner = employees.find(emp => emp.role === 'owner');
-                if (owner && owner.departments) {
-                    let depts = owner.departments;
-                    if (typeof depts === 'string') {
-                        try { depts = JSON.parse(depts); } catch (e) { depts = []; }
-                    }
-                    if (Array.isArray(depts)) {
-                        gCompanyDepartments = depts.sort();
-                    }
+                // 새로 만든 /api/users/departments 엔드포인트 사용
+                const response = await users.getDepartments(); 
+                if (response && Array.isArray(response.departments)) {
+                    gCompanyDepartments = response.departments.map(d => d.name || d).sort(); // 객체 배열, 문자열 배열 둘 다 처리
                 }
-
+                
                 // 부서 선택 드롭다운 채우기 (CEO 폼, Admin 폼 둘 다)
                 populateDeptSelect('newDeptSelect');
                 populateDeptSelect('adminNewDeptSelect');
