@@ -284,11 +284,22 @@
                     allItems = allItems.filter(p => p.content && p.content.includes('[FOLLOWUP_SEPARATOR]'));
                 }
 
-                if (userData.role !== 'owner') {
-                    const myDept = (userData.department || '').trim();
-                    if (myDept && myDept !== '전사') {
-                        allItems = allItems.filter(p => ((p.userDepartment || '').trim() === myDept));
+                const myDept = (userData.department || '').trim();
+                const isCompanyWide = myDept === '전사';
+
+                if (isCompanyWide) {
+                    document.getElementById('pageTitleText').innerText = '자문 내역 (전사)';
+                    document.getElementById('deptSearchWrapper').style.display = 'block';
+                    const tableHeader = document.getElementById('tableHeader');
+                    // '부서' 컬럼이 이미 추가되었는지 확인 (owner 권한과 중복 실행 방지)
+                    if (Array.from(tableHeader.children).every(th => th.textContent !== '부서')) {
+                        const deptTh = document.createElement('th');
+                        deptTh.style.width = '12%';
+                        deptTh.textContent = '부서';
+                        tableHeader.insertBefore(deptTh, tableHeader.children[3]);
                     }
+                } else if (userData.role !== 'owner') {
+                    allItems = allItems.filter(p => ((p.userDepartment || '').trim() === myDept));
                 }
 
                 allItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -297,13 +308,14 @@
                 gCurrentPage = 1;
                 renderPosts(gAllPosts);
 
-                if (userData.role === 'owner') {
+                if (userData.role === 'owner' || isCompanyWide) {
                     loadDepartments(gAllPosts);
                 }
 
             } catch (error) {
                 console.error('데이터 로드 에러:', error);
-                document.getElementById('postListBody').innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+                const colspan = (gUserData && (gUserData.role === 'owner' || gUserData.department === '전사')) ? 6 : 5;
+                document.getElementById('postListBody').innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding:40px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>`;
             }
         })();
 
@@ -313,7 +325,9 @@
             if (!tbody) return;
 
             const isOwner = gUserData && gUserData.role === 'owner';
-            const colspan = isOwner ? 6 : 5;
+            const isCompanyWide = gUserData && gUserData.department === '전사';
+            const showDeptColumn = isOwner || isCompanyWide;
+            const colspan = showDeptColumn ? 6 : 5;
 
             if (!posts || posts.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding:40px; color:#999;">자문 내역이 없습니다.</td></tr>`;
@@ -371,7 +385,7 @@
 
                 const displayManager = post.userManagerName || '-';
                 const displayDept = post.userDepartment || '-';
-                const deptCell = isOwner ? `<td>${displayDept}</td>` : '';
+                const deptCell = showDeptColumn ? `<td>${displayDept}</td>` : '';
 
                 return `
                     <tr onclick="${rowClickAction}" style="cursor:${cursorStyle};">
@@ -386,7 +400,7 @@
             }).join('');
         }
 
-        // 부서 목록 로드 (owner 전용)
+        // 부서 목록 로드 (owner 또는 전사)
         function loadDepartments(posts) {
             const deptSet = new Set();
             posts.forEach(post => {
