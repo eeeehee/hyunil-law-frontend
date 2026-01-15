@@ -240,7 +240,16 @@
                 }
 
                 const myDept = (userData.department || '').trim();
-                const isCompanyWide = myDept === '전사';
+                // 전사 권한 체크: departments 배열이 있고 비어있지 않으면 전사 권한
+                let hasDepartmentsAccess = false;
+                if (userData.departments) {
+                    let depts = userData.departments;
+                    if (typeof depts === 'string') {
+                        try { depts = JSON.parse(depts); } catch (e) { depts = []; }
+                    }
+                    hasDepartmentsAccess = Array.isArray(depts) && depts.length > 0;
+                }
+                const isCompanyWide = hasDepartmentsAccess || myDept === '전사';
                 const isOwner = userData.role === 'owner';
 
                 if (isOwner || isCompanyWide) {
@@ -306,10 +315,22 @@
 
             } catch (error) {
                 console.error('데이터 로드 에러:', error);
-                const colspan = (gUserData && (gUserData.role === 'owner' || gUserData.department === '전사')) ? 6 : 5;
-                document.getElementById('postListBody').innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding:40px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>`;
+                document.getElementById('postListBody').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>`;
             }
         })();
+
+        // 전사 권한 체크 헬퍼 함수
+        function checkCompanyWideAccess(userData) {
+            if (!userData) return false;
+            if (userData.departments) {
+                let depts = userData.departments;
+                if (typeof depts === 'string') {
+                    try { depts = JSON.parse(depts); } catch (e) { depts = []; }
+                }
+                if (Array.isArray(depts) && depts.length > 0) return true;
+            }
+            return (userData.department || '').trim() === '전사';
+        }
 
         // 게시글 렌더링 함수 (페이지네이션 적용)
         function renderPosts(posts) {
@@ -317,7 +338,7 @@
             if (!tbody) return;
 
             const isOwner = gUserData && gUserData.role === 'owner';
-            const isCompanyWide = gUserData && gUserData.department === '전사';
+            const isCompanyWide = checkCompanyWideAccess(gUserData);
             const showDeptColumn = isOwner || isCompanyWide;
             const colspan = showDeptColumn ? 6 : 5;
 
