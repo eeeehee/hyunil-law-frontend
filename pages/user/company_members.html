@@ -203,6 +203,12 @@
         '추가이용문의': '추가 이용 문의',
         '요금제변경신청': '요금제 변경 신청'
     };
+
+    const ROLE_MAP = {
+        'owner': '대표',
+        'manager': '부서장',
+        'staff': '사원'
+    };
     
     let allCompanies = [];
     let inactiveCompanies = [];
@@ -571,8 +577,19 @@
 
                 requests.forEach(req => {
                     const requestData = JSON.parse(req.content || '{}');
-                    // ✅ newDepartment 필드 사용 (member_info.html에서 저장하는 필드명)
-                    const requestContentHtml = `${requestData.fromDepartment || '미지정'} → <span class="req-highlight">${requestData.newDepartment || '미지정'}</span>`;
+                    let requestTypeHtml = '부서 변경';
+                    let requestContentHtml = '내용 없음';
+
+                    if(requestData.type === 'rank') {
+                        requestTypeHtml = '직급 변경';
+                        const fromRankName = ROLE_MAP[requestData.fromRank] || requestData.fromRank || '미지정';
+                        // newRank는 직접 입력된 텍스트이므로 그대로 사용
+                        const newRankName = requestData.newRank || '미지정';
+                        requestContentHtml = `${fromRankName} → <span class="req-highlight">${newRankName}</span>`;
+                    } else { // 기본은 부서 변경으로 처리
+                        requestContentHtml = `${requestData.fromDepartment || '미지정'} → <span class="req-highlight">${requestData.newDepartment || '미지정'}</span>`;
+                    }
+                    
                     const dateStr = new Date(req.createdAt).toLocaleString('ko-KR');
 
                     tbody.innerHTML += `
@@ -582,7 +599,7 @@
                                 <div style="font-size:11px; color:#888;">${req.userDepartment || '-'}</div>
                                 <div style="font-size:11px; color:#999;">요청일: ${dateStr}</div>
                             </td>
-                            <td>부서 변경</td>
+                            <td>${requestTypeHtml}</td>
                             <td>${requestContentHtml}</td>
                             <td>
                                 <button class="btn-act ok" onclick="handleDeptChangeApproval('${req.docId}')">✓ 승인</button>
