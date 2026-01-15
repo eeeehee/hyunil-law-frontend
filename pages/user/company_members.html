@@ -437,23 +437,37 @@
 
             // --- 직원 정보 수정 모달 ---
             window.openEditMemberModal = function(uid) {
-                console.log('openEditMemberModal called with uid:', uid); // Debug line
+                console.log('openEditMemberModal called with uid:', uid);
                 const member = gAllUsers.find(u => u.uid === uid);
                 if (!member) {
                     alert('사용자 정보를 찾을 수 없습니다.');
                     return;
                 }
 
-                document.getElementById('editMemberUid').value = uid;
-                document.getElementById('editName').value = member.managerName || '';
-                document.getElementById('editEmail').value = member.email || '';
-                document.getElementById('editPhone').value = member.phone || '';
-
+                console.log('Finding modal elements...');
+                const uidInput = document.getElementById('editMemberUid');
+                const nameInput = document.getElementById('editName');
+                const emailInput = document.getElementById('editEmail');
+                const phoneInput = document.getElementById('editPhone');
                 const deptSelect = document.getElementById('editDepartment');
+                const modal = document.getElementById('editMemberModal');
+
+                console.log({ uidInput, nameInput, emailInput, phoneInput, deptSelect, modal });
+
+                if (!uidInput || !nameInput || !emailInput || !phoneInput || !deptSelect || !modal) {
+                    alert('수정 폼의 일부 요소를 찾을 수 없습니다. 페이지를 새로고침 후 다시 시도해주세요.');
+                    return;
+                }
+
+                uidInput.value = uid;
+                nameInput.value = member.managerName || '';
+                emailInput.value = member.email || '';
+                phoneInput.value = member.phone || '';
+
                 deptSelect.innerHTML = gCompanyDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
                 deptSelect.value = member.department || '';
 
-                document.getElementById('editMemberModal').style.display = 'flex';
+                modal.style.display = 'flex';
             }
 
             window.closeEditMemberModal = function() {
