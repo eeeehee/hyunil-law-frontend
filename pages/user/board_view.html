@@ -329,14 +329,14 @@
                             <span style="background:#2c5bf2; color:#fff; font-size:11px; padding:2px 6px; border-radius:3px; margin-left:8px;">📞 전화상담 요청</span>
                         </div>
                         <div class="msg-content">
-                            <p style="margin-bottom:10px;"><strong>[상담 분야]</strong> ${consultCategory}</p>
-                            <p style="margin-bottom:10px;"><strong>[희망 시간대]</strong></p>
-                            <ul style="list-style-type: decimal; padding-left: 20px; margin-top: -5px; margin-bottom: 10px;">
+                            <p style="margin-bottom:5px;"><strong>[상담 분야]</strong> ${consultCategory}</p>
+                            <p style="margin-bottom:5px;"><strong>[희망 시간대]</strong></p>
+                            <ul style="list-style-type: decimal; padding-left: 20px; margin-top: -5px; margin-bottom: 5px;">
                                 ${timeSlots}
                             </ul>
-                            <p style="margin-bottom:10px;"><strong>[연락처]</strong> ${contact}</p>
-                            <p><strong>[상담 내용]</strong></p>
-                            <div style="white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-top: 10px;">${consultContent}</div>
+                            <p style="margin-bottom:5px;"><strong>[연락처]</strong> ${contact}</p>
+                            <p style="margin-bottom:5px;"><strong>[상담 내용]</strong></p>
+                            <div style="white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-top: 5px;">${consultContent}</div>
                         </div>
                         <div class="msg-time">${post.createdAt ? new Date(post.createdAt).toLocaleString('ko-KR') : ''}</div>
                     </div>
