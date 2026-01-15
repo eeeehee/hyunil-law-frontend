@@ -180,27 +180,19 @@
 
     <div id="changeModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 class="modal-title">부서 변경 신청</h3>
-            <div id="deptChangeFormArea">
-                <div class="form-group">
-                    <label class="label">현재 부서</label>
-                    <input type="text" id="currentDepartmentDisplay" class="input-box" readonly>
-                </div>
-                <div class="form-group">
-                    <label class="label">변경할 부서</label>
-                    <select id="newDepartmentSelect" class="input-box">
-                        <!-- Options will be populated by JS -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="label">변경 사유 (선택)</label>
-                    <textarea id="departmentChangeReason" class="input-box" rows="3" placeholder="변경 사유를 입력해주세요."></textarea>
-                </div>
-                <button class="btn-save" onclick="submitDepartmentChange()">대표자에게 변경 요청</button>
-                <hr style="border:0; border-top:1px dashed #ddd; margin:20px 0;">
-                <button class="btn-save" onclick="showAdminForm()" style="background-color:#555; margin-top:0;">👩‍💻 관리자에게 서류 첨부 요청</button>
+            <h3 class="modal-title">부서/정보 변경 신청</h3>
+            <div id="opt-ceo">
+                <button class="option-btn" onclick="reqToCEO()">
+                    <span class="opt-title">🏢 대표자에게 승인 요청 (추천)</span>
+                    <span class="opt-desc">별도 서류 없이 대표님 승인으로 즉시 변경됩니다.</span>
+                </button>
             </div>
-
+            <div id="opt-admin">
+                <button class="option-btn" onclick="showAdminForm()">
+                    <span class="opt-title">👩‍💻 사이트 관리자에게 문의</span>
+                    <span class="opt-desc">재직증명서 등 <strong>증빙서류 첨부</strong>가 필요합니다.</span>
+                </button>
+            </div>
             <div id="admin-form-area" style="display:none; margin-top:10px; border-top:1px solid #eee; padding-top:15px;">
                 <label class="label" style="font-size:13px;">변경 요청 내용</label>
                 <input type="text" id="req-content" class="input-box" style="height:40px; margin-bottom:10px;" placeholder="예: 인사팀으로 부서 이동">
@@ -217,7 +209,7 @@
         import { renderClientSidebar } from "../../js/client_ui.js";
 
         let gUserData = null;
-        let gAllDepartments = []; // 모든 부서 목록을 저장할 변수
+        // let gAllDepartments = []; // Removed
 
         const ROLE_MAP = {
             'owner': '대표',
@@ -230,7 +222,7 @@
             { name: '사원', value: 'staff' }
         ];
 
-        // 페이지 로드 시 사용자 정보 및 부서 목록 가져오기
+        // 페이지 로드 시 사용자 정보 가져오기
         (async () => {
             if (!auth.isLoggedIn()) {
                 location.href = "../../pages/public/login.html";
@@ -241,29 +233,29 @@
                 gUserData = await users.getMe();
                 renderClientSidebar('member_info', gUserData);
 
-                // 부서 목록 가져오기 (권한에 따라)
-                const isPrivileged = ['owner', 'admin', 'master'].includes(gUserData.role);
-                if (isPrivileged) {
-                    try {
-                        const allUsersData = await users.getAll();
-                        const deptSet = new Set();
-                        if (allUsersData && allUsersData.users) {
-                            allUsersData.users.forEach(user => {
-                                if (user.department) deptSet.add(user.department);
-                            });
-                        }
-                        gAllDepartments = Array.from(deptSet).sort();
-                    } catch (deptError) {
-                        console.error("부서 목록 로드 실패:", deptError);
-                        alert('부서 목록을 불러오는 데 실패했습니다. 기본 목록을 사용합니다.');
-                        gAllDepartments = ['영업팀', '마케팅팀', '개발팀', '인사팀', '재무팀', '법무팀', '기타']; 
-                    }
-                } else {
-                    // 일반 사용자는 기본 목록 사용
-                    gAllDepartments = ['영업팀', '마케팅팀', '개발팀', '인사팀', '재무팀', '법무팀', '기타'];
-                }
+                // // 부서 목록 가져오기 (권한에 따라) - Removed
+                // const isPrivileged = ['owner', 'admin', 'master'].includes(gUserData.role);
+                // if (isPrivileged) {
+                //     try {
+                //         const allUsersData = await users.getAll();
+                //         const deptSet = new Set();
+                //         if (allUsersData && allUsersData.users) {
+                //             allUsersData.users.forEach(user => {
+                //                 if (user.department) deptSet.add(user.department);
+                //             });
+                //         }
+                //         gAllDepartments = Array.from(deptSet).sort();
+                //     } catch (deptError) {
+                //         console.error("부서 목록 로드 실패:", deptError);
+                //         alert('부서 목록을 불러오는 데 실패했습니다. 기본 목록을 사용합니다.');
+                //         gAllDepartments = ['영업팀', '마케팅팀', '개발팀', '인사팀', '재무팀', '법무팀', '기타']; 
+                //     }
+                // } else {
+                //     // 일반 사용자는 기본 목록 사용
+                //     gAllDepartments = ['영업팀', '마케팅팀', '개발팀', '인사팀', '재무팀', '법무팀', '기타'];
+                // }
 
-                // 폼 채우기 및 UI 처리
+
                 document.getElementById('email').value = gUserData.email || '';
                 document.getElementById('company').value = gUserData.companyName || '-';
                 document.getElementById('department').value = gUserData.department || '미지정';
@@ -307,47 +299,46 @@
         // --- 부서 변경 모달 ---
         window.openChangeModal = function() {
             document.getElementById('changeModal').style.display = 'flex';
-            document.getElementById('deptChangeFormArea').style.display = 'block';
-            document.getElementById('admin-form-area').style.display = 'none';
-            document.getElementById('currentDepartmentDisplay').value = gUserData.department || '미지정';
-            const newDepartmentSelect = document.getElementById('newDepartmentSelect');
-            newDepartmentSelect.innerHTML = gAllDepartments.map(dept => `<option value="${dept}">${dept}</option>`).join('');
-            if (gUserData.department && gAllDepartments.includes(gUserData.department)) {
-                newDepartmentSelect.value = gUserData.department;
-            }
-            document.getElementById('departmentChangeReason').value = '';
+            document.getElementById('opt-ceo').style.display = 'block'; // Show these again
+            document.getElementById('opt-admin').style.display = 'block'; // Show these again
+            document.getElementById('admin-form-area').style.display = 'none'; // Hide form area
         }
         window.closeChangeModal = function() { document.getElementById('changeModal').style.display = 'none'; }
-        window.submitDepartmentChange = async function() {
-            const newDept = document.getElementById('newDepartmentSelect').value;
-            const reason = document.getElementById('departmentChangeReason').value.trim();
-            if (!newDept || newDept === gUserData.department) {
-                alert("변경할 새로운 부서를 선택해주세요."); return;
-            }
+        
+        // window.submitDepartmentChange = async function() { /* Removed */ }
+
+        window.reqToCEO = async function() {
+            const newDept = prompt("변경하고 싶은 부서명을 입력하세요:");
+            if (!newDept) return;
             if (!confirm(`'${newDept}' 부서로 변경을 대표님께 요청하시겠습니까?`)) return;
             try {
                 await posts.create({
                     category: "member_req_internal",
-                    title: `부서 변경 요청 (${gUserData.department || '미지정'} → ${newDept})`,
+                    title: `부서 변경 요청 (대표 승인)`,
                     content: JSON.stringify({
                         fromDepartment: gUserData.department || '미지정',
                         newDepartment: newDept,
-                        reason, requesterName: gUserData.managerName, requestTo: 'ceo'
+                        requesterName: gUserData.managerName,
+                        requestTo: 'ceo'
                     }),
                     status: 'pending'
                 });
-                alert("✅ 대표자에게 승인 요청이 전송되었습니다.");
+                alert("✅ 대표자에게 승인 요청이 전송되었습니다.\n'나의 자문 내역'에서 현황을 확인하세요.");
                 closeChangeModal();
             } catch (error) {
-                console.error('❌ 부서 변경 요청 오류:', error); alert("오류가 발생했습니다.");
+                console.error('❌ 대표에게 요청 오류:', error);
+                alert("오류가 발생했습니다: " + (error.message || '알 수 없는 오류'));
             }
         }
+
         window.showAdminForm = function() {
-            document.getElementById('deptChangeFormArea').style.display = 'none';
-            document.getElementById('admin-form-area').style.display = 'block';
-            document.getElementById('req-content').value = `부서 변경 (${gUserData.department || '미지정'} → )`;
+            document.getElementById('opt-ceo').style.display = 'none'; // Hide option buttons
+            document.getElementById('opt-admin').style.display = 'none'; // Hide option buttons
+            document.getElementById('admin-form-area').style.display = 'block'; // Show admin form
+            document.getElementById('req-content').value = '';
             document.getElementById('req-file').value = '';
         };
+
         window.submitToAdmin = async function() { 
             const reqContent = document.getElementById('req-content').value.trim();
             const reqFile = document.getElementById('req-file').files[0];
