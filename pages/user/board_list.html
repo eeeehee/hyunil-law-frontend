@@ -254,6 +254,7 @@
                 // --- 데이터 로딩 시작 ---
                 const urlParams = new URLSearchParams(window.location.search);
                 const statusFilter = urlParams.get('status') || '';
+                const followupFilter = urlParams.get('filter') || '';
 
                 const postsResponse = await posts.getAll({ status: statusFilter, limit: 100 });
                 
@@ -277,6 +278,11 @@
                     }));
                 
                 let allItems = [...postsData, ...mappedApprovals];
+
+                // 추가 질문 필터 적용
+                if (followupFilter === 'followup') {
+                    allItems = allItems.filter(p => p.content && p.content.includes('[FOLLOWUP_SEPARATOR]'));
+                }
 
                 if (userData.role !== 'owner') {
                     const myDept = (userData.department || '').trim();

@@ -99,30 +99,38 @@
             <a href="../admin/admin.html" class="btn-admin" id="adminBtn">⚙️ 관리자 페이지</a>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card" id="cardTotal" onclick="location.href='board_list.html'">
-                <div class="stat-header"><span class="stat-title">총 자문 신청</span><span class="stat-icon">📝</span></div>
+        <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
+            <div class="stat-card" onclick="location.href='board_list.html'">
+                <div class="stat-header"><span class="stat-title">총 자문신청</span></div>
                 <div class="stat-value" id="countTotal">-</div>
             </div>
-            <div class="stat-card" id="cardWaiting" onclick="location.href='board_list.html?status=waiting'">
-                <div class="stat-header"><span class="stat-title">답변 대기중</span><span class="stat-icon">⏳</span></div>
-                <div class="stat-value" style="color:#ff9800;" id="countWaiting">-</div>
+            <div class="stat-card" onclick="location.href='board_list.html?status=pending'">
+                <div class="stat-header"><span class="stat-title">접수 대기</span></div>
+                <div class="stat-value" id="countPending" style="color:#2c5bf2;">-</div>
             </div>
-            <div class="stat-card" id="cardDone" onclick="location.href='board_list.html?status=done'">
-                <div class="stat-header"><span class="stat-title">답변 완료</span><span class="stat-icon">✅</span></div>
-                <div class="stat-value" style="color:#52c41a;" id="countDone">-</div>
+            <div class="stat-card" onclick="location.href='board_list.html?status=processing'">
+                <div class="stat-header"><span class="stat-title">답변 대기중</span></div>
+                <div class="stat-value" id="countProcessing" style="color:#ff9800;">-</div>
+            </div>
+            <div class="stat-card" onclick="location.href='board_list.html?status=done'">
+                <div class="stat-header"><span class="stat-title">답변 완료</span></div>
+                <div class="stat-value" id="countDone" style="color:#52c41a;">-</div>
+            </div>
+             <div class="stat-card" onclick="location.href='board_list.html?filter=followup'">
+                <div class="stat-header"><span class="stat-title">추가 질문</span></div>
+                <div class="stat-value" id="countFollowup" style="color:#722ed1;">-</div>
             </div>
         </div>
 
         <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 15px;">빠른 실행</h3>
         <div class="quick-actions">
-            <div class="action-card" onclick="location.href='board_write.html'">
+             <div class="action-card" onclick="location.href='board_write.html'">
                 <div class="action-icon">✏️</div>
-                <div class="action-text"><h3>새 자문 신청하기</h3><p>법률 전문가에게 문의를 남겨보세요.</p></div>
+                <div class="action-text"><h3>서면 자문 신청</h3><p>문서 검토, 법률 서면 자문을 신청합니다.</p></div>
             </div>
-            <div class="action-card" onclick="location.href='board_list.html'">
-                <div class="action-icon">📂</div>
-                <div class="action-text"><h3>내역 확인하기</h3><p>진행 중인 자문과 완료된 내역을 확인합니다.</p></div>
+            <div class="action-card" onclick="location.href='../public/phone_consult.html'">
+                <div class="action-icon">📞</div>
+                <div class="action-text"><h3>전화 상담 신청</h3><p>변호사와 직접 통화 상담을 예약합니다.</p></div>
             </div>
         </div>
 
@@ -191,33 +199,55 @@
             }
         })();
 
-        // 자문 카운트 불러오기
+        // 자문 카운트 불러오기 (프론트엔드에서 직접 계산)
         async function loadPostsCounts() {
             try {
-                const counts = await posts.getCounts();
+                // 시스템 카테고리 제외 (자문이 아닌 요청들)
+                const EXCLUDED_CATEGORIES = [
+                    'extra_usage_quote', 'payment_request', 'plan_change', 'payment_method',
+                    'member_req', 'member_req_internal', 'member_req_admin', 'phone_log', 'guest'
+                ];
 
-                // 총 자문 신청
-                const countTotalEl = document.getElementById('countTotal');
-                if (countTotalEl) {
-                    countTotalEl.textContent = counts.totalCount || 0;
-                }
+                const postsData = await posts.getAll({ limit: 5000 }); // 모든 자문 가져오기
+                const allPosts = (postsData.posts || []).filter(p => !EXCLUDED_CATEGORIES.includes(p.category));
 
-                // 답변 대기중
-                const countWaitingEl = document.getElementById('countWaiting');
-                if (countWaitingEl) {
-                    countWaitingEl.textContent = counts.pendingCount || 0;
-                }
+                let pendingCount = 0;
+                let processingCount = 0;
+                let doneCount = 0;
+                let followupCount = 0;
 
-                // 답변 완료
-                const countDoneEl = document.getElementById('countDone');
-                if (countDoneEl) {
-                    countDoneEl.textContent = counts.doneCount || 0;
-                }
+                allPosts.forEach(post => {
+                    const status = post.status || 'pending';
+                    const hasFollowup = post.content && post.content.includes('[FOLLOWUP_SEPARATOR]');
 
-                console.log('자문 카운트 로드 완료:', counts);
+                    if (status === 'pending' || status === 'waiting') {
+                        pendingCount++;
+                    } else if (status === 'analyzing' || status === 'processing' || status === 'InProgress') {
+                        processingCount++;
+                    } else if (['done', 'completed', 'Completed'].includes(status)) {
+                        doneCount++;
+                    }
+
+                    // 추가 질문은 상태와 별개로 카운트될 수 있음
+                    if (hasFollowup && !(['done', 'completed', 'Completed'].includes(status))) {
+                       followupCount++;
+                    }
+                });
+
+                document.getElementById('countTotal').textContent = allPosts.length;
+                document.getElementById('countPending').textContent = pendingCount;
+                document.getElementById('countProcessing').textContent = processingCount;
+                document.getElementById('countDone').textContent = doneCount;
+                document.getElementById('countFollowup').textContent = followupCount;
+
             } catch (error) {
                 console.error('자문 카운트 로드 에러:', error);
-                // 에러가 나도 계속 진행 (카운트만 표시 안됨)
+                // 에러 발생 시 모든 카운트를 0으로 설정
+                document.getElementById('countTotal').textContent = 0;
+                document.getElementById('countPending').textContent = 0;
+                document.getElementById('countProcessing').textContent = 0;
+                document.getElementById('countDone').textContent = 0;
+                document.getElementById('countFollowup').textContent = 0;
             }
         }
 
