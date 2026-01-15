@@ -760,10 +760,24 @@
                     //     .map(req => { ... });
 
                     let allRequests = [...postsList]; // ✅ [REVISED] postsList만 사용
-                    if (userData.role === 'manager') {
-                        allRequests = allRequests.filter(r => r.userDepartment === userData.department || r.authorName === userData.managerName);
-                    } else if (userData.role === 'user' || userData.role === 'staff') {
-                        allRequests = allRequests.filter(r => r.authorUid === userData.uid || r.authorName === userData.managerName);
+
+                    // 전사 권한 체크: departments 배열이 있고 비어있지 않으면 전사 권한
+                    let hasDepartmentsAccess = false;
+                    if (userData.departments) {
+                        let depts = userData.departments;
+                        if (typeof depts === 'string') {
+                            try { depts = JSON.parse(depts); } catch (e) { depts = []; }
+                        }
+                        hasDepartmentsAccess = Array.isArray(depts) && depts.length > 0;
+                    }
+
+                    // 전사 권한이 없는 경우에만 필터링 적용
+                    if (!hasDepartmentsAccess) {
+                        if (userData.role === 'manager') {
+                            allRequests = allRequests.filter(r => r.userDepartment === userData.department || r.authorName === userData.managerName);
+                        } else if (userData.role === 'user' || userData.role === 'staff') {
+                            allRequests = allRequests.filter(r => r.authorUid === userData.uid || r.authorName === userData.managerName);
+                        }
                     }
                     allRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     renderRequestList(allRequests);
