@@ -399,11 +399,10 @@
             }
 
             try {
-                const newReport = await reports.create(payload);
+                await reports.create(payload);
                 alert('리포트가 성공적으로 생성되었습니다.');
                 closeReportModal();
                 await loadReportHistory();
-                window.location.href = `../user/preview_report.html?id=${newReport.doc_id}`;
             } catch (error) {
                 console.error('리포트 생성 실패:', error);
                 alert(`리포트 생성 중 오류가 발생했습니다: ${error.message}`);

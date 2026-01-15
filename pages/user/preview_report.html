@@ -40,128 +40,113 @@
 <body>
 
 <div class="controls">
-    <button id="pdfBtn" onclick="show('pdf')" class="active">📊 리포트 (PDF)</button>
-    <button id="emailBtn" onclick="show('email')">📧 이메일 본문</button>
+    <button onclick="show('pdf')" class="active">📊 리포트 (PDF)</button>
+    <button onclick="show('email')">📧 이메일 본문</button>
 </div>
 
 <p class="guide" id="guideText">※ 서버에서 자동 생성되어 첨부될 PDF 디자인입니다.</p>
 
 <div id="viewer"></div>
 
-<script type="module">
-    import { reports } from '../../js/api.js';
+<script>
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}년 ${today.getMonth()+1}월`;
 
-    let reportData = null;
-
-    function buildViews(report) {
-        const today = new Date();
-        const dateStr = `${today.getFullYear()}년 ${today.getMonth()+1}월`;
-        const companyName = report.companyName || (report.title.match(/\[(.*?)\]/) ? report.title.match(/\[(.*?)\]/)[1] : '고객사');
-        
-        // period (YYYY-MM) -> YYYY.MM.01 ~ YYYY.MM.마지막일
-        const [year, month] = report.period.split('-');
-        const startDate = new Date(year, month - 1, 2).toISOString().slice(0, 10).replace(/-/g, '.');
-        const endDate = new Date(year, month, 1).toISOString().slice(0, 10).replace(/-/g, '.');
-
-        return {
-            pdf: `
-                <div class="preview-wrapper"><div class="pdf-content">
-                    <div class="pdf-header">
-                        <div>
-                            <h1 class="pdf-title">${report.type === 'month' ? '월간' : '정기'} 법률 자문 리포트</h1>
-                            <span class="pdf-sub">기간: ${startDate} ~ ${endDate}</span>
-                        </div>
-                        <div style="text-align:right;">
-                            <strong style="font-size:16px; color:#082545;">${companyName} 귀중</strong><br>
-                            <span style="font-size:11px;">발행일: ${new Date(report.created_at).toLocaleDateString()}</span>
-                        </div>
+    const VIEWS = {
+        pdf: `
+            <div class="preview-wrapper"><div class="pdf-content">
+                <div class="pdf-header">
+                    <div>
+                        <h1 class="pdf-title">월간 법률 자문 리포트</h1>
+                        <span class="pdf-sub">기간: 2025.01.01 ~ 2025.01.31</span>
                     </div>
-
-                    <div class="opinion-box">
-                        <span class="op-title">⚖️ 전담 변호사 종합 의견</span>
-                        <p style="font-size:13px; margin:0; white-space: pre-wrap;">${report.content || '종합 의견이 없습니다.'}</p>
-                    </div>
-
-                    <div style="position:absolute; bottom:50px; width:calc(100% - 100px); text-align:center; border-top:1px solid #eee; padding-top:20px;">
-                        <strong style="color:#082545;">법무그룹 현일 기업자문센터</strong><br>
-                        <span style="font-size:11px; color:#888;">본 문서는 기업 법무 자문 내역을 정리한 리포트이며, 법적 효력이 있는 증명서는 아닙니다.</span>
-                    </div>
-                </div></div>
-            `,
-            email: `
-                <div class="email-wrapper">
-                    <h2 style="color:#082545; margin-top:0;">[법무그룹 현일] ${year}년 ${month}월 자문 리포트</h2>
-                    <p style="font-size:15px; line-height:1.6; color:#333;">
-                        <strong>${companyName}</strong> 담당자님, 안녕하세요.<br>
-                        법무그룹 현일입니다.<br><br>
-                        ${year}년 ${month}월 진행된 법률 자문 내역을 정리하여<br>
-                        <strong>월간 리포트(PDF)</strong>를 송부드립니다.<br><br>
-                        자세한 내용은 첨부파일을 확인해 주시기 바라며,<br>
-                        문의사항은 언제든 연락 주시기 바랍니다.
-                    </p>
-                    
-                    <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin:25px 0; border:1px solid #eee;">
-                        <strong>📎 첨부파일:</strong> 
-                        <span style="color:#082545; font-weight:bold;">${year}년_${month}월_법률자문리포트.pdf</span>
-                    </div>
-
-                    <div style="border-top:1px solid #eee; padding-top:20px; margin-top:30px; font-size:12px; color:#888; text-align:center;">
-                        본 메일은 발신 전용입니다.<br>
-                        법무그룹 현일 | 1533-6092
+                    <div style="text-align:right;">
+                        <strong style="font-size:16px; color:#082545;">주식회사 리비스 귀중</strong><br>
+                        <span style="font-size:11px;">발행일: ${dateStr} 1일</span>
                     </div>
                 </div>
-            `
-        };
-    }
+
+                <div class="stat-box">
+                    <div class="stat-item"><span class="stat-label">총 자문 건수</span><span class="stat-val">5 건</span></div>
+                    <div class="stat-item"><span class="stat-label">계약 검토</span><span class="stat-val">2 건</span></div>
+                    <div class="stat-item"><span class="stat-label">노무 자문</span><span class="stat-val">1 건</span></div>
+                    <div class="stat-item"><span class="stat-label">완료율</span><span class="stat-val" style="color:#2e7d32;">100%</span></div>
+                </div>
+
+                <h3 style="font-size:16px; border-bottom:2px solid #eee; padding-bottom:8px; margin-bottom:15px;">📌 상세 자문 내역</h3>
+                <table class="pdf-table">
+                    <thead><tr><th width="15%">일자</th><th width="15%">분야</th><th>자문 제목</th><th width="15%">요청자</th><th width="15%">상태</th></tr></thead>
+                    <tbody>
+                        <tr><td>25.01.05</td><td>계약</td><td class="td-left">비밀유지계약서(NDA) 검토</td><td>김팀장</td><td>완료</td></tr>
+                        <tr><td>25.01.12</td><td>노무</td><td class="td-left">연차수당 지급 규정 문의</td><td>박대리</td><td>완료</td></tr>
+                        <tr><td>25.01.15</td><td>채권</td><td class="td-left">미수금 내용증명 발송</td><td>이이사</td><td>완료</td></tr>
+                        <tr><td>25.01.20</td><td>기타</td><td class="td-left">신규 사업 적법성 검토</td><td>최대표</td><td>완료</td></tr>
+                        <tr><td>25.01.28</td><td>계약</td><td class="td-left">용역 공급 계약서 작성</td><td>김팀장</td><td>완료</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="opinion-box">
+                    <span class="op-title">⚖️ 전담 변호사 종합 의견</span>
+                    <p style="font-size:13px; margin:0;">
+                        1월에는 주로 신규 계약 체결과 관련된 검토 요청이 많았습니다. 
+                        특히 NDA 및 용역 계약서 작성 시, 독소 조항을 사전에 제거하여 리스크를 최소화하였습니다.<br><br>
+                        내부 규정(노무) 관련하여 문의주신 사항은 최신 판례를 반영하여 가이드를 드렸으니, 
+                        사내 취업규칙 개정 시 참고하시기 바랍니다.<br><br>
+                        다음 달 예정된 주주총회 관련 절차도 미리 준비하시면 좋을 것으로 판단됩니다.
+                    </p>
+                </div>
+
+                <div style="position:absolute; bottom:50px; width:calc(100% - 100px); text-align:center; border-top:1px solid #eee; padding-top:20px;">
+                    <strong style="color:#082545;">법무그룹 현일 기업자문센터</strong><br>
+                    <span style="font-size:11px; color:#888;">본 문서는 기업 법무 자문 내역을 정리한 리포트이며, 법적 효력이 있는 증명서는 아닙니다.</span>
+                </div>
+            </div></div>
+        `,
+
+        email: `
+            <div class="email-wrapper">
+                <h2 style="color:#082545; margin-top:0;">[법무그룹 현일] ${dateStr} 자문 리포트</h2>
+                <p style="font-size:15px; line-height:1.6; color:#333;">
+                    <strong>주식회사 리비스</strong> 담당자님, 안녕하세요.<br>
+                    법무그룹 현일입니다.<br><br>
+                    지난 한 달간 진행된 법률 자문 내역을 정리하여<br>
+                    <strong>월간 리포트(PDF)</strong>를 송부드립니다.<br><br>
+                    자세한 내용은 첨부파일을 확인해 주시기 바라며,<br>
+                    문의사항은 언제든 연락 주시기 바랍니다.
+                </p>
+                
+                <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin:25px 0; border:1px solid #eee;">
+                    <strong>📎 첨부파일:</strong> 
+                    <span style="color:#082545; font-weight:bold;">2025년_1월_법률자문리포트.pdf</span>
+                </div>
+
+                <div style="border-top:1px solid #eee; padding-top:20px; margin-top:30px; font-size:12px; color:#888; text-align:center;">
+                    본 메일은 발신 전용입니다.<br>
+                    법무그룹 현일 | 1533-6935
+                </div>
+            </div>
+        `
+    };
 
     function show(type) {
         const container = document.getElementById('viewer');
         const guide = document.getElementById('guideText');
         
-        document.getElementById('pdfBtn').classList.toggle('active', type === 'pdf');
-        document.getElementById('emailBtn').classList.toggle('active', type === 'email');
-
-        if (!reportData) {
-            container.innerHTML = "리포트 데이터를 불러오는 중...
-"
-            return;
-        }
-
-        const views = buildViews(reportData);
+        document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
 
         if(type === 'pdf') {
-            container.innerHTML = views.pdf;
+            container.innerHTML = VIEWS.pdf;
+            container.style.background = "none";
             guide.innerText = "※ 서버에서 자동 생성되어 첨부될 PDF 디자인입니다.";
         } else {
-            container.innerHTML = views.email;
+            container.innerHTML = VIEWS.email;
             guide.innerText = "※ 담당자에게 발송될 이메일 본문입니다.";
         }
     }
 
-    // 전역 스코프에 함수 노출
-    window.show = show;
-
-    // 메인 로직
-    (async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const docId = urlParams.get('id');
-        const viewer = document.getElementById('viewer');
-
-        if (!docId) {
-            viewer.innerHTML = '<h2 style="text-align:center; padding:50px;">❌ 리포트 ID가 없습니다.</h2>';
-            return;
-        }
-
-        try {
-            viewer.innerHTML = '<h2 style="text-align:center; padding:50px;">리포트 데이터를 불러오는 중...</h2>';
-            reportData = await reports.getById(docId);
-            console.log("Fetched Report Data:", reportData);
-            show('pdf');
-        } catch(error) {
-            console.error("리포트 조회 실패:", error);
-            viewer.innerHTML = `<h2 style="text-align:center; padding:50px;">❌ 리포트 조회 실패: ${error.message}</h2>`;
-        }
-    })();
+    // 초기 실행
+    show('pdf');
 </script>
 
 </body>
