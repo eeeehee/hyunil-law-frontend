@@ -236,13 +236,13 @@
 
         <textarea id="a_content_input" class="a-input" placeholder="답변 내용을 작성해주세요. (저장 시 자동으로 의뢰인에게 알림 메일이 발송됩니다)"></textarea>
 
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <div id="deductWrap" style="display:flex; justify-content:space-between; margin-bottom:10px;">
             <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-size:13px;">
                 <input type="checkbox" id="deductCheck" checked> 📝 서면 자문 횟수 1회 차감
             </label>
         </div>
 
-        <button class="btn-reply-save" onclick="saveReply()">답변 저장 및 알림 발송</button>
+        <button id="replyModalBtn" class="btn-reply-save" onclick="saveReply()">답변 저장 및 알림 발송</button>
     </div>
 </div>
 
@@ -727,6 +727,10 @@
         if(!content) return alert("상담 내용을 입력해주세요.");
 
         try {
+            // 현재 로그인한 관리자 이름 가져오기
+            const currentUser = await users.getMe();
+            const recorderName = currentUser?.managerName || currentUser?.manager_name || currentUser?.email || '관리자';
+
             // posts에 전화상담 기록 저장
             await posts.create({
                 title: "[전화상담] 상담 기록",
@@ -734,7 +738,8 @@
                 companyName: compName,
                 authorBizNum: bizNum, // ✨ 사업자번호 명시
                 category: "phone_log",
-                status: "done"
+                status: "done",
+                answeredBy: recorderName // 기록자 이름 저장
             });
 
             // ✅ [REMOVED] 횟수 차감은 백엔드에서 처리하므로 제거
@@ -757,8 +762,19 @@
             'legal_document': '법률서면 작성',
             'certification': '내용증명',
             'phone_log': '전화상담',
+            'phone_request': '전화상담요청',
             'visit_consult': '방문상담',
-            'case_representation': '사건대리'
+            'case_representation': '사건대리',
+            'etc': '기타',
+            'general': '일반',
+            'labor': '노무',
+            'contract': '계약',
+            'credit': '채권',
+            'ip': '지식재산',
+            'guest': '비회원상담',
+            'plan_change': '요금제문의',
+            'payment_method': '결제문의',
+            'extra_usage_quote': '추가이용문의'
         };
 
         let html = "";
@@ -894,23 +910,47 @@ window.openReplyModal = function(docId, bizNum) {
             return;
         }
 
-        if (post?.category === 'phone_log') {
+        const isPhoneLog = post?.category === 'phone_log';
+        const isCompleted = post?.status === 'completed' || post?.status === 'done';
+        const modalBtn = document.getElementById('replyModalBtn');
+
+        if (isPhoneLog) {
+            // 전화상담 기록: 답변 인풋, 체크박스, 저장 버튼 모두 숨김
             if (headerSpan) headerSpan.textContent = '전화 상담 기록';
             const qaLabel = document.getElementById('qaLabel');
-            if (qaLabel) qaLabel.textContent = 'A. 상담 기록';
+            if (qaLabel) qaLabel.textContent = '📞 상담 기록';
             if (aViewBox) aViewBox.style.display = 'none';
             if (aInput) { aInput.style.display = 'none'; aInput.value = ''; }
-            if (saveBtn) saveBtn.style.display = 'none';
             if (deductWrap) deductWrap.style.display = 'none';
-            if (writtenDeductWrap) writtenDeductWrap.style.display = 'none';
+            if (modalBtn) {
+                modalBtn.textContent = '확인';
+                modalBtn.onclick = function() { closeReplyModal(); };
+                modalBtn.style.display = '';
+            }
+        } else if (isCompleted) {
+            // 완료 상태: 체크박스 숨김, 버튼 문구 "확인"
+            if (headerSpan) headerSpan.textContent = '자문 내역 확인';
+            const qaLabel = document.getElementById('qaLabel');
+            if (qaLabel) qaLabel.textContent = 'Q. 질문 내용';
+            if (aInput) aInput.style.display = 'none';
+            if (deductWrap) deductWrap.style.display = 'none';
+            if (modalBtn) {
+                modalBtn.textContent = '확인';
+                modalBtn.onclick = function() { closeReplyModal(); };
+                modalBtn.style.display = '';
+            }
         } else {
+            // 대기 상태: 답변 작성 가능
             if (headerSpan) headerSpan.textContent = '자문 답변 작성';
             const qaLabel = document.getElementById('qaLabel');
             if (qaLabel) qaLabel.textContent = 'Q. 질문 내용';
             if (aInput) aInput.style.display = '';
-            if (saveBtn) saveBtn.style.display = '';
             if (deductWrap) deductWrap.style.display = '';
-            if (writtenDeductWrap) writtenDeductWrap.style.display = '';
+            if (modalBtn) {
+                modalBtn.textContent = '답변 저장 및 알림 발송';
+                modalBtn.onclick = function() { saveReply(); };
+                modalBtn.style.display = '';
+            }
         }
 
         document.getElementById('replyDocId').value = docId;
