@@ -1163,10 +1163,45 @@
                 }
 
                 detailHtml += `</div>`;
+
+                // 요청 내용 포맷팅 (JSON인 경우 보기 좋게 변환)
+                let formattedContent = post.content || '내용 없음';
+                try {
+                    const parsed = JSON.parse(post.content);
+                    if (typeof parsed === 'object' && parsed !== null) {
+                        // 부서변경 등 JSON 형식인 경우 보기 좋게 변환
+                        let lines = [];
+                        const labelMap = {
+                            'targetUid': '대상자 UID',
+                            'targetEmail': '대상자 이메일',
+                            'targetName': '대상자 이름',
+                            'currentDepartment': '현재 부서',
+                            'newDepartment': '변경 부서',
+                            'reason': '변경 사유',
+                            'requestedBy': '요청자',
+                            'requestedAt': '요청일시',
+                            'type': '유형',
+                            'planType': '요금제',
+                            'company': '회사명',
+                            'phone': '연락처',
+                            'email': '이메일'
+                        };
+                        for (const [key, value] of Object.entries(parsed)) {
+                            if (value !== null && value !== undefined && value !== '') {
+                                const label = labelMap[key] || key;
+                                lines.push(`<strong>${label}:</strong> ${value}`);
+                            }
+                        }
+                        formattedContent = lines.join('<br>');
+                    }
+                } catch (e) {
+                    // JSON이 아닌 경우 그대로 사용
+                }
+
                 detailHtml += `
                     <div style="margin-top:20px;">
                         <strong style="color:#333; font-size:15px;">📝 요청 내용:</strong>
-                        <pre style="white-space:pre-wrap; word-break:break-all; margin-top:10px; padding:15px; background:#fff; border:1px solid #eee; border-radius:6px; line-height:1.6;">${post.content || '내용 없음'}</pre>
+                        <div style="margin-top:10px; padding:15px; background:#fff; border:1px solid #eee; border-radius:6px; line-height:1.8;">${formattedContent}</div>
                     </div>
                 `;
 
