@@ -125,7 +125,7 @@
                 <label class="label">부서</label>
                 <div class="input-group">
                     <input type="text" id="department" class="input-box" readonly>
-                    <button class="btn-change" onclick="openChangeModal()">변경 신청 ></button>
+                    <button class="btn-change" id="btnChangeDept" onclick="openChangeModal()">변경 신청 ></button>
                 </div>
                 <div class="help-text">
                     ① <b>사내 해결:</b> 대표자 승인 시 즉시 변경 (서류 불필요)<br>
@@ -137,7 +137,7 @@
                 <label class="label">직급 (권한)</label>
                 <div class="input-group">
                     <input type="text" id="role" class="input-box" readonly>
-                    <button class="btn-change" onclick="openChangeModal('rank')">변경 신청 ></button>
+                    <button class="btn-change" id="btnChangeRank" onclick="openChangeModal('rank')">변경 신청 ></button>
                 </div>
             </div>
 
@@ -215,9 +215,10 @@
                 document.getElementById('role').value = roleName;
                 gUserData.roleName = roleName;
 
+                // 대표(owner)인 경우 변경 신청 버튼 숨기고 부서 직접 수정 가능
                 if (gUserData.role === 'owner') {
-                    document.querySelector('.btn-change[onclick="openChangeModal(\'department\')"]').style.display = 'none';
-                    document.querySelector('.btn-change[onclick="openChangeModal(\'rank\')"]').style.display = 'none';
+                    document.getElementById('btnChangeDept').style.display = 'none';
+                    document.getElementById('btnChangeRank').style.display = 'none';
                     document.getElementById('department').readOnly = false;
                 }
 
