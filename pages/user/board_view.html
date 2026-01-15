@@ -310,30 +310,66 @@
             // 대화형 형식으로 렌더링
             let questionHTML = '';
 
-            // 1. 원본 질문
-            questionHTML += `
-                <div class="msg-box msg-question">
-                    <div class="msg-header">
-                        <span class="writer-name">${post.userManagerName || '작성자'}</span>
-                        <span style="background:#2c5bf2; color:#fff; font-size:11px; padding:2px 6px; border-radius:3px; margin-left:8px;">Q</span>
-                    </div>
-                    <div class="msg-content">${originalContent}</div>
-                    ${fileUrls.length > 0 ? `
-                        <div class="msg-files" style="margin-top:15px; padding-top:15px; border-top:1px solid #eee;">
-                            <div style="font-weight:700; color:#555; margin-bottom:8px; font-size:13px;">📎 첨부파일 (${fileUrls.length})</div>
-                            ${fileUrls.map(url => {
-                                const fileName = url.split('/').pop();
-                                return `<div style="margin-bottom:5px;">
-                                    <a href="http://localhost:3000${url}" target="_blank" style="color:#2c5bf2; text-decoration:none; font-size:13px;">
-                                        📄 ${decodeURIComponent(fileName)}
-                                    </a>
-                                </div>`;
-                            }).join('')}
+            let questionHTML = '';
+
+            if (post.category === 'phone_request') {
+                // 전화상담 요청 특별 처리
+                const consultCategoryMatch = originalContent.match(/\[상담 분야\]\s*(.*)/);
+                const timeSlotsMatch = originalContent.match(/\[희망 시간대\]\s*(.*)/);
+                const contactMatch = originalContent.match(/\[연락처\]\s*(.*)/);
+                const consultContentMatch = originalContent.match(/\[상담 내용\]\n([\s\S]*)/);
+
+                const consultCategory = consultCategoryMatch ? consultCategoryMatch[1].trim() : 'N/A';
+                const timeSlots = timeSlotsMatch ? timeSlotsMatch[1].trim().split(',').map(s => `<li>${s.trim()}</li>`).join('') : '';
+                const contact = contactMatch ? contactMatch[1].trim() : 'N/A';
+                const consultContent = consultContentMatch ? consultContentMatch[1].trim() : 'N/A';
+
+                questionHTML += `
+                    <div class="msg-box msg-question">
+                        <div class="msg-header">
+                            <span class="writer-name">${post.userManagerName || '작성자'}</span>
+                            <span style="background:#2c5bf2; color:#fff; font-size:11px; padding:2px 6px; border-radius:3px; margin-left:8px;">📞 전화상담 요청</span>
                         </div>
-                    ` : ''}
-                    <div class="msg-time">${post.createdAt ? new Date(post.createdAt).toLocaleString('ko-KR') : ''}</div>
-                </div>
-            `;
+                        <div class="msg-content">
+                            <p style="margin-bottom:10px;"><strong>[상담 분야]</strong> ${consultCategory}</p>
+                            <p style="margin-bottom:10px;"><strong>[희망 시간대]</strong></p>
+                            <ul style="list-style-type: decimal; padding-left: 20px; margin-top: -5px; margin-bottom: 10px;">
+                                ${timeSlots}
+                            </ul>
+                            <p style="margin-bottom:10px;"><strong>[연락처]</strong> ${contact}</p>
+                            <p><strong>[상담 내용]</strong></p>
+                            <div style="white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-top: 10px;">${consultContent}</div>
+                        </div>
+                        <div class="msg-time">${post.createdAt ? new Date(post.createdAt).toLocaleString('ko-KR') : ''}</div>
+                    </div>
+                `;
+            } else {
+                // 기존 일반 게시글 렌더링 로직
+                questionHTML += `
+                    <div class="msg-box msg-question">
+                        <div class="msg-header">
+                            <span class="writer-name">${post.userManagerName || '작성자'}</span>
+                            <span style="background:#2c5bf2; color:#fff; font-size:11px; padding:2px 6px; border-radius:3px; margin-left:8px;">Q</span>
+                        </div>
+                        <div class="msg-content">${originalContent}</div>
+                        ${fileUrls.length > 0 ? `
+                            <div class="msg-files" style="margin-top:15px; padding-top:15px; border-top:1px solid #eee;">
+                                <div style="font-weight:700; color:#555; margin-bottom:8px; font-size:13px;">📎 첨부파일 (${fileUrls.length})</div>
+                                ${fileUrls.map(url => {
+                                    const fileName = url.split('/').pop();
+                                    return `<div style="margin-bottom:5px;">
+                                        <a href="http://localhost:3000${url}" target="_blank" style="color:#2c5bf2; text-decoration:none; font-size:13px;">
+                                            📄 ${decodeURIComponent(fileName)}
+                                        </a>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="msg-time">${post.createdAt ? new Date(post.createdAt).toLocaleString('ko-KR') : ''}</div>
+                    </div>
+                `;
+            }
+
 
             // 2. 원본 답변 (있으면)
             if (originalAnswer) {
