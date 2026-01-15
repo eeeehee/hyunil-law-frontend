@@ -109,10 +109,10 @@
             </div>
             <div class="report-modal-body">
                 <div class="report-controls">
-                    <select id="reportDeptSelect" class="form-select" style="min-width:150px;"></select>
-                    <select id="reportYearSelect" class="form-select"></select>
-                    <select id="reportMonthSelect" class="form-select"></select>
-                    <button class="btn-gen-rep" onclick="generateDraftReport()">조회 및 생성</button>
+                    <select id="reportDeptSelect" class="form-select" style="min-width:150px;" onchange="loadDraftOpinion()"></select>
+                    <select id="reportYearSelect" class="form-select" onchange="loadDraftOpinion()"></select>
+                    <select id="reportMonthSelect" class="form-select" onchange="loadDraftOpinion()"></select>
+                    <button class="btn-gen-rep" onclick="generateAndPreviewReport()">조회 및 생성</button>
                 </div>
                 <div class="report-main">
                     <label style="font-weight:600; margin-bottom:8px;">📢 종합 의견 작성</label>
@@ -123,7 +123,7 @@
             </div>
             <div class="report-modal-footer">
                 <button onclick="closeReportModal()" style="background:#f0f0f0; color:#333; border:1px solid #ccc; padding:10px 20px; border-radius:6px; font-weight:600; cursor:pointer;">취소</button>
-                <button onclick="saveReport()" style="background:#2c5bf2; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-weight:700; cursor:pointer;">저장 및 적용</button>
+                <button onclick="saveDraftOpinion()" style="background:#1a7f37; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-weight:700; cursor:pointer;">종합 의견 저장</button>
             </div>
         </div>
     </div>
@@ -271,7 +271,7 @@
                 const employees = response.employees || [];
                 const depts = new Set(employees.map(e => e.department).filter(Boolean));
                 
-                deptSelect.innerHTML = '<option value="all">전체 부서 (CEO용)</option>';
+                deptSelect.innerHTML = '<option value="all">전체 부서</option>';
                 depts.forEach(d => {
                     deptSelect.innerHTML += `<option value="${d}">${d}</option>`;
                 });
@@ -280,15 +280,25 @@
             }
         }
 
+        function getDraftKey() {
+            const bizNum = document.getElementById('targetBizNum').value;
+            const year = document.getElementById('reportYearSelect').value;
+            const month = document.getElementById('reportMonthSelect').value;
+            return `draft_opinion_${bizNum}_${year}-${month}`;
+        }
+
+        window.loadDraftOpinion = function() {
+            const key = getDraftKey();
+            const savedDraft = localStorage.getItem(key);
+            document.getElementById('reportContent').value = savedDraft || '';
+        }
+
         // 리포트 모달 열기
         window.openReportModal = function(uid, companyName, bizNum) {
             document.getElementById('reportModal').style.display = 'flex';
             document.getElementById('modalCompanyName').innerText = companyName;
             document.getElementById('targetUid').value = uid;
             document.getElementById('targetBizNum').value = bizNum;
-
-            // 폼 초기화
-            document.getElementById('reportContent').value = '';
             
             // 년/월 드롭다운 채우기
             const yearSelect = document.getElementById('reportYearSelect');
@@ -307,35 +317,42 @@
                 monthSelect.innerHTML += `<option value="${i}" ${i===currentMonth ? 'selected':''}>${i}월</option>`;
             }
             
-            // 부서 드롭다운 채우기
-            loadDepartmentsForModal(bizNum);
+            // 부서 드롭다운 채우기 및 의견 로드
+            loadDepartmentsForModal(bizNum).then(() => {
+                loadDraftOpinion();
+            });
         }
 
         window.closeReportModal = function() {
             document.getElementById('reportModal').style.display = 'none';
         }
 
-        // [신규] 조회 및 생성
-        window.generateDraftReport = async function() {
+        window.saveDraftOpinion = function() {
+            const key = getDraftKey();
+            const content = document.getElementById('reportContent').value;
+            localStorage.setItem(key, content);
+            alert('종합 의견이 임시 저장되었습니다.');
+        }
+
+        window.generateAndPreviewReport = async function() {
             const bizNum = document.getElementById('targetBizNum').value;
+            const companyName = document.getElementById('modalCompanyName').innerText;
             const year = document.getElementById('reportYearSelect').value;
             const month = document.getElementById('reportMonthSelect').value;
             const dept = document.getElementById('reportDeptSelect').value;
-
-            const contentArea = document.getElementById('reportContent');
-            contentArea.value = '자문 내역을 불러오는 중...';
+            const overallOpinion = document.getElementById('reportContent').value;
+            
+            const btn = event.target;
+            btn.innerText = '생성 중...';
+            btn.disabled = true;
 
             try {
-                // 특정 기간의 자문 내역(posts) 조회
                 const response = await posts.getAll({
                     bizNum: bizNum,
-                    // 필요한 카테고리만 포함 (필요에 따라 수정)
                     category: 'general_counsel,contract_review,legal_document,certification,phone_log,visit_consult,case_representation'
                 });
-
                 const allPosts = response.posts || [];
                 
-                // 클라이언트 사이드에서 날짜 및 부서 필터링
                 const startDate = new Date(year, month - 1, 1);
                 const endDate = new Date(year, month, 1);
                 
@@ -343,69 +360,55 @@
                     const postDate = new Date(p.createdAt);
                     const isInDate = postDate >= startDate && postDate < endDate;
                     if (!isInDate) return false;
-                    
                     if (dept === 'all') return true;
                     return p.userDepartment === dept || p.department === dept;
                 });
-                
-                if (filteredPosts.length === 0) {
-                    contentArea.value = '해당 기간 및 부서의 자문 내역이 없습니다.';
-                    return;
-                }
 
-                // 리포트 초안 생성
-                let draft = `[${year}년 ${month}월 자문 요약]\n\n`;
-                draft += `총 ${filteredPosts.length}건의 자문이 진행되었습니다.\n\n`;
-                draft += "----------------------------------------\n\n";
-
-                filteredPosts.forEach((p, index) => {
-                    draft += `No. ${index + 1}\n`;
-                    draft += `- 일시: ${new Date(p.createdAt).toLocaleString('ko-KR')}\n`;
-                    draft += `- 부서: ${p.userDepartment || p.department || '미지정'}\n`;
-                    draft += `- 제목: ${p.title}\n`;
-                    draft += `\n[질문 요약]\n${p.content.substring(0, 100)}...\n`;
-                    draft += `\n[답변 요약]\n${(p.answer || '답변 대기중').substring(0, 100)}...\n\n`;
-                    draft += "----------------------------------------\n\n";
-                });
+                const stats = {
+                    total: filteredPosts.length,
+                    completed: filteredPosts.filter(p => ['done', 'completed', 'answered'].includes(p.status)).length,
+                    pending: filteredPosts.filter(p => !['done', 'completed', 'answered'].includes(p.status)).length
+                };
                 
-                contentArea.value = draft;
+                const deptStats = filteredPosts.reduce((acc, p) => {
+                    const deptName = p.userDepartment || p.department || '미지정';
+                    acc[deptName] = (acc[deptName] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const reportData = {
+                    companyName: companyName,
+                    opinion: overallOpinion,
+                    stats,
+                    deptStats,
+                    posts: filteredPosts.map(p => ({
+                        date: p.createdAt,
+                        category: p.category,
+                        title: p.title,
+                        requester: p.userManagerName || 'N/A',
+                        status: p.status
+                    }))
+                };
+
+                const payload = {
+                    title: `[${companyName}] ${year}년 ${month}월 리포트 (${dept === 'all' ? '전사' : dept})`,
+                    content: JSON.stringify(reportData),
+                    type: 'month',
+                    period: `${year}-${String(month).padStart(2, '0')}`,
+                    target_biz_num: bizNum,
+                    status: 'draft'
+                };
+
+                const newReport = await reports.create(payload);
+                alert('리포트 생성 완료! 미리보기 페이지로 이동합니다.');
+                window.location.href = `../user/preview_report.html?id=${newReport.doc_id}`;
 
             } catch (error) {
-                console.error("리포트 초안 생성 중 오류:", error);
-                contentArea.value = `오류 발생: ${error.message}`;
-            }
-        }
-
-        // [수정] 리포트 저장
-        window.saveReport = async function() {
-            const bizNum = document.getElementById('targetBizNum').value;
-            const companyName = document.getElementById('modalCompanyName').innerText;
-            const year = document.getElementById('reportYearSelect').value;
-            const month = document.getElementById('reportMonthSelect').value;
-            const dept = document.getElementById('reportDeptSelect').value;
-
-            const payload = {
-                title: `[${companyName}] ${year}년 ${month}월 리포트 (${dept === 'all' ? '전사' : dept})`,
-                content: document.getElementById('reportContent').value,
-                type: 'month',
-                period: `${year}-${String(month).padStart(2, '0')}`,
-                target_biz_num: bizNum,
-                status: 'draft'
-            };
-
-            if (!payload.title || !payload.period || !payload.target_biz_num) {
-                alert('제목, 대상 기간, 대상 기업 정보는 필수입니다.');
-                return;
-            }
-
-            try {
-                await reports.create(payload);
-                alert('리포트가 성공적으로 생성되었습니다.');
-                closeReportModal();
-                await loadReportHistory();
-            } catch (error) {
-                console.error('리포트 생성 실패:', error);
-                alert(`리포트 생성 중 오류가 발생했습니다: ${error.message}`);
+                console.error("리포트 생성 중 오류:", error);
+                alert(`오류 발생: ${error.message}`);
+            } finally {
+                btn.innerText = '조회 및 생성';
+                btn.disabled = false;
             }
         }
     </script>

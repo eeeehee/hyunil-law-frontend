@@ -2,151 +2,158 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>리포트 발송 디자인 미리보기</title>
-    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <title>법률 자문 리포트</title>
+    <link rel="stylesheet" as="style" crossorigin="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
-        body { background: #f0f2f5; margin: 0; padding: 20px; font-family: 'Pretendard', sans-serif; }
-        .controls { text-align: center; margin-bottom: 30px; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #fff; border: 1px solid #ddd; border-radius: 8px; margin: 0 5px; font-weight: bold; }
-        button.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
-        
-        .preview-wrapper { width: 210mm; margin: 0 auto; background: white; padding: 0; box-shadow: 0 0 20px rgba(0,0,0,0.1); min-height: 297mm; position: relative; }
-        .guide { text-align: center; color: #666; margin-bottom: 10px; font-size: 14px; }
-        
-        /* PDF용 스타일 (나눔고딕 강제) */
-        .pdf-content { padding: 50px; font-family: 'Nanum Gothic', sans-serif; color: #333; line-height: 1.6; }
-        .pdf-header { border-bottom: 2px solid #082545; padding-bottom: 15px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .pdf-title { font-size: 28px; font-weight: 800; color: #082545; margin: 0; }
-        .pdf-sub { font-size: 12px; color: #555; }
-        
-        .stat-box { display: flex; gap: 10px; margin-bottom: 30px; }
-        .stat-item { flex: 1; background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #eee; }
-        .stat-label { font-size: 12px; color: #666; margin-bottom: 5px; display: block; }
-        .stat-val { font-size: 20px; font-weight: 800; color: #082545; }
-
-        .pdf-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 30px; }
-        .pdf-table th { background: #082545; color: white; padding: 8px; text-align: center; font-weight: normal; }
-        .pdf-table td { border-bottom: 1px solid #ddd; padding: 8px; text-align: center; }
-        .td-left { text-align: left !important; }
-        
-        .opinion-box { border: 1px solid #082545; border-radius: 8px; padding: 20px; margin-top: 30px; position: relative; }
-        .op-title { position: absolute; top: -12px; left: 20px; background: white; padding: 0 10px; font-weight: bold; color: #082545; }
-
-        /* 이메일용 스타일 */
-        .email-wrapper { max-width: 600px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 8px; border: 1px solid #ddd; }
+        body { background-color: #f0f2f5; font-family: "Pretendard", sans-serif; margin: 0; padding: 40px 20px; }
+        .report-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .report-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 1px solid #eee; margin-bottom: 30px; }
+        .report-title h1 { font-size: 28px; font-weight: 900; margin: 0 0 10px; color: #1a1a2e; }
+        .report-meta { font-size: 14px; color: #666; line-height: 1.6; }
+        .report-actions button { background: #333; color: #fff; border: none; padding: 10px 20px; font-size: 14px; border-radius: 6px; cursor: pointer; font-weight: 700; }
+        .section { margin-bottom: 40px; }
+        .section-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 15px; padding-left: 10px; border-left: 3px solid #2c5bf2; }
+        .opinion-box { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 25px; line-height: 1.7; white-space: pre-wrap; font-size: 15px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: #e9ecef; border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden; text-align: center; }
+        .summary-item { background: #fff; padding: 20px; }
+        .summary-item .label { font-size: 14px; color: #666; margin-bottom: 8px; }
+        .summary-item .value { font-size: 24px; font-weight: 700; color: #1a1a2e; }
+        .summary-item .value.red { color: #e53935; }
+        .summary-item .value.green { color: #43a047; }
+        .report-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .report-table th, .report-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .report-table th { background-color: #f9fafb; font-weight: 600; text-align: center; }
+        .report-table td { text-align: center; }
+        .report-table td:nth-child(2) { text-align: left; }
     </style>
 </head>
 <body>
 
-<div class="controls">
-    <button onclick="show('pdf')" class="active">📊 리포트 (PDF)</button>
-    <button onclick="show('email')">📧 이메일 본문</button>
+<div class="report-container" id="reportContainer">
+    <!-- 데이터 로딩 전 표시될 내용 -->
+    <div style="text-align: center; padding: 80px 0;">
+        <h2 id="loadingText">리포트 데이터를 불러오는 중입니다...</h2>
+    </div>
 </div>
 
-<p class="guide" id="guideText">※ 서버에서 자동 생성되어 첨부될 PDF 디자인입니다.</p>
+<script type="module">
+    import { reports, users } from '../../js/api.js';
 
-<div id="viewer"></div>
-
-<script>
-    const today = new Date();
-    const dateStr = `${today.getFullYear()}년 ${today.getMonth()+1}월`;
-
-    const VIEWS = {
-        pdf: `
-            <div class="preview-wrapper"><div class="pdf-content">
-                <div class="pdf-header">
-                    <div>
-                        <h1 class="pdf-title">월간 법률 자문 리포트</h1>
-                        <span class="pdf-sub">기간: 2025.01.01 ~ 2025.01.31</span>
-                    </div>
-                    <div style="text-align:right;">
-                        <strong style="font-size:16px; color:#082545;">주식회사 리비스 귀중</strong><br>
-                        <span style="font-size:11px;">발행일: ${dateStr} 1일</span>
-                    </div>
-                </div>
-
-                <div class="stat-box">
-                    <div class="stat-item"><span class="stat-label">총 자문 건수</span><span class="stat-val">5 건</span></div>
-                    <div class="stat-item"><span class="stat-label">계약 검토</span><span class="stat-val">2 건</span></div>
-                    <div class="stat-item"><span class="stat-label">노무 자문</span><span class="stat-val">1 건</span></div>
-                    <div class="stat-item"><span class="stat-label">완료율</span><span class="stat-val" style="color:#2e7d32;">100%</span></div>
-                </div>
-
-                <h3 style="font-size:16px; border-bottom:2px solid #eee; padding-bottom:8px; margin-bottom:15px;">📌 상세 자문 내역</h3>
-                <table class="pdf-table">
-                    <thead><tr><th width="15%">일자</th><th width="15%">분야</th><th>자문 제목</th><th width="15%">요청자</th><th width="15%">상태</th></tr></thead>
-                    <tbody>
-                        <tr><td>25.01.05</td><td>계약</td><td class="td-left">비밀유지계약서(NDA) 검토</td><td>김팀장</td><td>완료</td></tr>
-                        <tr><td>25.01.12</td><td>노무</td><td class="td-left">연차수당 지급 규정 문의</td><td>박대리</td><td>완료</td></tr>
-                        <tr><td>25.01.15</td><td>채권</td><td class="td-left">미수금 내용증명 발송</td><td>이이사</td><td>완료</td></tr>
-                        <tr><td>25.01.20</td><td>기타</td><td class="td-left">신규 사업 적법성 검토</td><td>최대표</td><td>완료</td></tr>
-                        <tr><td>25.01.28</td><td>계약</td><td class="td-left">용역 공급 계약서 작성</td><td>김팀장</td><td>완료</td></tr>
-                    </tbody>
-                </table>
-
-                <div class="opinion-box">
-                    <span class="op-title">⚖️ 전담 변호사 종합 의견</span>
-                    <p style="font-size:13px; margin:0;">
-                        1월에는 주로 신규 계약 체결과 관련된 검토 요청이 많았습니다. 
-                        특히 NDA 및 용역 계약서 작성 시, 독소 조항을 사전에 제거하여 리스크를 최소화하였습니다.<br><br>
-                        내부 규정(노무) 관련하여 문의주신 사항은 최신 판례를 반영하여 가이드를 드렸으니, 
-                        사내 취업규칙 개정 시 참고하시기 바랍니다.<br><br>
-                        다음 달 예정된 주주총회 관련 절차도 미리 준비하시면 좋을 것으로 판단됩니다.
-                    </p>
-                </div>
-
-                <div style="position:absolute; bottom:50px; width:calc(100% - 100px); text-align:center; border-top:1px solid #eee; padding-top:20px;">
-                    <strong style="color:#082545;">법무그룹 현일 기업자문센터</strong><br>
-                    <span style="font-size:11px; color:#888;">본 문서는 기업 법무 자문 내역을 정리한 리포트이며, 법적 효력이 있는 증명서는 아닙니다.</span>
-                </div>
-            </div></div>
-        `,
-
-        email: `
-            <div class="email-wrapper">
-                <h2 style="color:#082545; margin-top:0;">[법무그룹 현일] ${dateStr} 자문 리포트</h2>
-                <p style="font-size:15px; line-height:1.6; color:#333;">
-                    <strong>주식회사 리비스</strong> 담당자님, 안녕하세요.<br>
-                    법무그룹 현일입니다.<br><br>
-                    지난 한 달간 진행된 법률 자문 내역을 정리하여<br>
-                    <strong>월간 리포트(PDF)</strong>를 송부드립니다.<br><br>
-                    자세한 내용은 첨부파일을 확인해 주시기 바라며,<br>
-                    문의사항은 언제든 연락 주시기 바랍니다.
-                </p>
-                
-                <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin:25px 0; border:1px solid #eee;">
-                    <strong>📎 첨부파일:</strong> 
-                    <span style="color:#082545; font-weight:bold;">2025년_1월_법률자문리포트.pdf</span>
-                </div>
-
-                <div style="border-top:1px solid #eee; padding-top:20px; margin-top:30px; font-size:12px; color:#888; text-align:center;">
-                    본 메일은 발신 전용입니다.<br>
-                    법무그룹 현일 | 1533-6935
-                </div>
-            </div>
-        `
-    };
-
-    function show(type) {
-        const container = document.getElementById('viewer');
-        const guide = document.getElementById('guideText');
+    function renderReport(report) {
+        const container = document.getElementById('reportContainer');
         
-        document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+        try {
+            const data = JSON.parse(report.content);
+            const [year, month] = report.period.split('-');
 
-        if(type === 'pdf') {
-            container.innerHTML = VIEWS.pdf;
-            container.style.background = "none";
-            guide.innerText = "※ 서버에서 자동 생성되어 첨부될 PDF 디자인입니다.";
-        } else {
-            container.innerHTML = VIEWS.email;
-            guide.innerText = "※ 담당자에게 발송될 이메일 본문입니다.";
+            container.innerHTML = `
+                <div class="report-header">
+                    <div class="report-title">
+                        <h1>${year}년 ${month}월 법률 자문 리포트</h1>
+                        <div class="report-meta">
+                            <strong>수신:</strong> ${data.companyName} 귀중<br>
+                            <strong>기간:</strong> ${report.period}<br>
+                            <strong>발행:</strong> 법무그룹 현일 기업자문센터
+                        </div>
+                    </div>
+                    <div class="report-actions">
+                        <button onclick="window.print()">🖨️ PDF 저장/인쇄</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">종합 의견</h2>
+                    <div class="opinion-box">${data.opinion || '작성된 종합 의견이 없습니다.'}</div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">자문 현황 요약</h2>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="label">총 요청</div>
+                            <div class="value">${data.stats.total}건</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">처리 완료</div>
+                            <div class="value green">${data.stats.completed}건</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">진행 중</div>
+                            <div class="value red">${data.stats.pending}건</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">부서별 현황</h2>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>부서명</th>
+                                <th>건수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(data.deptStats).map(([dept, count]) => `
+                                <tr>
+                                    <td>${dept}</td>
+                                    <td>${count}건</td>
+                                </tr>
+                            `).join('')}
+                            ${Object.keys(data.deptStats).length === 0 ? '<tr><td colspan="2">데이터가 없습니다.</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">상세 자문 내역</h2>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>일자</th>
+                                <th>자문 제목</th>
+                                <th>요청자</th>
+                                <th>상태</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.posts.map(post => `
+                                <tr>
+                                    <td>${new Date(post.date).toLocaleDateString()}</td>
+                                    <td style="text-align:left;">${post.title}</td>
+                                    <td>${post.requester}</td>
+                                    <td>${post.status}</td>
+                                </tr>
+                            `).join('')}
+                            ${data.posts.length === 0 ? '<tr><td colspan="4">데이터가 없습니다.</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } catch (e) {
+            console.error('리포트 내용 파싱 실패:', e);
+            container.innerHTML = '<div style="text-align: center; padding: 80px 0;"><h2 id="loadingText">리포트 데이터를 표시할 수 없습니다. (형식 오류)</h2></div>';
         }
     }
 
-    // 초기 실행
-    show('pdf');
+    (async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const docId = urlParams.get('id');
+        const loadingText = document.getElementById('loadingText');
+
+        if (!docId) {
+            loadingText.innerText = '❌ 리포트 ID가 없습니다.';
+            return;
+        }
+
+        try {
+            const report = await reports.getById(docId);
+            renderReport(report);
+        } catch (error) {
+            console.error("리포트 조회 실패:", error);
+            loadingText.innerText = `❌ 리포트 조회 실패: ${error.message}`;
+        }
+    })();
 </script>
 
 </body>
