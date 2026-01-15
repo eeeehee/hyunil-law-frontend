@@ -239,17 +239,23 @@
                     document.getElementById('phMax').textContent = `/ ${phoneLimit}`;
                 }
 
-                if (userData.role === 'owner') {
-                    document.getElementById('pageTitleText').innerText = '우리 회사 자문 내역 (전체)';
+                const myDept = (userData.department || '').trim();
+                const isCompanyWide = myDept === '전사';
+                const isOwner = userData.role === 'owner';
+
+                if (isOwner || isCompanyWide) {
+                    document.getElementById('pageTitleText').innerText = '자문 내역 (전체)';
+                    if(isCompanyWide && !isOwner) document.getElementById('pageTitleText').innerText = '자문 내역 (전사)';
                     document.getElementById('deptSearchWrapper').style.display = 'block';
                     const tableHeader = document.getElementById('tableHeader');
-                    if (tableHeader.children.length === 5) {
+                    if (Array.from(tableHeader.children).every(th => th.textContent !== '부서')) {
                         const deptTh = document.createElement('th');
                         deptTh.style.width = '12%';
                         deptTh.textContent = '부서';
                         tableHeader.insertBefore(deptTh, tableHeader.children[3]);
                     }
                 }
+
 
                 // --- 데이터 로딩 시작 ---
                 const urlParams = new URLSearchParams(window.location.search);
@@ -284,21 +290,7 @@
                     allItems = allItems.filter(p => p.content && p.content.includes('[FOLLOWUP_SEPARATOR]'));
                 }
 
-                const myDept = (userData.department || '').trim();
-                const isCompanyWide = myDept === '전사';
-
-                if (isCompanyWide) {
-                    document.getElementById('pageTitleText').innerText = '자문 내역 (전사)';
-                    document.getElementById('deptSearchWrapper').style.display = 'block';
-                    const tableHeader = document.getElementById('tableHeader');
-                    // '부서' 컬럼이 이미 추가되었는지 확인 (owner 권한과 중복 실행 방지)
-                    if (Array.from(tableHeader.children).every(th => th.textContent !== '부서')) {
-                        const deptTh = document.createElement('th');
-                        deptTh.style.width = '12%';
-                        deptTh.textContent = '부서';
-                        tableHeader.insertBefore(deptTh, tableHeader.children[3]);
-                    }
-                } else if (userData.role !== 'owner') {
+                if (!isOwner && !isCompanyWide) {
                     allItems = allItems.filter(p => ((p.userDepartment || '').trim() === myDept));
                 }
 
