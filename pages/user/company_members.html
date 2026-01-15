@@ -697,10 +697,11 @@
 
                         if(requestData.type === 'rank') {
                             requestTypeHtml = '직급 변경';
-                            const fromRankName = ROLE_MAP[requestData.fromRank] || requestData.fromRank || '미지정';
-                            // newRank는 직접 입력된 텍스트이므로 그대로 사용
-                            const newRankName = requestData.newRank || '미지정';
-                            requestContentHtml = `${fromRankName} → <span class="req-highlight">${newRankName}</span>`;
+                            // 기존 직급: fromRankName 필드 우선, 없으면 ROLE_MAP에서 변환
+                            const fromRankDisplay = requestData.fromRankName || ROLE_MAP[requestData.fromRank] || requestData.fromRank || '미지정';
+                            // 새 직급: newRankName 필드 우선, 없으면 ROLE_MAP에서 변환 (하위 호환)
+                            const newRankDisplay = requestData.newRankName || ROLE_MAP[requestData.newRank] || requestData.newRank || '미지정';
+                            requestContentHtml = `${fromRankDisplay} → <span class="req-highlight">${newRankDisplay}</span>`;
                         } else { // 기본은 부서 변경으로 처리
                             requestContentHtml = `${requestData.fromDepartment || '미지정'} → <span class="req-highlight">${requestData.newDepartment || '미지정'}</span>`;
                         }
