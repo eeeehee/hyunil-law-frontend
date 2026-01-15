@@ -768,6 +768,32 @@
             } catch (error) { console.error('페이지 로드 에러:', error); }
         })();
 
+        // --- 마스킹 헬퍼 함수 ---
+        function maskValue(value, visiblePrefix = 0, visibleSuffix = 4) {
+            const str = String(value || '');
+            if (str.length <= visiblePrefix + visibleSuffix) {
+                return '****'; // 너무 짧으면 그냥 마스킹
+            }
+            const prefix = str.substring(0, visiblePrefix);
+            const suffix = str.substring(str.length - visibleSuffix);
+            const masked = '*'.repeat(Math.max(0, str.length - (visiblePrefix + visibleSuffix)));
+            return prefix + masked + suffix;
+        }
+
+        function maskName(name) {
+            const str = String(name || '');
+            if (str.length <= 1) return '*';
+            if (str.length === 2) return str[0] + '*';
+            return str[0] + '*'.repeat(str.length - 2) + str.slice(-1);
+        }
+
+        function maskCardNumber(num) {
+            const str = String(num || '').replace(/[-\s]/g, '');
+            if (str.length < 8) return maskValue(str, 0, 0);
+            return `${str.substring(0, 4)}-${str.substring(4, 6)}**-****-${str.substring(str.length - 4)}`;
+        }
+        // --- 마스킹 헬퍼 함수 끝 ---
+
         async function loadSavedPaymentInfo() {
             try {
                 const requestsData = await posts.getAll({ category: 'payment_method' });
@@ -776,21 +802,66 @@
                 const latestPayment = paymentMethods[0];
                 let paymentInfo;
                 try { paymentInfo = JSON.parse(latestPayment.content); } catch (e) { console.error('결제수단 정보 파싱 실패:', e); return; }
+                
+                // 데이터를 채우기 전에 모든 입력 필드에 data-original 속성이 있는지 확인하고, 없으면 현재 값으로 설정
+                const inputs = document.querySelectorAll('#ceoPaymentForm input[type="text"], #ceoPaymentForm input[type="tel"], #ceoPaymentForm input[type="email"]');
+                inputs.forEach(input => {
+                    if (!input.hasAttribute('data-original')) {
+                        input.setAttribute('data-original', input.value);
+                    }
+                });
+
                 if (paymentInfo.type === 'card') {
                     togglePaymentTab('card');
-                    if (paymentInfo.cardCompany) document.getElementById('cardCompany').value = paymentInfo.cardCompany;
-                    if (paymentInfo.cardNum) document.getElementById('cardNum').value = paymentInfo.cardNum;
-                    if (paymentInfo.cardExpiry) document.getElementById('cardExpiry').value = paymentInfo.cardExpiry;
-                    if (paymentInfo.cardBizNum) document.getElementById('cardBizNum').value = paymentInfo.cardBizNum;
-                    if (paymentInfo.cardAgree) document.getElementById('cardAgree').checked = true;
+                    
+                    const cardCompanyEl = document.getElementById('cardCompany');
+                    const cardNumEl = document.getElementById('cardNum');
+                    const cardExpiryEl = document.getElementById('cardExpiry');
+                    const cardBizNumEl = document.getElementById('cardBizNum');
+                    const cardAgreeEl = document.getElementById('cardAgree');
+                    
+                    if (cardCompanyEl && paymentInfo.cardCompany) cardCompanyEl.value = paymentInfo.cardCompany;
+                    if (cardAgreeEl && paymentInfo.cardAgree) cardAgreeEl.checked = true;
+
+                    if (cardNumEl && paymentInfo.cardNum) {
+                        cardNumEl.setAttribute('data-original', paymentInfo.cardNum);
+                        cardNumEl.value = maskCardNumber(paymentInfo.cardNum);
+                    }
+                    if (cardExpiryEl && paymentInfo.cardExpiry) {
+                        cardExpiryEl.setAttribute('data-original', paymentInfo.cardExpiry);
+                        cardExpiryEl.value = "**/**";
+                    }
+                    if (cardBizNumEl && paymentInfo.cardBizNum) {
+                        cardBizNumEl.setAttribute('data-original', paymentInfo.cardBizNum);
+                        cardBizNumEl.value = maskValue(paymentInfo.cardBizNum, 3, 2); // 123-**-***45
+                    }
+
                 } else if (paymentInfo.type === 'cms') {
                     togglePaymentTab('cms');
-                    if (paymentInfo.bank) document.getElementById('cmsBank').value = paymentInfo.bank;
-                    if (paymentInfo.accountNumber) document.getElementById('cmsAccount').value = paymentInfo.accountNumber;
-                    if (paymentInfo.depositor) document.getElementById('cmsOwner').value = paymentInfo.depositor;
-                    if (paymentInfo.birth) document.getElementById('cmsBirth').value = paymentInfo.birth;
-                    if (paymentInfo.agreeCms) document.getElementById('cmsAgree1').checked = true;
-                    if (paymentInfo.agreeThirdParty) document.getElementById('cmsAgree2').checked = true;
+                    
+                    const cmsBankEl = document.getElementById('cmsBank');
+                    const cmsAccountEl = document.getElementById('cmsAccount');
+                    const cmsOwnerEl = document.getElementById('cmsOwner');
+                    const cmsBirthEl = document.getElementById('cmsBirth');
+                    const cmsAgree1El = document.getElementById('cmsAgree1');
+                    const cmsAgree2El = document.getElementById('cmsAgree2');
+
+                    if (cmsBankEl && paymentInfo.bank) cmsBankEl.value = paymentInfo.bank;
+                    if (cmsAgree1El && paymentInfo.agreeCms) cmsAgree1El.checked = true;
+                    if (cmsAgree2El && paymentInfo.agreeThirdParty) cmsAgree2El.checked = true;
+                    
+                    if (cmsAccountEl && paymentInfo.accountNumber) {
+                        cmsAccountEl.setAttribute('data-original', paymentInfo.accountNumber);
+                        cmsAccountEl.value = maskValue(paymentInfo.accountNumber, 3, 4);
+                    }
+                    if (cmsOwnerEl && paymentInfo.depositor) {
+                        cmsOwnerEl.setAttribute('data-original', paymentInfo.depositor);
+                        cmsOwnerEl.value = maskName(paymentInfo.depositor);
+                    }
+                    if (cmsBirthEl && paymentInfo.birth) {
+                        cmsBirthEl.setAttribute('data-original', paymentInfo.birth);
+                        cmsBirthEl.value = maskValue(paymentInfo.birth, 0, 0); // 생년월일/사업자번호 전체 마스킹
+                    }
                 }
                 if (paymentInfo.taxEvidenceType && paymentInfo.taxEvidenceType !== 'none') {
                     const taxEvidenceSelect = document.getElementById('taxEvidenceType');
@@ -821,12 +892,13 @@
                 let payload = {};
                 if (isCard) {
                     const cardNumEl = document.getElementById('cardNum');
+                    const cardExpiryEl = document.getElementById('cardExpiry');
                     const cardBizNumEl = document.getElementById('cardBizNum');
                     payload = {
                         type: 'card',
                         cardCompany: document.getElementById('cardCompany')?.value || '',
                         cardNum: cardNumEl?.getAttribute('data-original') || cardNumEl?.value || '',
-                        cardExpiry: document.getElementById('cardExpiry')?.value || '',
+                        cardExpiry: cardExpiryEl?.getAttribute('data-original') || cardExpiryEl?.value || '',
                         cardBizNum: cardBizNumEl?.getAttribute('data-original') || cardBizNumEl?.value || '',
                         cardAgree: document.getElementById('cardAgree')?.checked || false
                     };
@@ -835,12 +907,13 @@
                     }
                 } else {
                     const cmsAccountEl = document.getElementById('cmsAccount');
+                    const cmsOwnerEl = document.getElementById('cmsOwner');
                     const birthInput = document.getElementById('cmsBirth');
                     payload = {
                         type: 'cms',
                         bank: document.getElementById('cmsBank')?.value || '',
                         accountNumber: cmsAccountEl?.getAttribute('data-original') || cmsAccountEl?.value || '',
-                        depositor: document.getElementById('cmsOwner')?.value || '',
+                        depositor: cmsOwnerEl?.getAttribute('data-original') || cmsOwnerEl?.value || '',
                         birth: birthInput?.getAttribute('data-original') || birthInput?.value || '',
                         agreeCms: document.getElementById('cmsAgree1')?.checked || false,
                         agreeThirdParty: document.getElementById('cmsAgree2')?.checked || false
