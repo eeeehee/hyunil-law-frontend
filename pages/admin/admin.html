@@ -783,13 +783,29 @@
             postList.forEach(p => {
                 const date = new Date(p.createdAt).toLocaleDateString();
                 // ✅ 작성자/답변자 표시 규칙
-                // - phone_log: 항상 관리자(로그인) 기록자 = answeredBy
+                // - phone_log: 항상 관리자(로그인) 기록자 = answeredBy (이름 우선, 이메일이면 이름 필드 사용)
                 // - 일반 자문: 답변 완료 시 answeredBy(관리자) 표시, 그 외는 기존 작성자 표시
                 let writerDisplay = '-';
+
+                // 이메일 형식 체크 함수
+                const isEmail = (str) => str && str.includes('@');
+                // 이메일에서 이름 추출 (@ 앞부분)
+                const extractNameFromEmail = (email) => email ? email.split('@')[0] : '-';
+                // 이름 우선 표시 (이메일이면 @ 앞부분 또는 다른 이름 필드 사용)
+                const getDisplayName = (primary, ...fallbacks) => {
+                    if (primary && !isEmail(primary)) return primary;
+                    for (const fb of fallbacks) {
+                        if (fb && !isEmail(fb)) return fb;
+                    }
+                    // 모든 fallback이 없으면 이메일의 @ 앞부분 표시
+                    if (primary && isEmail(primary)) return extractNameFromEmail(primary);
+                    return '-';
+                };
+
                 if (p.category === 'phone_log') {
-                    writerDisplay = p.answeredBy || p.answererName || p.adminName || '-';
+                    writerDisplay = getDisplayName(p.answeredBy, p.answererName, p.adminName, p.userManagerName);
                 } else if (p.answeredBy) {
-                    writerDisplay = p.answeredBy;
+                    writerDisplay = getDisplayName(p.answeredBy, p.answererName, p.adminName);
                 } else {
                     writerDisplay = p.userManagerName || p.authorManager || '-';
                 }
