@@ -175,6 +175,62 @@
         </div>
     </main>
 
+    <!-- 직원 정보 수정 모달 -->
+    <div id="editMemberModal" class="modal-overlay" style="align-items: flex-start; padding-top: 5%;">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3 class="modal-title">직원 정보 수정</h3>
+            <input type="hidden" id="editMemberUid">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label class="label">이름</label>
+                <input type="text" id="editName" class="input-box" style="height: 40px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label class="label">부서</label>
+                <select id="editDepartment" class="input-box" style="height: 40px;"></select>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label class="label">이메일 (ID)</label>
+                <input type="email" id="editEmail" class="input-box" style="height: 40px;" readonly>
+            </div>
+            <div class="form-group" style="margin-bottom: 25px;">
+                <label class="label">연락처</label>
+                <input type="tel" id="editPhone" class="input-box" style="height: 40px;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="closeEditMemberModal()" class="btn-add-dept" style="flex:1; background-color:#888;">취소</button>
+                <button onclick="saveMemberChanges()" class="btn-add-dept" style="flex:2;">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 직원 정보 수정 모달 -->
+    <div id="editMemberModal" class="modal-overlay" style="align-items: flex-start; padding-top: 5%;">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3 class="modal-title">직원 정보 수정</h3>
+            <input type="hidden" id="editMemberUid">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label class="label">이름</label>
+                <input type="text" id="editName" class="input-box" style="height: 40px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label class="label">부서</label>
+                <select id="editDepartment" class="input-box" style="height: 40px;"></select>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label class="label">이메일 (ID)</label>
+                <input type="email" id="editEmail" class="input-box" style="height: 40px;" readonly>
+            </div>
+            <div class="form-group" style="margin-bottom: 25px;">
+                <label class="label">연락처</label>
+                <input type="tel" id="editPhone" class="input-box" style="height: 40px;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="closeEditMemberModal()" class="btn-add-dept" style="flex:1; background-color:#888;">취소</button>
+                <button onclick="saveMemberChanges()" class="btn-add-dept" style="flex:2;">저장</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { auth, users, requireAuth, posts } from "../../js/api.js";
         import { renderClientSidebar } from "../../js/client_ui.js";
@@ -207,6 +263,7 @@
     let gOwnerData = null; // 대표 정보
     let gCompanyDepartments = []; // 부서 목록
     let gPendingRequests = []; // 승인 대기중인 요청 목록
+    let gAllUsers = []; // 직원 목록 전역 변수
 
         (async () => {
             if (!requireAuth()) {
@@ -358,19 +415,18 @@
         async function loadMembers() {
             try {
                 const response = await users.getAll();
-                const allUsers = response.users || [];
+                gAllUsers = response.users || []; // 전역 변수에 저장
 
-                console.log('직원 목록:', allUsers);
+                console.log('직원 목록:', gAllUsers);
 
                 const tbody = document.getElementById('memberListBody');
 
-                if (allUsers.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">등록된 직원이 없습니다.</td></tr>';
+                if (gAllUsers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px;">등록된 직원이 없습니다.</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = allUsers.map(member => {
-                    console.log('직원 정보:', member.managerName, 'role:', member.role, 'email:', member.email);
+                tbody.innerHTML = gAllUsers.map(member => {
                     const roleKorean = getRoleKorean(member.role);
 
                     // 전사 권한 확인
@@ -380,9 +436,7 @@
                             try {
                                 const depts = JSON.parse(member.departments);
                                 hasAllDeptAccess = Array.isArray(depts) && depts.length > 0;
-                            } catch (e) {
-                                hasAllDeptAccess = false;
-                            }
+                            } catch (e) { hasAllDeptAccess = false; }
                         } else if (Array.isArray(member.departments)) {
                             hasAllDeptAccess = member.departments.length > 0;
                         }
@@ -401,7 +455,7 @@
                                 <select class="role-select" data-uid="${member.uid}" data-current-role="${member.role}">
                                     <option value="owner" ${member.role === 'owner' ? 'selected' : ''}>대표 (CEO)</option>
                                     <option value="manager" ${member.role === 'manager' ? 'selected' : ''}>부서장 (Manager)</option>
-                                    <option value="user" ${member.role === 'user' || member.role === 'staff' || member.role === 'employee' ? 'selected' : ''}>일반 직원</option>
+                                    <option value="staff" ${member.role === 'user' || member.role === 'staff' || member.role === 'employee' ? 'selected' : ''}>일반 직원</option>
                                 </select>
                                 <button class="btn-act ok" onclick="changeRole('${member.uid}', this.previousElementSibling.value)">변경</button>
                             </td>
@@ -414,6 +468,7 @@
                                 </div>
                             </td>
                             <td>
+                                <button class="btn-act ok" style="margin-left:0;" onclick="openEditMemberModal('${member.uid}')">수정</button>
                                 <button class="btn-act no" onclick="deleteMember('${member.uid}', '${member.managerName}')">삭제</button>
                             </td>
                         </tr>
@@ -423,7 +478,7 @@
             } catch (error) {
                 console.error('직원 목록 로드 실패:', error);
                 const tbody = document.getElementById('memberListBody');
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:red;">직원 목록을 불러오는데 실패했습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:red;">직원 목록을 불러오는데 실패했습니다.</td></tr>';
             }
         }
 
@@ -439,6 +494,57 @@
                 'employee': '일반 직원'
             };
             return roleMap[role] || role;
+        }
+
+
+        // --- 직원 정보 수정 모달 ---
+        window.openEditMemberModal = function(uid) {
+            const member = gAllUsers.find(u => u.uid === uid);
+            if (!member) {
+                alert('사용자 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            document.getElementById('editMemberUid').value = uid;
+            document.getElementById('editName').value = member.managerName || '';
+            document.getElementById('editEmail').value = member.email || '';
+            document.getElementById('editPhone').value = member.phone || '';
+
+            const deptSelect = document.getElementById('editDepartment');
+            deptSelect.innerHTML = gCompanyDepartments.map(d => `<option value="${d}">${d}</option>`).join('');
+            deptSelect.value = member.department || '';
+
+            document.getElementById('editMemberModal').style.display = 'flex';
+        }
+
+        window.closeEditMemberModal = function() {
+            document.getElementById('editMemberModal').style.display = 'none';
+        }
+
+        window.saveMemberChanges = async function() {
+            const uid = document.getElementById('editMemberUid').value;
+            const updateData = {
+                managerName: document.getElementById('editName').value,
+                department: document.getElementById('editDepartment').value,
+                phone: document.getElementById('editPhone').value
+            };
+
+            if (!updateData.managerName) {
+                alert('이름을 입력해주세요.');
+                return;
+            }
+
+            if (!confirm('직원 정보를 수정하시겠습니까?')) return;
+
+            try {
+                await users.update(uid, updateData);
+                alert('직원 정보가 수정되었습니다.');
+                closeEditMemberModal();
+                await loadMembers();
+            } catch (error) {
+                console.error('직원 정보 수정 실패:', error);
+                alert('직원 정보 수정에 실패했습니다: ' + error.message);
+            }
         }
 
         // 전사 권한 토글
