@@ -347,26 +347,27 @@
             btn.disabled = true;
 
             try {
-                const response = await posts.getAll({
-                    bizNum: bizNum,
-                    category: 'general_counsel,contract_review,legal_document,certification,phone_log,visit_consult,case_representation,phone_request'
-                });
-                const allPosts = response.posts || [];
-                
                 const year = document.getElementById('reportYearSelect').value;
                 const month = document.getElementById('reportMonthSelect').value; // month is 1-indexed from UI
 
-                // Normalize start and end dates to UTC
-                const startDate = new Date(Date.UTC(year, month - 1, 1)); // First day of selected month, UTC
-                const endDate = new Date(Date.UTC(year, month, 1));       // First day of next month, UTC
+                // Normalize start and end dates to UTC for API request
+                const startDateObj = new Date(Date.UTC(year, month - 1, 1)); // First day of selected month, UTC
+                const endDateObj = new Date(Date.UTC(year, month, 1));       // First day of next month, UTC
                 
-                const filteredPosts = allPosts.filter(p => {
-                    const postDate = new Date(p.createdAt);
-                    // Parse postDate as UTC equivalent for comparison
-                    const postDateUTC = new Date(Date.UTC(postDate.getUTCFullYear(), postDate.getUTCMonth(), postDate.getUTCDate()));
+                // Format to ISO string for backend
+                const apiStartDate = startDateObj.toISOString();
+                const apiEndDate = endDateObj.toISOString();
 
-                    const isInDate = postDateUTC >= startDate && postDateUTC < endDate;
-                    if (!isInDate) return false;
+                const response = await posts.getAll({
+                    bizNum: bizNum,
+                    category: 'general_counsel,contract_review,legal_document,certification,phone_log,visit_consult,case_representation,phone_request',
+                    startDate: apiStartDate, // Pass to backend
+                    endDate: apiEndDate    // Pass to backend
+                });
+                const allPosts = response.posts || []; // Now allPosts are already filtered by date
+                
+                // Client-side date filtering is no longer needed
+                const filteredPosts = allPosts.filter(p => {
                     if (dept === 'all') return true;
                     return p.userDepartment === dept || p.department === dept;
                 });
