@@ -362,9 +362,8 @@
                 
                 const filteredPosts = allPosts.filter(p => {
                     const postDate = new Date(p.createdAt);
-                    // Convert postDate to UTC equivalent for comparison
-                    const postDateUTC = new Date(Date.UTC(postDate.getFullYear(), postDate.getMonth(), postDate.getDate(),
-                                                            postDate.getHours(), postDate.getMinutes(), postDate.getSeconds()));
+                    // Parse postDate as UTC equivalent for comparison
+                    const postDateUTC = new Date(Date.UTC(postDate.getUTCFullYear(), postDate.getUTCMonth(), postDate.getUTCDate()));
 
                     const isInDate = postDateUTC >= startDate && postDateUTC < endDate;
                     if (!isInDate) return false;
