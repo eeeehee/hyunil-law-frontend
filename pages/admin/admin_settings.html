@@ -67,12 +67,10 @@
 
 <script src="../../js/admin_sidebar.js"></script>
 <script>
-    // 사이드바를 동적으로 렌더링하고, 현재 페이지('admin_settings.html')에 맞는 메뉴를 활성화합니다.
-    document.addEventListener('DOMContentLoaded', () => {
-        if (typeof renderAdminSidebar === 'function') {
-            renderAdminSidebar();
-        }
-    });
+    // 사이드바 즉시 렌더링
+    if (typeof renderAdminSidebar === 'function') {
+        renderAdminSidebar();
+    }
 </script>
 
     <main class="main-content">
