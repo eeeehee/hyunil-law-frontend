@@ -65,71 +65,11 @@
 </head>
 <body>
 
-<nav class="sidebar">
-    <div class="sidebar-brand">ADMINISTRATOR</div>
-    <ul class="sidebar-menu">
-        <li>
-            <div class="menu-category" onclick="toggleAdminMenu('groupCorp', this)">
-                <div><span class="menu-icon">🏢</span> 기업자문센터</div>
-                <span class="menu-arrow">▼</span>
-            </div>
-            <ul id="groupCorp" class="submenu">
-                <li><a href="admin.html">📝 자문 관리 (전체)</a></li>
-                <li><a href="admin_requests.html">📩 요청 관리함</a></li>
-                <li><a href="admin_report.html">📊 리포트 발송</a></li>
-                <li><a href="admin_corpbilling.html">💸 자문료 청구/발송</a></li>
-                <li><a href="admin_members.html">👥 회원/기업 관리</a></li>
-                <li><a href="admin_payments.html">💳 매출/CMS 관리</a></li>
-            </ul>
-        </li>
-
-        <li>
-            <div class="menu-category" onclick="toggleAdminMenu('groupLitigation', this)">
-                <div><span class="menu-icon">⚖️</span> 전자소송/사건</div>
-                <span class="menu-arrow">▼</span>
-            </div>
-            <ul id="groupLitigation" class="submenu">
-                <li><a href="admin_litigation.html">🔎 전자소송 데이터 확인</a></li>
-                <li><a href="admin_clients.html">📇 당사자(고객) 관리</a></li>
-            </ul>
-        </li>
-
-        <li>
-            <div class="menu-category" onclick="toggleAdminMenu('groupSpecial', this)">
-                <div><span class="menu-icon">📞</span> 파산/추심 센터</div>
-                <span class="menu-arrow">▼</span>
-            </div>
-            <ul id="groupSpecial" class="submenu">
-                <li><a href="admin_collection_consult.html">💰 채권 추심 상담</a></li>
-                <li><a href="admin_collection.html">💰 채권 추심 사건</a></li>
-                <li><a href="admin_pasan_consult.html">📉 파산/회생 상담</a></li>
-                <li><a href="admin_pasan.html">📉 파산/회생 사건</a></li>
-            </ul>
-        </li>
-
-        <li class="menu-divider"></li>
-
-        <li><a href="admin_settings.html" class="menu-link" style="background-color: #2c2c45; color: #fff; font-weight: 700;">⚙️ 환경 설정</a></li>
-        <li class="menu-divider"></li>
-        <li><a href="../../index.html" class="menu-link">🏢 기업자문 홈페이지</a></li>
-        <li><a href="../user/dashboard.html" class="menu-link" style="color:#2c5bf2; font-weight:700;">🖥️ 기업자문 사용자 모드</a></li>
-    </ul>
-</nav>
+<nav class="sidebar"></nav>
 
 <script>
-    function toggleAdminMenu(id, header) {
-        const submenu = document.getElementById(id);
-        if(!submenu) return;
-        if (submenu.style.display === "block") {
-            submenu.style.display = "none";
-            header.classList.remove("open");
-            header.classList.remove("active");
-        } else {
-            submenu.style.display = "block";
-            header.classList.add("open");
-            header.classList.add("active");
-        }
-    }
+    // 이 스크립트 블록은 비워두거나 삭제합니다. 
+    // 공통 사이드바 스크립트가 로드되도록 수정할 것입니다.
 </script>
 
     <main class="main-content">
@@ -255,7 +195,8 @@
     </div>
 
     <script type="module">
-        import { auth, users, requireAuth, checkRole, posts, reports, payments, litigationCases, cases, leaveRequests, creditReports, expenses } from '../../js/api.js';
+        import { auth, users, requireAuth, checkRole } from '../../js/api.js';
+        import { renderAdminSidebar } from '../../js/admin_ui.js';
 
         (async () => {
             if (!requireAuth()) return;
@@ -273,23 +214,9 @@
                     location.href = '../../pages/user/dashboard.html';
                     return;
                 }
+                
+                renderAdminSidebar('settings', userData);
 
-                // ✅ 변호사 권한일 경우 특정 메뉴 숨김
-                if (userData.role === 'lawyer') {
-                    const hideMenus = [
-                        'admin_report.html',
-                        'admin_corpbilling.html',
-                        'admin_members.html',
-                        'admin_payments.html'
-                    ];
-
-                    hideMenus.forEach(menuFile => {
-                        const menuLink = document.querySelector(`a[href="${menuFile}"]`);
-                        if (menuLink) {
-                            menuLink.parentElement.style.display = 'none';
-                        }
-                    });
-                }
 
                 // 관리자 이메일 표시
                 document.getElementById('adminEmail').value = userData.email || '';
