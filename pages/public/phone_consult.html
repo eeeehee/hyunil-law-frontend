@@ -130,12 +130,12 @@
                 submitBtn.disabled = true;
                 submitBtn.textContent = '플랜을 구독해주세요';
             } else if (phoneRemaining === 0) {
-                badge.textContent = `${phoneUsed} / ${phoneLimit} (한도 초과)`;
+                badge.textContent = `${phoneRemaining} / ${phoneLimit} (한도 초과)`;
                 badge.className = 'usage-badge usage-full';
                 submitBtn.disabled = true;
                 submitBtn.textContent = '사용 가능 횟수 초과';
             } else {
-                badge.textContent = `${phoneUsed} / ${phoneLimit} (남은 ${phoneRemaining}건)`;
+                badge.textContent = `${phoneRemaining} / ${phoneLimit} (남은 ${phoneRemaining}건)`;
                 badge.className = 'usage-badge';
                 submitBtn.disabled = false;
                 submitBtn.textContent = '예약 신청하기 (1회 차감)';

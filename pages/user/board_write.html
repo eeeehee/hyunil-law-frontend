@@ -182,14 +182,14 @@
                     submitBtn.textContent = '플랜을 구독해주세요';
                 }
             } else if (qaRemaining === 0) {
-                badge.textContent = `${qaUsed} / ${qaLimit} (한도 초과)`;
+                badge.textContent = `${qaRemaining} / ${qaLimit} (한도 초과)`;
                 badge.className = 'usage-badge usage-full';
                 if (submitBtn) {
                     submitBtn.disabled = true;
                     submitBtn.textContent = '사용 가능 횟수 초과';
                 }
             } else {
-                badge.textContent = `${qaUsed} / ${qaLimit} (남은 ${qaRemaining}건)`;
+                badge.textContent = `${qaRemaining} / ${qaLimit} (남은 ${qaRemaining}건)`;
                 badge.className = 'usage-badge';
                 if (submitBtn) {
                     submitBtn.disabled = false;
