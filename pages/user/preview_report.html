@@ -264,14 +264,35 @@
 
         try {
             const data = filteredData || JSON.parse(report.content);
-            const [year, month] = report.period.split('-');
+
+            // 기간 레이블 파싱
+            let periodLabel = data.periodLabel || '';
+            if (!periodLabel && report.period) {
+                const period = report.period;
+                if (period.includes('-Q')) {
+                    // 분기: 2024-Q1
+                    const [year, quarter] = period.split('-Q');
+                    periodLabel = `${year}년 ${quarter}분기`;
+                } else if (period.includes('-H')) {
+                    // 반기: 2024-H1
+                    const [year, half] = period.split('-H');
+                    periodLabel = `${year}년 ${half === '1' ? '상반기' : '하반기'}`;
+                } else if (period.includes('-')) {
+                    // 월간: 2024-01
+                    const [year, month] = period.split('-');
+                    periodLabel = `${year}년 ${parseInt(month)}월`;
+                } else {
+                    // 연간: 2024
+                    periodLabel = `${period}년`;
+                }
+            }
 
             container.innerHTML = `
                 <div class="report-title-section">
-                    <h1 class="report-main-title">${year}년 ${parseInt(month)}월 법률 자문 리포트</h1>
+                    <h1 class="report-main-title">${periodLabel} 법률 자문 리포트</h1>
                     <div class="report-meta">
                         <strong>수신:</strong> ${data.companyName} 대표이사 귀중<br>
-                        <strong>기간:</strong> ${year}년 ${parseInt(month)}월<br>
+                        <strong>기간:</strong> ${periodLabel}<br>
                         <strong>발행:</strong> 법무그룹 현일 기업자문센터
                     </div>
                 </div>

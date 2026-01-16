@@ -109,9 +109,15 @@
             </div>
             <div class="report-modal-body">
                 <div class="report-controls">
-                    <select id="reportDeptSelect" class="form-select" style="min-width:150px;" onchange="loadDraftOpinion()"></select>
-                    <select id="reportYearSelect" class="form-select" onchange="loadDraftOpinion()"></select>
-                    <select id="reportMonthSelect" class="form-select" onchange="loadDraftOpinion()"></select>
+                    <select id="reportDeptSelect" class="form-select" style="min-width:120px;" onchange="loadDraftOpinion()"></select>
+                    <select id="reportYearSelect" class="form-select" style="min-width:90px;" onchange="loadDraftOpinion()"></select>
+                    <select id="reportPeriodType" class="form-select" style="min-width:80px;" onchange="onPeriodTypeChange()">
+                        <option value="month">월간</option>
+                        <option value="quarter">분기</option>
+                        <option value="half">반기</option>
+                        <option value="year">연간</option>
+                    </select>
+                    <select id="reportPeriodSelect" class="form-select" style="min-width:100px;" onchange="loadDraftOpinion()"></select>
                     <button class="btn-gen-rep" onclick="generateAndPreviewReport()">조회 및 생성</button>
                 </div>
                 <div class="report-main">
@@ -283,8 +289,9 @@
         function getDraftKey() {
             const bizNum = document.getElementById('targetBizNum').value;
             const year = document.getElementById('reportYearSelect').value;
-            const month = document.getElementById('reportMonthSelect').value;
-            return `draft_opinion_${bizNum}_${year}-${month}`;
+            const periodType = document.getElementById('reportPeriodType').value;
+            const periodValue = document.getElementById('reportPeriodSelect').value;
+            return `draft_opinion_${bizNum}_${year}-${periodType}-${periodValue}`;
         }
 
         window.loadDraftOpinion = function() {
@@ -293,30 +300,63 @@
             document.getElementById('reportContent').value = savedDraft || '';
         }
 
+        // 기간 유형 변경 시 하위 선택박스 업데이트
+        window.onPeriodTypeChange = function() {
+            const periodType = document.getElementById('reportPeriodType').value;
+            const periodSelect = document.getElementById('reportPeriodSelect');
+            const currentMonth = new Date().getMonth() + 1;
+
+            if (periodType === 'month') {
+                periodSelect.style.display = '';
+                periodSelect.innerHTML = '';
+                for (let i = 1; i <= 12; i++) {
+                    periodSelect.innerHTML += `<option value="${i}" ${i===currentMonth ? 'selected':''}>${i}월</option>`;
+                }
+            } else if (periodType === 'quarter') {
+                periodSelect.style.display = '';
+                const currentQuarter = Math.ceil(currentMonth / 3);
+                periodSelect.innerHTML = `
+                    <option value="1" ${currentQuarter===1 ? 'selected':''}>1분기</option>
+                    <option value="2" ${currentQuarter===2 ? 'selected':''}>2분기</option>
+                    <option value="3" ${currentQuarter===3 ? 'selected':''}>3분기</option>
+                    <option value="4" ${currentQuarter===4 ? 'selected':''}>4분기</option>
+                `;
+            } else if (periodType === 'half') {
+                periodSelect.style.display = '';
+                const currentHalf = currentMonth <= 6 ? 1 : 2;
+                periodSelect.innerHTML = `
+                    <option value="1" ${currentHalf===1 ? 'selected':''}>상반기</option>
+                    <option value="2" ${currentHalf===2 ? 'selected':''}>하반기</option>
+                `;
+            } else if (periodType === 'year') {
+                periodSelect.style.display = 'none';
+                periodSelect.innerHTML = '<option value="all">전체</option>';
+            }
+
+            loadDraftOpinion();
+        }
+
         // 리포트 모달 열기
         window.openReportModal = function(uid, companyName, bizNum) {
             document.getElementById('reportModal').style.display = 'flex';
             document.getElementById('modalCompanyName').innerText = companyName;
             document.getElementById('targetUid').value = uid;
             document.getElementById('targetBizNum').value = bizNum;
-            
-            // 년/월 드롭다운 채우기
+
+            // 년도 드롭다운 채우기
             const yearSelect = document.getElementById('reportYearSelect');
-            const monthSelect = document.getElementById('reportMonthSelect');
             const currentYear = new Date().getFullYear();
-            const currentMonth = new Date().getMonth() + 1;
-            
+
             yearSelect.innerHTML = '';
             for (let i = 0; i < 3; i++) {
                 const year = currentYear - i;
                 yearSelect.innerHTML += `<option value="${year}" ${i===0 ? 'selected':''}>${year}년</option>`;
             }
-            
-            monthSelect.innerHTML = '';
-            for (let i = 1; i <= 12; i++) {
-                monthSelect.innerHTML += `<option value="${i}" ${i===currentMonth ? 'selected':''}>${i}월</option>`;
-            }
-            
+
+            // 기간 유형 초기화 (월간으로)
+            document.getElementById('reportPeriodType').value = 'month';
+            onPeriodTypeChange();
+
             // 부서 드롭다운 채우기 및 의견 로드
             loadDepartmentsForModal(bizNum).then(() => {
                 loadDraftOpinion();
@@ -337,27 +377,60 @@
         window.generateAndPreviewReport = async function() {
             const bizNum = document.getElementById('targetBizNum').value;
             const companyName = document.getElementById('modalCompanyName').innerText;
-            const year = document.getElementById('reportYearSelect').value;
-            const month = document.getElementById('reportMonthSelect').value;
+            const year = parseInt(document.getElementById('reportYearSelect').value);
+            const periodType = document.getElementById('reportPeriodType').value;
+            const periodValue = document.getElementById('reportPeriodSelect').value;
             const dept = document.getElementById('reportDeptSelect').value;
             const overallOpinion = document.getElementById('reportContent').value;
-            
+
             const btn = event.target;
             btn.innerText = '생성 중...';
             btn.disabled = true;
 
             try {
-                const year = document.getElementById('reportYearSelect').value;
-                const month = document.getElementById('reportMonthSelect').value; // month is 1-indexed from UI
+                let localStartDate, localEndDate;
+                let periodLabel = '';
+                let reportType = '';
+                let periodCode = '';
 
-                // Calculate local start and end dates for the selected month
-                // These will be in the browser's local timezone
-                const localStartDate = new Date(year, month - 1, 1, 0, 0, 0); // 1st day of month, 00:00:00 local time
-                const localEndDate = new Date(year, month, 1, 0, 0, 0);       // 1st day of next month, 00:00:00 local time
+                // 기간 유형에 따른 날짜 범위 계산
+                if (periodType === 'month') {
+                    const month = parseInt(periodValue);
+                    localStartDate = new Date(year, month - 1, 1, 0, 0, 0);
+                    localEndDate = new Date(year, month, 1, 0, 0, 0);
+                    periodLabel = `${year}년 ${month}월`;
+                    reportType = 'month';
+                    periodCode = `${year}-${String(month).padStart(2, '0')}`;
+                } else if (periodType === 'quarter') {
+                    const quarter = parseInt(periodValue);
+                    const startMonth = (quarter - 1) * 3;
+                    const endMonth = quarter * 3;
+                    localStartDate = new Date(year, startMonth, 1, 0, 0, 0);
+                    localEndDate = new Date(year, endMonth, 1, 0, 0, 0);
+                    periodLabel = `${year}년 ${quarter}분기`;
+                    reportType = 'quarter';
+                    periodCode = `${year}-Q${quarter}`;
+                } else if (periodType === 'half') {
+                    const half = parseInt(periodValue);
+                    if (half === 1) {
+                        localStartDate = new Date(year, 0, 1, 0, 0, 0);  // 1월
+                        localEndDate = new Date(year, 6, 1, 0, 0, 0);    // 7월
+                        periodLabel = `${year}년 상반기`;
+                    } else {
+                        localStartDate = new Date(year, 6, 1, 0, 0, 0);  // 7월
+                        localEndDate = new Date(year + 1, 0, 1, 0, 0, 0); // 다음해 1월
+                        periodLabel = `${year}년 하반기`;
+                    }
+                    reportType = 'half';
+                    periodCode = `${year}-H${half}`;
+                } else if (periodType === 'year') {
+                    localStartDate = new Date(year, 0, 1, 0, 0, 0);      // 1월 1일
+                    localEndDate = new Date(year + 1, 0, 1, 0, 0, 0);    // 다음해 1월 1일
+                    periodLabel = `${year}년`;
+                    reportType = 'year';
+                    periodCode = `${year}`;
+                }
 
-                // To send as ISO-like strings that backend can interpret as local times easily
-                // or compare with DATETIME fields that are often local.
-                // Format to YYYY-MM-DD HH:MM:SS
                 const formatToDBDateTimeString = (date) => {
                     const y = date.getFullYear();
                     const m = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -367,16 +440,11 @@
                     const ss = date.getSeconds().toString().padStart(2, '0');
                     return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
                 };
-                
-                // The API call expects startDate and endDate to be "inclusive" and "exclusive"
-                // So, startDate should be 'YYYY-MM-01 00:00:00'
-                // And endDate should be 'YYYY-MM-DD 23:59:59' for the last day of the month.
-                // We send localEndDate (1st of next month) and let backend subtract 1ms.
+
                 const apiStartDate = formatToDBDateTimeString(localStartDate);
-                // apiEndDate will be the first day of the next month, local time
                 const apiEndDate = formatToDBDateTimeString(localEndDate);
 
-                // 자문관리에서 제외되는 카테고리 (결제/요금제/회원정보 관련)
+                // 자문관리에서 제외되는 카테고리
                 const excludeCategories = ['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin', 'guest'];
 
                 const response = await posts.getAll({
@@ -388,9 +456,7 @@
 
                 // 자문 관련 카테고리만 필터링 + 부서 필터링
                 const filteredPosts = allPosts.filter(p => {
-                    // 제외 카테고리는 제외
                     if (excludeCategories.includes(p.category)) return false;
-                    // 부서 필터
                     if (dept === 'all') return true;
                     return p.userDepartment === dept || p.department === dept;
                 });
@@ -400,7 +466,7 @@
                     completed: filteredPosts.filter(p => ['done', 'completed', 'answered'].includes(p.status)).length,
                     pending: filteredPosts.filter(p => !['done', 'completed', 'answered'].includes(p.status)).length
                 };
-                
+
                 const deptStats = filteredPosts.reduce((acc, p) => {
                     const deptName = p.userDepartment || p.department || '미지정';
                     acc[deptName] = (acc[deptName] || 0) + 1;
@@ -412,6 +478,8 @@
                     opinion: overallOpinion,
                     stats,
                     deptStats,
+                    periodType: reportType,
+                    periodLabel: periodLabel,
                     posts: filteredPosts.map(p => ({
                         date: p.createdAt,
                         category: p.category,
@@ -422,10 +490,10 @@
                 };
 
                 const payload = {
-                    title: `[${companyName}] ${year}년 ${month}월 리포트 (${dept === 'all' ? '전사' : dept})`,
+                    title: `[${companyName}] ${periodLabel} 리포트 (${dept === 'all' ? '전사' : dept})`,
                     content: JSON.stringify(reportData),
-                    type: 'month',
-                    period: `${year}-${String(month).padStart(2, '0')}`,
+                    type: reportType,
+                    period: periodCode,
                     target_biz_num: bizNum,
                     status: 'draft'
                 };
