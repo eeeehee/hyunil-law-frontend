@@ -627,6 +627,15 @@ export const admin = {
     getLogs: async (params = {}) => {
         const queryString = new URLSearchParams(params).toString();
         return await apiRequest(`/admin/logs${queryString ? '?' + queryString : ''}`);
+    },
+
+    // [NEW] 콘텐츠 파일 수정
+    updateContentFile: async (data) => {
+        // data: { filePath: string, content: string }
+        return await apiRequest('/admin/update-content-file', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
     }
 };
 

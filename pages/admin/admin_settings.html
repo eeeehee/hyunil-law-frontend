@@ -150,7 +150,37 @@
                 </ul>
             </div>
         </div>
+
+        <div class="setting-box">
+            <h3 class="box-title">📄 콘텐츠 관리</h3>
+            <div class="form-group" style="max-width: none;">
+                <label class="form-label">이용가이드 (FAQ)</label>
+                <p style="font-size:13px; color:#666; margin-bottom:10px;">
+                    사용자 화면에 표시되는 '이용가이드' 페이지의 내용을 수정합니다.
+                </p>
+                <button class="btn-save" style="background-color: #2c5bf2;" onclick="openFaqModal()">이용가이드 수정하기</button>
+            </div>
+        </div>
     </main>
+
+    <div id="faqEditModal" class="modal-overlay" style="z-index: 1001;">
+        <div class="modal-content" style="width: 80%; max-width: 900px;" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeFaqModal()">✕</span>
+            <div class="modal-h">이용가이드(FAQ) 수정</div>
+            
+            <p style="font-size:13px; color:#666; margin-bottom:15px; line-height:1.4;">
+                HTML 코드를 직접 수정합니다. 변경 사항은 즉시 사용자 페이지에 반영됩니다.
+            </p>
+
+            <textarea id="faqContentEditor" style="width: 100%; height: 50vh; font-family: monospace; font-size: 13px; padding: 15px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button class="btn-save" style="background-color: #888;" onclick="closeFaqModal()">취소</button>
+                <button class="btn-save" onclick="saveFaqContent()">저장하기</button>
+            </div>
+        </div>
+    </div>
+
 
 <script>
     // 생계비 관리 기능 (향후 구현 예정)
@@ -310,6 +340,58 @@
 
         // 이 페이지는 전역 로그아웃 함수를 사용할 수 없음
         // window.handleLogout = ...
+
+        window.openFaqModal = async () => {
+            const modal = document.getElementById('faqEditModal');
+            const editor = document.getElementById('faqContentEditor');
+            if (!modal || !editor) return;
+
+            try {
+                editor.value = '로딩 중...';
+                modal.style.display = 'block';
+
+                const response = await fetch('../../pages/public/user_guide.html');
+                if (!response.ok) {
+                    throw new Error('이용가이드 파일을 불러오는 데 실패했습니다.');
+                }
+                const htmlContent = await response.text();
+                editor.value = htmlContent;
+
+            } catch (error) {
+                console.error('FAQ 로드 오류:', error);
+                editor.value = `오류: ${error.message}\n\n파일을 불러올 수 없습니다.`;
+            }
+        };
+
+        window.closeFaqModal = () => {
+            const modal = document.getElementById('faqEditModal');
+            if (modal) modal.style.display = 'none';
+        };
+
+        window.saveFaqContent = async () => {
+            const editor = document.getElementById('faqContentEditor');
+            if (!editor) return;
+
+            const newContent = editor.value;
+            if (!confirm('이용가이드 내용을 저장하시겠습니까?\n변경 사항은 즉시 모든 사용자에게 적용됩니다.')) {
+                return;
+            }
+
+            try {
+                // 'admin' API 모듈에 새로운 함수를 추가해야 합니다. (향후 작업)
+                await admin.updateContentFile({
+                    filePath: 'frontend/pages/public/user_guide.html',
+                    content: newContent
+                });
+
+                alert('✅ 성공적으로 저장되었습니다.');
+                closeFaqModal();
+
+            } catch (error) {
+                console.error('FAQ 저장 오류:', error);
+                alert(`저장 실패: ${error.message}\n\n백엔드 API에 /api/admin/update-content-file 엔드포인트를 추가해야 합니다.`);
+            }
+        };
     </script>
 </body>
 </html>
