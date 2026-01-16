@@ -265,12 +265,12 @@
             } else if (post.status === 'analyzing' || post.status === 'processing' || post.status === 'InProgress') {
                 badge.className = 'badge badge-progress';
                 badge.textContent = '검토중';
-            } else if (post.status === 'done' || post.status === 'completed' || post.status === 'Completed') {
+            } else if (post.status === 'done' || post.status === 'completed' || post.status === 'Completed' || post.status === 'archived') {
                 badge.className = 'badge badge-done';
                 badge.textContent = '답변 완료';
             } else {
                 badge.className = 'badge badge-waiting';
-                badge.textContent = post.status || '대기중';
+                badge.textContent = '대기중';
             }
 
             category.textContent = post.category || '분야 미지정';
@@ -492,7 +492,7 @@
                 historyList.innerHTML = recentPosts.map(p => {
                     let statusClass = 'waiting';
                     let statusText = '대기';
-                    if (p.status === 'done' || p.status === 'completed' || p.status === 'Completed') {
+                    if (p.status === 'done' || p.status === 'completed' || p.status === 'Completed' || p.status === 'archived') {
                         statusClass = 'done';
                         statusText = '완료';
                     } else if (p.status === 'analyzing' || p.status === 'processing' || p.status === 'InProgress') {

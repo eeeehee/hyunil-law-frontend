@@ -391,7 +391,7 @@
                 } else if (post.status === 'analyzing' || post.status === 'processing' || post.status === 'InProgress') {
                     statusClass = 'status-progress';
                     statusText = '검토중';
-                } else if (['done', 'completed', 'Completed'].includes(post.status)) {
+                } else if (['done', 'completed', 'Completed', 'archived'].includes(post.status)) {
                     statusClass = 'status-done';
                     statusText = '답변 완료';
                 }

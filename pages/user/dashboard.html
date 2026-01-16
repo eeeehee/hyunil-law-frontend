@@ -228,12 +228,12 @@
                         pendingCount++;
                     } else if (status === 'analyzing' || status === 'processing' || status === 'InProgress') {
                         processingCount++;
-                    } else if (['done', 'completed', 'Completed'].includes(status)) {
+                    } else if (['done', 'completed', 'Completed', 'archived'].includes(status)) {
                         doneCount++;
                     }
 
                     // 추가 질문은 상태와 별개로 카운트될 수 있음
-                    if (hasFollowup && !(['done', 'completed', 'Completed'].includes(status))) {
+                    if (hasFollowup && !(['done', 'completed', 'Completed', 'archived'].includes(status))) {
                        followupCount++;
                     }
                 });
