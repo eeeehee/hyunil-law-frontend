@@ -65,16 +65,18 @@
 </head>
 <body>
 
-<nav class="sidebar"></nav>
-
+<script src="../../js/admin_sidebar.js"></script>
 <script>
-    // 이 스크립트 블록은 비워두거나 삭제합니다. 
-    // 공통 사이드바 스크립트가 로드되도록 수정할 것입니다.
+    // 사이드바를 동적으로 렌더링하고, 현재 페이지('admin_settings.html')에 맞는 메뉴를 활성화합니다.
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof renderAdminSidebar === 'function') {
+            renderAdminSidebar();
+        }
+    });
 </script>
 
     <main class="main-content">
         <h2 class="page-title">환경 설정</h2>
-
         <div class="setting-box">
             <h3 class="box-title">기본 정보 설정</h3>
             <div class="form-group">
