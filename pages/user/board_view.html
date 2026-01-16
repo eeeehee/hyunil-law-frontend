@@ -476,8 +476,12 @@
         // 최근 자문 내역 로드
         async function loadRecentPosts() {
             try {
-                const response = await posts.getAll({ limit: 10 });
-                const recentPosts = response.posts || [];
+                const response = await posts.getAll({ limit: 20 });
+                // 자문 내역에 노출되는 카테고리만 필터링
+                const excludeCategories = ['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin', 'guest'];
+                const recentPosts = (response.posts || [])
+                    .filter(p => !excludeCategories.includes(p.category))
+                    .slice(0, 10);
 
                 const historyList = document.getElementById('historyList');
                 if (recentPosts.length === 0) {
