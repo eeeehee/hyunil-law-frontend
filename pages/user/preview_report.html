@@ -365,9 +365,14 @@
     function getStatusText(status) {
         const statusMap = {
             'pending': '대기',
+            'waiting': '대기',
             'in_progress': '진행중',
+            'analyzing': '검토중',
+            'processing': '검토중',
+            'InProgress': '진행중',
             'done': '완료',
             'completed': '완료',
+            'Completed': '완료',
             'answered': '답변완료',
             'archived': '완료'
         };
