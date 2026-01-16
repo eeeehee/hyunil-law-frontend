@@ -196,7 +196,6 @@
 
     <script type="module">
         import { auth, users, requireAuth, checkRole } from '../../js/api.js';
-        import { renderAdminSidebar } from '../../js/admin_ui.js';
 
         (async () => {
             if (!requireAuth()) return;
@@ -214,31 +213,22 @@
                     location.href = '../../pages/user/dashboard.html';
                     return;
                 }
-                
-                renderAdminSidebar('settings', userData);
 
-
-                // 관리자 이메일 표시
                 document.getElementById('adminEmail').value = userData.email || '';
-
-                // 관리자 목록 로드
                 await loadAdminList();
 
-                console.log('Settings page loaded');
             } catch (error) {
                 console.error('페이지 로드 에러:', error);
                 alert('데이터를 불러오는 중 오류가 발생했습니다.');
+                location.href = '../../pages/public/login.html';
             }
         })();
 
-        // 관리자 목록 로드
         async function loadAdminList() {
             try {
                 const adminRoles = ['master', 'admin', 'general_manager', 'lawyer'];
                 const response = await users.getAll();
                 const allUsers = response.users || [];
-
-                // 관리자 권한 사용자만 필터링
                 const adminUsers = allUsers.filter(u => adminRoles.includes(u.role));
 
                 const tbody = document.getElementById('adminListBody');
@@ -256,9 +246,7 @@
                     } else if (u.role === 'lawyer') {
                         roleBadge = '<span class="badge-role role-lawyer">⚖️ 변호사</span>';
                     }
-
                     const date = u.createdAt ? new Date(u.createdAt).toLocaleDateString('ko-KR') : '-';
-
                     return `
                         <tr>
                             <td>${u.managerName || u.representativeName || '-'}</td>
@@ -279,83 +267,49 @@
             }
         }
 
-        // 모달 열기
         window.openAdminModal = function() {
             document.getElementById('adminInviteModal').style.display = 'block';
             document.getElementById('targetEmail').value = '';
         };
 
-        // 모달 닫기
         window.closeAdminModal = function() {
             document.getElementById('adminInviteModal').style.display = 'none';
         };
 
-        // 권한 부여
         window.promoteUser = async function() {
             const email = document.getElementById('targetEmail').value.trim();
             const role = document.getElementById('targetRole').value;
+            if (!email) return alert('이메일을 입력해주세요.');
 
-            if (!email) {
-                alert('이메일을 입력해주세요.');
-                return;
-            }
-
-            if (!confirm(`${email}에게 ${role} 권한을 부여하시겠습니까?`)) {
-                return;
-            }
+            if (!confirm(`${email}에게 ${role} 권한을 부여하시겠습니까?`)) return;
 
             try {
-                // 이메일로 사용자 찾기
                 const response = await users.getAll();
-                const allUsers = response.users || [];
-                const targetUser = allUsers.find(u => u.email === email);
-
-                if (!targetUser) {
-                    alert('해당 이메일의 사용자를 찾을 수 없습니다.');
-                    return;
-                }
-
-                // 권한 변경
+                const targetUser = (response.users || []).find(u => u.email === email);
+                if (!targetUser) return alert('해당 이메일의 사용자를 찾을 수 없습니다.');
+                
                 await users.update(targetUser.uid, { role: role });
-
                 alert('권한이 부여되었습니다.');
                 closeAdminModal();
                 await loadAdminList();
-
             } catch (error) {
-                console.error('권한 부여 실패:', error);
                 alert('권한 부여 중 오류가 발생했습니다: ' + error.message);
             }
         };
 
-        // 관리자 권한 회수
         window.removeAdmin = async function(uid, email) {
-            if (!confirm(`${email}의 관리자 권한을 회수하시겠습니까?\n(일반 회원으로 변경됩니다)`)) {
-                return;
-            }
-
+            if (!confirm(`${email}의 관리자 권한을 회수하시겠습니까?\n(일반 회원으로 변경됩니다)`)) return;
             try {
-                // owner 역할로 변경 (일반 회원)
                 await users.update(uid, { role: 'owner' });
-
                 alert('권한이 회수되었습니다.');
                 await loadAdminList();
-
             } catch (error) {
-                console.error('권한 회수 실패:', error);
                 alert('권한 회수 중 오류가 발생했습니다: ' + error.message);
             }
         };
 
-        window.handleLogout = async function() {
-            try {
-                await auth.logout();
-                location.href = "../../index.html";
-            } catch (error) {
-                console.error('로그아웃 에러:', error);
-            }
-        };
+        // 이 페이지는 전역 로그아웃 함수를 사용할 수 없음
+        // window.handleLogout = ...
     </script>
-
 </body>
 </html>
