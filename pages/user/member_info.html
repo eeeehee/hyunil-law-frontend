@@ -63,6 +63,11 @@
         .help-text b { color: #2c5bf2; }
         .highlight-red { color: #ff4d4f; font-weight: 700; }
 
+        .help-row { display: flex; align-items: center; gap: 12px; margin-top: 15px; }
+        .help-row .help-text { flex: 1; margin-top: 0; }
+        .btn-combined { height: 100%; min-height: 60px; padding: 0 20px; background: #2c5bf2; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .btn-combined:hover { background: #1a4fd6; }
+
         .btn-save { width: 100%; height: 50px; background-color: #1a1a1a; color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; transition: 0.2s; }
         .btn-save:hover { background-color: #333; }
 
@@ -125,11 +130,7 @@
                 <label class="label">부서</label>
                 <div class="input-group">
                     <input type="text" id="department" class="input-box" readonly>
-                    <button class="btn-change" id="btnChangeDept" onclick="openChangeModal()">변경 신청 ></button>
-                </div>
-                <div class="help-text">
-                    ① <b>사내 해결:</b> 대표자 승인 시 즉시 변경 (서류 불필요)<br>
-                    ② <b>사이트 문의:</b> 관리자에게 직접 요청 <span class="highlight-red">(재직증명서 등 서류 필수)</span>
+                    <button class="btn-change" id="btnChangeDept" onclick="openChangeModal('department')">변경 신청 ></button>
                 </div>
             </div>
 
@@ -138,6 +139,13 @@
                 <div class="input-group">
                     <input type="text" id="role" class="input-box" readonly>
                     <button class="btn-change" id="btnChangeRank" onclick="openChangeModal('rank')">변경 신청 ></button>
+                </div>
+                <div class="help-row" id="helpRow">
+                    <div class="help-text">
+                        ① <b>사내 해결:</b> 대표자 승인 시 즉시 변경 (서류 불필요)<br>
+                        ② <b>사이트 문의:</b> 관리자에게 직접 요청 <span class="highlight-red">(재직증명서 등 서류 필수)</span>
+                    </div>
+                    <button class="btn-combined" id="btnCombinedChange" onclick="openChangeModal('combined')">부서/직급<br>통합 변경</button>
                 </div>
             </div>
 
@@ -195,6 +203,22 @@
                         <option value="staff">사원</option>
                     </select>
                 </div>
+                <div id="combinedSelectArea" style="display:none;">
+                    <label class="label" style="font-size:13px;">현재 부서</label>
+                    <input type="text" id="currentDeptDisplayCombined" class="input-box" style="height:40px; margin-bottom:10px; background:#f5f5f5;" readonly>
+                    <label class="label" style="font-size:13px;">변경할 부서 선택</label>
+                    <select id="newDeptSelectCombined" class="input-box" style="height:44px; margin-bottom:15px; background-color:#fff !important;">
+                        <option value="">-- 부서를 선택하세요 --</option>
+                    </select>
+                    <label class="label" style="font-size:13px;">현재 직급</label>
+                    <input type="text" id="currentRankDisplayCombined" class="input-box" style="height:40px; margin-bottom:10px; background:#f5f5f5;" readonly>
+                    <label class="label" style="font-size:13px;">변경할 직급 선택</label>
+                    <select id="newRankSelectCombined" class="input-box" style="height:44px; margin-bottom:15px; background-color:#fff !important;">
+                        <option value="">-- 직급을 선택하세요 --</option>
+                        <option value="manager">부서장</option>
+                        <option value="staff">사원</option>
+                    </select>
+                </div>
                 <button class="btn-save" onclick="submitToCEO()" style="margin-top:5px; height:44px;">승인 요청하기</button>
                 <button class="btn-close-modal" onclick="backToOptions()" style="margin-top:5px;">← 뒤로</button>
             </div>
@@ -219,6 +243,22 @@
                         <option value="staff">사원</option>
                     </select>
                 </div>
+                <div id="adminCombinedSelectArea" style="display:none;">
+                    <label class="label" style="font-size:13px;">현재 부서</label>
+                    <input type="text" id="adminCurrentDeptDisplayCombined" class="input-box" style="height:40px; margin-bottom:10px; background:#f5f5f5;" readonly>
+                    <label class="label" style="font-size:13px;">변경할 부서 선택</label>
+                    <select id="adminNewDeptSelectCombined" class="input-box" style="height:44px; margin-bottom:15px; background-color:#fff !important;">
+                        <option value="">-- 부서를 선택하세요 --</option>
+                    </select>
+                    <label class="label" style="font-size:13px;">현재 직급</label>
+                    <input type="text" id="adminCurrentRankDisplayCombined" class="input-box" style="height:40px; margin-bottom:10px; background:#f5f5f5;" readonly>
+                    <label class="label" style="font-size:13px;">변경할 직급 선택</label>
+                    <select id="adminNewRankSelectCombined" class="input-box" style="height:44px; margin-bottom:15px; background-color:#fff !important;">
+                        <option value="">-- 직급을 선택하세요 --</option>
+                        <option value="manager">부서장</option>
+                        <option value="staff">사원</option>
+                    </select>
+                </div>
                 <label class="label" style="font-size:13px;">증빙 서류 첨부 (필수)</label>
                 <input type="file" id="req-file" style="margin-bottom:15px; font-size:13px;">
                 <button class="btn-save" onclick="submitToAdmin()" style="margin-top:5px; height:44px;">신청서 제출</button>
@@ -234,7 +274,7 @@
         import { renderClientSidebar } from "../../js/client_ui.js";
 
         let gUserData = null;
-        let gChangeType = 'department'; // 'department' or 'rank'
+        let gChangeType = 'department'; // 'department', 'rank', or 'combined'
         let gCompanyDepartments = []; // 회사 부서 목록
 
         const ROLE_MAP = {
@@ -255,6 +295,8 @@
                 // 부서 선택 드롭다운 채우기 (CEO 폼, Admin 폼 둘 다)
                 populateDeptSelect('newDeptSelect');
                 populateDeptSelect('adminNewDeptSelect');
+                populateDeptSelect('newDeptSelectCombined');
+                populateDeptSelect('adminNewDeptSelectCombined');
             } catch (error) {
                 console.error('부서 목록 로드 오류:', error);
             }
@@ -298,6 +340,7 @@
                 if (gUserData.role === 'owner') {
                     document.getElementById('btnChangeDept').style.display = 'none';
                     document.getElementById('btnChangeRank').style.display = 'none';
+                    document.getElementById('helpRow').style.display = 'none';
                     document.getElementById('department').readOnly = false;
                 } else {
                     // 일반 직원인 경우 부서 목록 로드
@@ -331,10 +374,19 @@
 
         // --- 통합 변경 모달 ---
         window.openChangeModal = function(type) {
-            gChangeType = type === 'rank' ? 'rank' : 'department';
+            if (type === 'rank') {
+                gChangeType = 'rank';
+            } else if (type === 'combined') {
+                gChangeType = 'combined';
+            } else {
+                gChangeType = 'department';
+            }
+
             const modalTitle = document.getElementById('changeModalTitle');
             if (type === 'rank') {
                 modalTitle.textContent = '직급 변경 신청';
+            } else if (type === 'combined') {
+                modalTitle.textContent = '부서/직급 통합 변경 신청';
             } else {
                 modalTitle.textContent = '부서 변경 신청';
             }
@@ -365,16 +417,23 @@
             document.getElementById('ceo-form-area').style.display = 'block';
             document.getElementById('closeModalBtn').style.display = 'none';
 
-            const isRankChange = gChangeType === 'rank';
+            // 모든 영역 초기화
+            document.getElementById('deptSelectArea').style.display = 'none';
+            document.getElementById('rankSelectArea').style.display = 'none';
+            document.getElementById('combinedSelectArea').style.display = 'none';
 
-            if (isRankChange) {
-                document.getElementById('deptSelectArea').style.display = 'none';
+            if (gChangeType === 'rank') {
                 document.getElementById('rankSelectArea').style.display = 'block';
                 document.getElementById('currentRankDisplay').value = gUserData.roleName || '미지정';
                 document.getElementById('newRankSelect').value = '';
+            } else if (gChangeType === 'combined') {
+                document.getElementById('combinedSelectArea').style.display = 'block';
+                document.getElementById('currentDeptDisplayCombined').value = gUserData.department || '미지정';
+                document.getElementById('newDeptSelectCombined').value = '';
+                document.getElementById('currentRankDisplayCombined').value = gUserData.roleName || '미지정';
+                document.getElementById('newRankSelectCombined').value = '';
             } else {
                 document.getElementById('deptSelectArea').style.display = 'block';
-                document.getElementById('rankSelectArea').style.display = 'none';
                 document.getElementById('currentDeptDisplay').value = gUserData.department || '미지정';
                 document.getElementById('newDeptSelect').value = '';
             }
@@ -382,55 +441,78 @@
 
         // CEO에게 승인 요청 제출
         window.submitToCEO = async function() {
-            const isRankChange = gChangeType === 'rank';
-            let newValue = '';
-            let newDisplayValue = '';
+            let title = '';
+            let content = {};
 
-            if (isRankChange) {
+            if (gChangeType === 'combined') {
+                // 통합 변경
+                const newDept = document.getElementById('newDeptSelectCombined').value;
+                const rankSelectEl = document.getElementById('newRankSelectCombined');
+                const newRank = rankSelectEl.value;
+                const newRankName = rankSelectEl.options[rankSelectEl.selectedIndex]?.text || '';
+
+                if (!newDept && !newRank) {
+                    alert('변경할 부서 또는 직급을 선택해주세요.');
+                    return;
+                }
+
+                let changeDesc = [];
+                if (newDept) changeDesc.push(`부서: ${gUserData.department || '미지정'} → ${newDept}`);
+                if (newRank) changeDesc.push(`직급: ${gUserData.roleName} → ${newRankName}`);
+
+                if (!confirm(`${changeDesc.join(', ')} 변경을 대표님께 요청하시겠습니까?`)) return;
+
+                title = `부서/직급 통합 변경 요청`;
+                content = {
+                    type: 'combined',
+                    fromDepartment: gUserData.department || '미지정',
+                    newDepartment: newDept || null,
+                    fromRank: gUserData.role,
+                    fromRankName: gUserData.roleName,
+                    newRank: newRank || null,
+                    newRankName: newRankName || null,
+                    requesterName: gUserData.managerName,
+                    requestTo: 'ceo'
+                };
+            } else if (gChangeType === 'rank') {
                 const selectEl = document.getElementById('newRankSelect');
-                newValue = selectEl.value;
-                newDisplayValue = selectEl.options[selectEl.selectedIndex]?.text || '';
+                const newValue = selectEl.value;
+                const newDisplayValue = selectEl.options[selectEl.selectedIndex]?.text || '';
                 if (!newValue) {
                     alert('변경할 직급을 선택해주세요.');
                     return;
                 }
+                if (!confirm(`'${newDisplayValue}'(으)로 변경을 대표님께 요청하시겠습니까?`)) return;
+
+                title = `직급 변경 요청 (${gUserData.roleName} → ${newDisplayValue})`;
+                content = {
+                    type: 'rank',
+                    fromRank: gUserData.role,
+                    fromRankName: gUserData.roleName,
+                    newRank: newValue,
+                    newRankName: newDisplayValue,
+                    requesterName: gUserData.managerName,
+                    requestTo: 'ceo'
+                };
             } else {
-                newValue = document.getElementById('newDeptSelect').value;
-                newDisplayValue = newValue;
+                const newValue = document.getElementById('newDeptSelect').value;
                 if (!newValue) {
                     alert('변경할 부서를 선택해주세요.');
                     return;
                 }
+                if (!confirm(`'${newValue}'(으)로 변경을 대표님께 요청하시겠습니까?`)) return;
+
+                title = `부서 변경 요청 (${gUserData.department || '미지정'} → ${newValue})`;
+                content = {
+                    type: 'department',
+                    fromDepartment: gUserData.department || '미지정',
+                    newDepartment: newValue,
+                    requesterName: gUserData.managerName,
+                    requestTo: 'ceo'
+                };
             }
 
-            if (!confirm(`'${newDisplayValue}'(으)로 변경을 대표님께 요청하시겠습니까?`)) return;
-
             try {
-                let title = '';
-                let content = {};
-
-                if (isRankChange) {
-                    title = `직급 변경 요청 (${gUserData.roleName} → ${newDisplayValue})`;
-                    content = {
-                        type: 'rank',
-                        fromRank: gUserData.role,
-                        fromRankName: gUserData.roleName,
-                        newRank: newValue,
-                        newRankName: newDisplayValue,
-                        requesterName: gUserData.managerName,
-                        requestTo: 'ceo'
-                    };
-                } else {
-                    title = `부서 변경 요청 (${gUserData.department || '미지정'} → ${newDisplayValue})`;
-                    content = {
-                        type: 'department',
-                        fromDepartment: gUserData.department || '미지정',
-                        newDepartment: newValue,
-                        requesterName: gUserData.managerName,
-                        requestTo: 'ceo'
-                    };
-                }
-
                 await posts.create({
                     category: "member_req_internal",
                     title: title,
@@ -452,84 +534,110 @@
             document.getElementById('closeModalBtn').style.display = 'none';
             document.getElementById('req-file').value = '';
 
-            const isRankChange = gChangeType === 'rank';
+            // 모든 영역 초기화
+            document.getElementById('adminDeptSelectArea').style.display = 'none';
+            document.getElementById('adminRankSelectArea').style.display = 'none';
+            document.getElementById('adminCombinedSelectArea').style.display = 'none';
 
-            if (isRankChange) {
-                document.getElementById('adminDeptSelectArea').style.display = 'none';
+            if (gChangeType === 'rank') {
                 document.getElementById('adminRankSelectArea').style.display = 'block';
                 document.getElementById('adminCurrentRankDisplay').value = gUserData.roleName || '미지정';
                 document.getElementById('adminNewRankSelect').value = '';
+            } else if (gChangeType === 'combined') {
+                document.getElementById('adminCombinedSelectArea').style.display = 'block';
+                document.getElementById('adminCurrentDeptDisplayCombined').value = gUserData.department || '미지정';
+                document.getElementById('adminNewDeptSelectCombined').value = '';
+                document.getElementById('adminCurrentRankDisplayCombined').value = gUserData.roleName || '미지정';
+                document.getElementById('adminNewRankSelectCombined').value = '';
             } else {
                 document.getElementById('adminDeptSelectArea').style.display = 'block';
-                document.getElementById('adminRankSelectArea').style.display = 'none';
                 document.getElementById('adminCurrentDeptDisplay').value = gUserData.department || '미지정';
                 document.getElementById('adminNewDeptSelect').value = '';
             }
         };
 
         window.submitToAdmin = async function() {
-            const isRankChange = gChangeType === 'rank';
-            let newValue = '';
-            let newDisplayValue = '';
-
-            if (isRankChange) {
-                const selectEl = document.getElementById('adminNewRankSelect');
-                newValue = selectEl.value;
-                newDisplayValue = selectEl.options[selectEl.selectedIndex]?.text || '';
-                if (!newValue) {
-                    alert('변경할 직급을 선택해주세요.');
-                    return;
-                }
-            } else {
-                newValue = document.getElementById('adminNewDeptSelect').value;
-                newDisplayValue = newValue;
-                if (!newValue) {
-                    alert('변경할 부서를 선택해주세요.');
-                    return;
-                }
-            }
-
             const fileInput = document.getElementById('req-file');
             if (!fileInput.files || fileInput.files.length === 0) {
                 alert('증빙 서류를 첨부해주세요.');
                 return;
             }
 
-            if (!confirm(`'${newDisplayValue}'(으)로 변경을 관리자에게 요청하시겠습니까?`)) return;
+            let title = '';
+            let content = {};
 
-            try {
-                // 파일 업로드 (실제 구현 시 업로드 API 호출 필요)
-                // const formData = new FormData();
-                // formData.append('file', fileInput.files[0]);
-                // await fetch('/api/upload', { method: 'POST', body: formData });
+            if (gChangeType === 'combined') {
+                // 통합 변경
+                const newDept = document.getElementById('adminNewDeptSelectCombined').value;
+                const rankSelectEl = document.getElementById('adminNewRankSelectCombined');
+                const newRank = rankSelectEl.value;
+                const newRankName = rankSelectEl.options[rankSelectEl.selectedIndex]?.text || '';
 
-                let title = '';
-                let content = {};
-
-                if (isRankChange) {
-                    title = `[관리자 문의] 직급 변경 요청 (${gUserData.roleName} → ${newDisplayValue})`;
-                    content = {
-                        type: 'rank',
-                        fromRank: gUserData.role,
-                        fromRankName: gUserData.roleName,
-                        newRank: newValue,
-                        newRankName: newDisplayValue,
-                        requesterName: gUserData.managerName,
-                        requestTo: 'admin',
-                        hasAttachment: true
-                    };
-                } else {
-                    title = `[관리자 문의] 부서 변경 요청 (${gUserData.department || '미지정'} → ${newDisplayValue})`;
-                    content = {
-                        type: 'department',
-                        fromDepartment: gUserData.department || '미지정',
-                        newDepartment: newValue,
-                        requesterName: gUserData.managerName,
-                        requestTo: 'admin',
-                        hasAttachment: true
-                    };
+                if (!newDept && !newRank) {
+                    alert('변경할 부서 또는 직급을 선택해주세요.');
+                    return;
                 }
 
+                let changeDesc = [];
+                if (newDept) changeDesc.push(`부서: ${gUserData.department || '미지정'} → ${newDept}`);
+                if (newRank) changeDesc.push(`직급: ${gUserData.roleName} → ${newRankName}`);
+
+                if (!confirm(`${changeDesc.join(', ')} 변경을 관리자에게 요청하시겠습니까?`)) return;
+
+                title = `[관리자 문의] 부서/직급 통합 변경 요청`;
+                content = {
+                    type: 'combined',
+                    fromDepartment: gUserData.department || '미지정',
+                    newDepartment: newDept || null,
+                    fromRank: gUserData.role,
+                    fromRankName: gUserData.roleName,
+                    newRank: newRank || null,
+                    newRankName: newRankName || null,
+                    requesterName: gUserData.managerName,
+                    requestTo: 'admin',
+                    hasAttachment: true
+                };
+            } else if (gChangeType === 'rank') {
+                const selectEl = document.getElementById('adminNewRankSelect');
+                const newValue = selectEl.value;
+                const newDisplayValue = selectEl.options[selectEl.selectedIndex]?.text || '';
+                if (!newValue) {
+                    alert('변경할 직급을 선택해주세요.');
+                    return;
+                }
+                if (!confirm(`'${newDisplayValue}'(으)로 변경을 관리자에게 요청하시겠습니까?`)) return;
+
+                title = `[관리자 문의] 직급 변경 요청 (${gUserData.roleName} → ${newDisplayValue})`;
+                content = {
+                    type: 'rank',
+                    fromRank: gUserData.role,
+                    fromRankName: gUserData.roleName,
+                    newRank: newValue,
+                    newRankName: newDisplayValue,
+                    requesterName: gUserData.managerName,
+                    requestTo: 'admin',
+                    hasAttachment: true
+                };
+            } else {
+                const newValue = document.getElementById('adminNewDeptSelect').value;
+                if (!newValue) {
+                    alert('변경할 부서를 선택해주세요.');
+                    return;
+                }
+                if (!confirm(`'${newValue}'(으)로 변경을 관리자에게 요청하시겠습니까?`)) return;
+
+                title = `[관리자 문의] 부서 변경 요청 (${gUserData.department || '미지정'} → ${newValue})`;
+                content = {
+                    type: 'department',
+                    fromDepartment: gUserData.department || '미지정',
+                    newDepartment: newValue,
+                    requesterName: gUserData.managerName,
+                    requestTo: 'admin',
+                    hasAttachment: true
+                };
+            }
+
+            try {
                 await posts.create({
                     category: "member_req_admin",
                     title: title,
