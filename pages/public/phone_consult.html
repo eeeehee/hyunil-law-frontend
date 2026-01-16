@@ -43,6 +43,10 @@
         .btn-submit:hover { background: #333; }
         .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
 
+        .usage-area { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 8px; }
+        .usage-badge { background-color: #e6f7ff; color: #096dd9; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; border: 1px solid #91d5ff; }
+        .usage-full { background-color: #fff1f0; color: #cf1322; border-color: #ffa39e; }
+
         @media (max-width: 900px) {
             .sidebar { display: none; }
             .main-content { margin-left: 0; padding: 30px 20px; }
@@ -84,15 +88,59 @@
                 <textarea id="content" class="input-box textarea-box" placeholder="상담 내용을 간략히 적어주세요."></textarea>
             </div>
 
-            <button class="btn-submit" onclick="submitRequest()">예약 신청하기 (1회 차감)</button>
+            <div class="usage-area">
+                <span style="font-size:13px; color:#666;">이번 달 전화상담 현황:</span>
+                <div id="usageBadge" class="usage-badge">로딩중...</div>
+            </div>
+
+            <button id="btnSubmit" class="btn-submit" onclick="submitRequest()">예약 신청하기 (1회 차감)</button>
         </div>
+    </main>
     </main>
 
     <script type="module">
         import { auth, users, posts, approvalRequests } from '../../js/api.js';
         import { renderClientSidebar } from '../../js/client_ui.js';
 
+        const PLAN_SPECS = {
+            'none': { qa: 0, phone: 0, label: '미가입' },
+            'Basic': { qa: 1, phone: 0, label: '🌱 Basic' },
+            'Standard': { qa: 3, phone: 1, label: '⭐ Standard' },
+            'Pro': { qa: 5, phone: 2, label: '💎 Pro' },
+            'Premium': { qa: 8, phone: 5, label: '👑 Premium' },
+            'Enterprise': { qa: 999, phone: 999, label: '🏢 Enterprise' } // Enterprise 플랜은 customLimit으로 관리
+        };
+
         let currentUserData = null;
+
+        // 전화 상담 사용량 배지 업데이트 및 버튼 제어 함수
+        function updatePhoneUsageBadge() {
+            const badge = document.getElementById('usageBadge');
+            const submitBtn = document.getElementById('btnSubmit');
+            if (!badge || !submitBtn || !currentUserData) return;
+
+            const spec = PLAN_SPECS[currentUserData.plan] || PLAN_SPECS['none'];
+            const phoneLimit = currentUserData.plan === 'Enterprise' ? (currentUserData.customPhoneLimit || 0) : spec.phone;
+            const phoneUsed = currentUserData.phoneUsedCount || 0;
+            const phoneRemaining = Math.max(0, phoneLimit - phoneUsed);
+
+            if (phoneLimit === 0) {
+                badge.textContent = '플랜 미가입';
+                badge.className = 'usage-badge usage-full';
+                submitBtn.disabled = true;
+                submitBtn.textContent = '플랜을 구독해주세요';
+            } else if (phoneRemaining === 0) {
+                badge.textContent = `${phoneUsed} / ${phoneLimit} (한도 초과)`;
+                badge.className = 'usage-badge usage-full';
+                submitBtn.disabled = true;
+                submitBtn.textContent = '사용 가능 횟수 초과';
+            } else {
+                badge.textContent = `${phoneUsed} / ${phoneLimit} (남은 ${phoneRemaining}건)`;
+                badge.className = 'usage-badge';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '예약 신청하기 (1회 차감)';
+            }
+        }
 
         (async () => {
             const user = auth.getCurrentUser();
@@ -107,10 +155,12 @@
                         document.getElementById('phone').value = currentUserData.phone;
                     }
                     
-                    updateSubmitButtonText(); // 버튼 텍스트 초기화
+                    updatePhoneUsageBadge(); // 초기 버튼 및 배지 상태 설정
                     console.log('전화상담 페이지 로드:', currentUserData);
                 } catch (error) {
                     console.error('사용자 정보 로드 실패:', error);
+                    alert('사용자 정보를 불러오는 데 실패했습니다. 다시 로그인해주세요.');
+                    location.href = '../../pages/public/login.html';
                 }
             } else {
                 alert('로그인이 필요합니다.');
@@ -120,7 +170,24 @@
 
         window.submitRequest = async function() {
             if (!currentUserData) {
-                alert('사용자 정보를 불러오는 중입니다.');
+                alert('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
+            // 사용량 체크 (submit 시점)
+            const spec = PLAN_SPECS[currentUserData.plan] || PLAN_SPECS['none'];
+            const phoneLimit = currentUserData.plan === 'Enterprise' ? (currentUserData.customPhoneLimit || 0) : spec.phone;
+            const phoneUsed = currentUserData.phoneUsedCount || 0;
+            const phoneRemaining = Math.max(0, phoneLimit - phoneUsed);
+
+            if (phoneLimit === 0) {
+                alert('플랜을 먼저 구독해주세요.');
+                location.href = '../../pages/user/payment.html';
+                return;
+            }
+            if (phoneRemaining === 0) {
+                alert('사용 가능한 전화상담 횟수가 없습니다.\n결제/구독 관리 페이지에서 추가 구매하시거나 플랜을 업그레이드해주세요.');
+                location.href = '../../pages/user/payment.html';
                 return;
             }
 
@@ -151,7 +218,7 @@
                 return;
             }
 
-            const btn = document.querySelector('.btn-submit');
+            const btn = document.querySelector('#btnSubmit'); // ID 셀렉터 사용
             btn.innerText = '신청 중...';
             btn.disabled = true;
 
@@ -179,7 +246,7 @@
                     alert('전화상담 신청이 대표(CEO)에게 승인 요청되었습니다.');
                 } else {
                     await posts.create(requestPayload);
-                    alert('전화상담 신청이 완료되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
+                    alert('전화상담 신청이 완료되었습니다.\n사용 가능 횟수가 1회 차감되었습니다.');
                 }
 
                 location.href = '../../pages/user/dashboard.html';
@@ -188,7 +255,7 @@
                 console.error('신청 중 에러:', error);
                 alert('신청 중 오류가 발생했습니다.');
                 btn.disabled = false;
-                updateSubmitButtonText(); // 버튼 텍스트 복원
+                updatePhoneUsageBadge(); // 버튼 텍스트 복원 및 상태 업데이트
             }
         };
 
@@ -196,22 +263,7 @@
             await auth.logout();
             location.href = '../../index.html';
         };
-
-        // 제출 버튼 텍스트 업데이트 함수
-        function updateSubmitButtonText() {
-            const btn = document.querySelector('.btn-submit');
-            if (!btn || !currentUserData) return;
-
-            const useApprovalFlow = currentUserData.useApproval === 1;
-            const isStaff = currentUserData.role === 'user' || currentUserData.role === 'manager';
-
-            if (useApprovalFlow && isStaff) {
-                btn.textContent = '승인 요청하기';
-            } else {
-                btn.textContent = '예약 신청하기 (1회 차감)';
-            }
-            btn.disabled = false; // 기본적으로 활성화
-        }
     </script>
 </body>
+
 </html>
