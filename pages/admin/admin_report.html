@@ -353,12 +353,20 @@
                 });
                 const allPosts = response.posts || [];
                 
-                const startDate = new Date(year, month - 1, 1);
-                const endDate = new Date(year, month, 1);
+                const year = document.getElementById('reportYearSelect').value;
+                const month = document.getElementById('reportMonthSelect').value; // month is 1-indexed from UI
+
+                // Normalize start and end dates to UTC
+                const startDate = new Date(Date.UTC(year, month - 1, 1)); // First day of selected month, UTC
+                const endDate = new Date(Date.UTC(year, month, 1));       // First day of next month, UTC
                 
                 const filteredPosts = allPosts.filter(p => {
                     const postDate = new Date(p.createdAt);
-                    const isInDate = postDate >= startDate && postDate < endDate;
+                    // Convert postDate to UTC equivalent for comparison
+                    const postDateUTC = new Date(Date.UTC(postDate.getFullYear(), postDate.getMonth(), postDate.getDate(),
+                                                            postDate.getHours(), postDate.getMinutes(), postDate.getSeconds()));
+
+                    const isInDate = postDateUTC >= startDate && postDateUTC < endDate;
                     if (!isInDate) return false;
                     if (dept === 'all') return true;
                     return p.userDepartment === dept || p.department === dept;
