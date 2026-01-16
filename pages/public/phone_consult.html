@@ -47,6 +47,15 @@
         .usage-badge { background-color: #e6f7ff; color: #096dd9; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; border: 1px solid #91d5ff; }
         .usage-full { background-color: #fff1f0; color: #cf1322; border-color: #ffa39e; }
 
+        .extra-usage-link { text-align: center; margin-top: 15px; }
+        .extra-usage-link a { color: #096dd9; font-weight: 600; font-size: 14px; text-decoration: underline; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; }
+        .modal-content h3 { font-size: 18px; margin-bottom: 15px; }
+        .modal-content p { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 20px; }
+        .btn-close-modal { background: #1a1a1a; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+
         @media (max-width: 900px) {
             .sidebar { display: none; }
             .main-content { margin-left: 0; padding: 30px 20px; }
@@ -93,177 +102,396 @@
                 <div id="usageBadge" class="usage-badge">로딩중...</div>
             </div>
 
-            <button id="btnSubmit" class="btn-submit" onclick="submitRequest()">예약 신청하기 (1회 차감)</button>
-        </div>
-    </main>
-    </main>
+                        <button id="btnSubmit" class="btn-submit" onclick="submitRequest()">예약 신청하기 (1회 차감)</button>
 
-    <script type="module">
-        import { auth, users, posts, approvalRequests } from '../../js/api.js';
-        import { renderClientSidebar } from '../../js/client_ui.js';
-
-        const PLAN_SPECS = {
-            'none': { qa: 0, phone: 0, label: '미가입' },
-            'Basic': { qa: 1, phone: 0, label: '🌱 Basic' },
-            'Standard': { qa: 3, phone: 1, label: '⭐ Standard' },
-            'Pro': { qa: 5, phone: 2, label: '💎 Pro' },
-            'Premium': { qa: 8, phone: 5, label: '👑 Premium' },
-            'Enterprise': { qa: 999, phone: 999, label: '🏢 Enterprise' } // Enterprise 플랜은 customLimit으로 관리
-        };
-
-        let currentUserData = null;
-
-        // 전화 상담 사용량 배지 업데이트 및 버튼 제어 함수
-        function updatePhoneUsageBadge() {
-            const badge = document.getElementById('usageBadge');
-            const submitBtn = document.getElementById('btnSubmit');
-            if (!badge || !submitBtn || !currentUserData) return;
-
-            const spec = PLAN_SPECS[currentUserData.plan] || PLAN_SPECS['none'];
-            const phoneLimit = currentUserData.plan === 'Enterprise' ? (currentUserData.customPhoneLimit || 0) : spec.phone;
-            const phoneUsed = currentUserData.phoneUsedCount || 0;
-            const phoneRemaining = Math.max(0, phoneLimit - phoneUsed);
-
-            if (phoneLimit === 0) {
-                badge.textContent = '플랜 미가입';
-                badge.className = 'usage-badge usage-full';
-                submitBtn.disabled = true;
-                submitBtn.textContent = '플랜을 구독해주세요';
-            } else if (phoneRemaining === 0) {
-                badge.textContent = `${phoneRemaining} / ${phoneLimit} (한도 초과)`;
-                badge.className = 'usage-badge usage-full';
-                submitBtn.disabled = true;
-                submitBtn.textContent = '사용 가능 횟수 초과';
-            } else {
-                badge.textContent = `${phoneRemaining} / ${phoneLimit} (남은 ${phoneRemaining}건)`;
-                badge.className = 'usage-badge';
-                submitBtn.disabled = false;
-                submitBtn.textContent = '예약 신청하기 (1회 차감)';
-            }
-        }
-
-        (async () => {
-            const user = auth.getCurrentUser();
             
-            if (user) {
-                try {
-                    currentUserData = await users.getMe();
-                    renderClientSidebar('phone_consult', currentUserData);
-                    
-                    // 전화번호 자동 입력
-                    if (currentUserData.phone) {
-                        document.getElementById('phone').value = currentUserData.phone;
+
+                        <div id="extraUsageInquiry" class="extra-usage-link" style="display: none;">
+
+                            <a href="#" onclick="event.preventDefault(); openExtraUsageModal();">추가 이용 문의하기</a>
+
+                        </div>
+
+                    </div>
+
+                </main>
+
+            
+
+                <div id="extraUsageModal" class="modal-overlay" onclick="closeExtraUsageModal()">
+
+                    <div class="modal-content" onclick="event.stopPropagation()">
+
+                        <h3>추가 이용 문의</h3>
+
+                        <p>
+
+                            사용 가능 횟수를 모두 소진하셨습니다.<br>
+
+                            플랜 업그레이드 또는 추가 횟수 구매는 아래 연락처로 문의해주세요.
+
+                        </p>
+
+                        <p style="font-weight: bold; font-size: 16px;">📞 02-535-0161</p>
+
+                        <button class="btn-close-modal" onclick="closeExtraUsageModal()">확인</button>
+
+                    </div>
+
+                </div>
+
+            
+
+                <script type="module">
+
+                    import { auth, users, posts, approvalRequests } from '../../js/api.js';
+
+                    import { renderClientSidebar } from '../../js/client_ui.js';
+
+            
+
+                    const PLAN_SPECS = {
+
+                        'none': { qa: 0, phone: 0, label: '미가입' },
+
+                        'Basic': { qa: 1, phone: 0, label: '🌱 Basic' },
+
+                        'Standard': { qa: 3, phone: 1, label: '⭐ Standard' },
+
+                        'Pro': { qa: 5, phone: 2, label: '💎 Pro' },
+
+                        'Premium': { qa: 8, phone: 5, label: '👑 Premium' },
+
+                        'Enterprise': { qa: 999, phone: 999, label: '🏢 Enterprise' } // Enterprise 플랜은 customLimit으로 관리
+
+                    };
+
+            
+
+                    let currentUserData = null;
+
+            
+
+                    // 전화 상담 사용량 배지 업데이트 및 버튼 제어 함수
+
+                    function updatePhoneUsageBadge() {
+
+                        const badge = document.getElementById('usageBadge');
+
+                        const submitBtn = document.getElementById('btnSubmit');
+
+                        const extraLink = document.getElementById('extraUsageInquiry');
+
+                        if (!badge || !submitBtn || !extraLink || !currentUserData) return;
+
+            
+
+                        const spec = PLAN_SPECS[currentUserData.plan] || PLAN_SPECS['none'];
+
+                        const phoneLimit = currentUserData.plan === 'Enterprise' ? (currentUserData.customPhoneLimit || 0) : spec.phone;
+
+                        const phoneUsed = currentUserData.phoneUsedCount || 0;
+
+                        const phoneRemaining = Math.max(0, phoneLimit - phoneUsed);
+
+            
+
+                        if (phoneLimit === 0) {
+
+                            badge.textContent = '플랜 미가입';
+
+                            badge.className = 'usage-badge usage-full';
+
+                            submitBtn.disabled = true;
+
+                            submitBtn.textContent = '플랜을 구독해주세요';
+
+                            extraLink.style.display = 'block';
+
+                        } else if (phoneRemaining === 0) {
+
+                            badge.textContent = `${phoneRemaining} / ${phoneLimit} (한도 초과)`;
+
+                            badge.className = 'usage-badge usage-full';
+
+                            submitBtn.disabled = true;
+
+                            submitBtn.textContent = '사용 가능 횟수 초과';
+
+                            extraLink.style.display = 'block';
+
+                        } else {
+
+                            badge.textContent = `${phoneRemaining} / ${phoneLimit} (남은 ${phoneRemaining}건)`;
+
+                            badge.className = 'usage-badge';
+
+                            submitBtn.disabled = false;
+
+                            submitBtn.textContent = '예약 신청하기 (1회 차감)';
+
+                            extraLink.style.display = 'none';
+
+                        }
+
                     }
-                    
-                    updatePhoneUsageBadge(); // 초기 버튼 및 배지 상태 설정
-                    console.log('전화상담 페이지 로드:', currentUserData);
-                } catch (error) {
-                    console.error('사용자 정보 로드 실패:', error);
-                    alert('사용자 정보를 불러오는 데 실패했습니다. 다시 로그인해주세요.');
-                    location.href = '../../pages/public/login.html';
-                }
-            } else {
-                alert('로그인이 필요합니다.');
-                location.href = '../../pages/public/login.html';
-            }
-        })();
 
-        window.submitRequest = async function() {
-            if (!currentUserData) {
-                alert('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
-                return;
-            }
+            
 
-            // 사용량 체크 (submit 시점)
-            const spec = PLAN_SPECS[currentUserData.plan] || PLAN_SPECS['none'];
-            const phoneLimit = currentUserData.plan === 'Enterprise' ? (currentUserData.customPhoneLimit || 0) : spec.phone;
-            const phoneUsed = currentUserData.phoneUsedCount || 0;
-            const phoneRemaining = Math.max(0, phoneLimit - phoneUsed);
+                    window.openExtraUsageModal = () => {
 
-            if (phoneLimit === 0) {
-                alert('플랜을 먼저 구독해주세요.');
-                location.href = '../../pages/user/payment.html';
-                return;
-            }
-            if (phoneRemaining === 0) {
-                alert('사용 가능한 전화상담 횟수가 없습니다.\n결제/구독 관리 페이지에서 추가 구매하시거나 플랜을 업그레이드해주세요.');
-                location.href = '../../pages/user/payment.html';
-                return;
-            }
+                        document.getElementById('extraUsageModal').style.display = 'flex';
 
-            const category = document.getElementById('category').value;
-            const slot1 = document.getElementById('slot1').value;
-            const slot2 = document.getElementById('slot2').value;
-            const slot3 = document.getElementById('slot3').value;
-            const phone = document.getElementById('phone').value;
-            const content = document.getElementById('content').value;
+                    };
 
-            if (!slot1 || !slot2 || !slot3) {
-                alert('희망 상담 일시 3개를 모두 입력해주세요.');
-                return;
-            }
+            
 
-            if (!phone || !content) {
-                alert('연락처와 상담 내용을 입력해주세요.');
-                return;
-            }
+                    window.closeExtraUsageModal = () => {
 
-            const useApprovalFlow = currentUserData.useApproval === 1;
-            const isStaff = currentUserData.role === 'user' || currentUserData.role === 'manager';
-            const confirmationMessage = (useApprovalFlow && isStaff)
-                ? '전화상담을 신청하시겠습니까?\n대표 승인 후 예약이 확정되며, 상담 횟수가 차감됩니다.'
-                : '전화상담을 신청하시겠습니까?\n(전화상담 1회가 차감됩니다)';
+                        document.getElementById('extraUsageModal').style.display = 'none';
 
-            if (!confirm(confirmationMessage)) {
-                return;
-            }
+                    };
 
-            const btn = document.querySelector('#btnSubmit'); // ID 셀렉터 사용
-            btn.innerText = '신청 중...';
-            btn.disabled = true;
+            
 
-            try {
-                const slots = [slot1, slot2, slot3].filter(s => s);
-                const title = `[전화상담] ${category} - ${currentUserData.managerName || ''}`;
-                
-                const requestPayload = {
-                    category: 'phone_request', // for posts table
-                    title: title,
-                    content: `[상담 분야] ${category}\n[희망 시간대] ${slots.join(', ')}\n[연락처] ${phone}\n[상담 내용]\n${content}`.trim(),
-                    status: 'pending',
-                     // for approval request's requestData
-                    requestCategory: category,
-                    slots: slots,
-                    phone: phone,
-                    summary: content
-                };
+                    (async () => {
 
-                if (useApprovalFlow && isStaff) {
-                    await approvalRequests.createRequest({
-                        requestType: '전화상담',
-                        requestData: requestPayload
-                    });
-                    alert('전화상담 신청이 대표(CEO)에게 승인 요청되었습니다.');
-                } else {
-                    await posts.create(requestPayload);
-                    alert('전화상담 신청이 완료되었습니다.\n사용 가능 횟수가 1회 차감되었습니다.');
-                }
+                        const user = auth.getCurrentUser();
 
-                location.href = '../../pages/user/dashboard.html';
+                        
 
-            } catch (error) {
-                console.error('신청 중 에러:', error);
-                alert('신청 중 오류가 발생했습니다.');
-                btn.disabled = false;
-                updatePhoneUsageBadge(); // 버튼 텍스트 복원 및 상태 업데이트
-            }
-        };
+                        if (user) {
 
-        window.handleLogout = async () => {
-            await auth.logout();
-            location.href = '../../index.html';
-        };
-    </script>
-</body>
+                            try {
 
-</html>
+                                currentUserData = await users.getMe();
+
+                                renderClientSidebar('phone_consult', currentUserData);
+
+                                
+
+                                if (currentUserData.phone) {
+
+                                    document.getElementById('phone').value = currentUserData.phone;
+
+                                }
+
+                                
+
+                                updatePhoneUsageBadge();
+
+                                console.log('전화상담 페이지 로드:', currentUserData);
+
+                            } catch (error) {
+
+                                console.error('사용자 정보 로드 실패:', error);
+
+                                alert('사용자 정보를 불러오는 데 실패했습니다. 다시 로그인해주세요.');
+
+                                location.href = '../../pages/public/login.html';
+
+                            }
+
+                        } else {
+
+                            alert('로그인이 필요합니다.');
+
+                            location.href = '../../pages/public/login.html';
+
+                        }
+
+                    })();
+
+            
+
+                    window.submitRequest = async function() {
+
+                        if (!currentUserData) {
+
+                            alert('사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+
+                            return;
+
+                        }
+
+            
+
+                        const spec = PLAN_SPECS[currentUserData.plan] || PLAN_SPECS['none'];
+
+                        const phoneLimit = currentUserData.plan === 'Enterprise' ? (currentUserData.customPhoneLimit || 0) : spec.phone;
+
+                        const phoneUsed = currentUserData.phoneUsedCount || 0;
+
+                        const phoneRemaining = Math.max(0, phoneLimit - phoneUsed);
+
+            
+
+                        if (phoneLimit === 0) {
+
+                            alert('플랜을 먼저 구독해주세요.');
+
+                            openExtraUsageModal();
+
+                            return;
+
+                        }
+
+                        if (phoneRemaining === 0) {
+
+                            alert('사용 가능한 전화상담 횟수가 없습니다.');
+
+                            openExtraUsageModal();
+
+                            return;
+
+                        }
+
+            
+
+                        const category = document.getElementById('category').value;
+
+                        const slot1 = document.getElementById('slot1').value;
+
+                        const slot2 = document.getElementById('slot2').value;
+
+                        const slot3 = document.getElementById('slot3').value;
+
+                        const phone = document.getElementById('phone').value;
+
+                        const content = document.getElementById('content').value;
+
+            
+
+                        if (!slot1 || !slot2 || !slot3) {
+
+                            alert('희망 상담 일시 3개를 모두 입력해주세요.');
+
+                            return;
+
+                        }
+
+            
+
+                        if (!phone || !content) {
+
+                            alert('연락처와 상담 내용을 입력해주세요.');
+
+                            return;
+
+                        }
+
+            
+
+                        const useApprovalFlow = currentUserData.useApproval === 1;
+
+                        const isStaff = currentUserData.role === 'user' || currentUserData.role === 'manager';
+
+                        const confirmationMessage = (useApprovalFlow && isStaff)
+
+                            ? '전화상담을 신청하시겠습니까?\n대표 승인 후 예약이 확정되며, 상담 횟수가 차감됩니다.'
+
+                            : '전화상담을 신청하시겠습니까?\n(전화상담 1회가 차감됩니다)';
+
+            
+
+                        if (!confirm(confirmationMessage)) {
+
+                            return;
+
+                        }
+
+            
+
+                        const btn = document.querySelector('#btnSubmit');
+
+                        btn.innerText = '신청 중...';
+
+                        btn.disabled = true;
+
+            
+
+                        try {
+
+                            const slots = [slot1, slot2, slot3].filter(s => s);
+
+                            const title = `[전화상담] ${category} - ${currentUserData.managerName || ''}`;
+
+                            
+
+                            const requestPayload = {
+
+                                category: 'phone_request',
+
+                                title: title,
+
+                                content: `[상담 분야] ${category}\n[희망 시간대] ${slots.join(', ')}\n[연락처] ${phone}\n[상담 내용]\n${content}`.trim(),
+
+                                status: 'pending',
+
+                                requestCategory: category,
+
+                                slots: slots,
+
+                                phone: phone,
+
+                                summary: content
+
+                            };
+
+            
+
+                            if (useApprovalFlow && isStaff) {
+
+                                await approvalRequests.createRequest({
+
+                                    requestType: '전화상담',
+
+                                    requestData: requestPayload
+
+                                });
+
+                                alert('전화상담 신청이 대표(CEO)에게 승인 요청되었습니다.');
+
+                            } else {
+
+                                await posts.create(requestPayload);
+
+                                alert('전화상담 신청이 완료되었습니다.\n사용 가능 횟수가 1회 차감되었습니다.');
+
+                            }
+
+            
+
+                            location.href = '../../pages/user/dashboard.html';
+
+            
+
+                        } catch (error) {
+
+                            console.error('신청 중 에러:', error);
+
+                            alert('신청 중 오류가 발생했습니다.');
+
+                            btn.disabled = false;
+
+                            updatePhoneUsageBadge();
+
+                        }
+
+                    };
+
+            
+
+                    window.handleLogout = async () => {
+
+                        await auth.logout();
+
+                        location.href = '../../index.html';
+
+                    };
+
+                </script>
+
+            </body>
+
+            </html>

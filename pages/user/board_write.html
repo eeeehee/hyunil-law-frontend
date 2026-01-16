@@ -57,6 +57,15 @@
         .btn-submit:hover { background-color: #333; }
         .btn-submit:disabled { background-color: #ccc !important; cursor: not-allowed; color: #666; }
 
+        .extra-usage-link { text-align: center; margin-top: 15px; }
+        .extra-usage-link a { color: #096dd9; font-weight: 600; font-size: 14px; text-decoration: underline; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; }
+        .modal-content h3 { font-size: 18px; margin-bottom: 15px; }
+        .modal-content p { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 20px; }
+        .btn-close-modal { background: #1a1a1a; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+
         @media (max-width: 900px) {
             .sidebar { display: none; }
             .main-content { margin-left: 0; padding: 30px 20px; }
@@ -144,8 +153,24 @@
             </div>
 
             <button id="btnSubmit" class="btn-submit" onclick="submitPost()">신청하기 (1회 차감)</button>
+
+            <div id="extraUsageInquiry" class="extra-usage-link" style="display: none;">
+                <a href="#" onclick="event.preventDefault(); openExtraUsageModal();">추가 이용 문의하기</a>
+            </div>
         </div>
     </main>
+
+    <div id="extraUsageModal" class="modal-overlay" onclick="closeExtraUsageModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3>추가 이용 문의</h3>
+            <p>
+                사용 가능 횟수를 모두 소진하셨습니다.<br>
+                플랜 업그레이드 또는 추가 횟수 구매는 아래 연락처로 문의해주세요.
+            </p>
+            <p style="font-weight: bold; font-size: 16px;">📞 02-535-0161</p>
+            <button class="btn-close-modal" onclick="closeExtraUsageModal()">확인</button>
+        </div>
+    </div>
 
     <script type="module">
         import { auth, users, requireAuth, posts, approvalRequests } from "../../js/api.js";
@@ -167,7 +192,8 @@
         function updateUsageBadge(userData) {
             const badge = document.getElementById('usageBadge');
             const submitBtn = document.getElementById('btnSubmit');
-            if (!badge) return;
+            const extraLink = document.getElementById('extraUsageInquiry');
+            if (!badge || !extraLink) return;
 
             const spec = PLAN_SPECS[userData.plan] || PLAN_SPECS['none'];
             const qaLimit = userData.plan === 'Enterprise' ? (userData.customQaLimit || 0) : spec.qa;
@@ -177,6 +203,7 @@
             if (qaLimit === 0) {
                 badge.textContent = '플랜 미가입';
                 badge.className = 'usage-badge usage-full';
+                extraLink.style.display = 'block';
                 if (submitBtn) {
                     submitBtn.disabled = true;
                     submitBtn.textContent = '플랜을 구독해주세요';
@@ -184,6 +211,7 @@
             } else if (qaRemaining === 0) {
                 badge.textContent = `${qaRemaining} / ${qaLimit} (한도 초과)`;
                 badge.className = 'usage-badge usage-full';
+                extraLink.style.display = 'block';
                 if (submitBtn) {
                     submitBtn.disabled = true;
                     submitBtn.textContent = '사용 가능 횟수 초과';
@@ -191,12 +219,21 @@
             } else {
                 badge.textContent = `${qaRemaining} / ${qaLimit} (남은 ${qaRemaining}건)`;
                 badge.className = 'usage-badge';
+                extraLink.style.display = 'none';
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = '신청하기 (1회 차감)';
                 }
             }
         }
+        
+        window.openExtraUsageModal = () => {
+            document.getElementById('extraUsageModal').style.display = 'flex';
+        };
+
+        window.closeExtraUsageModal = () => {
+            document.getElementById('extraUsageModal').style.display = 'none';
+        };
 
         window.showFileName = async function() {
             const fileInput = document.getElementById('fileInput');
