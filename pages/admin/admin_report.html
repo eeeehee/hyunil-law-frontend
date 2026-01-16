@@ -350,13 +350,31 @@
                 const year = document.getElementById('reportYearSelect').value;
                 const month = document.getElementById('reportMonthSelect').value; // month is 1-indexed from UI
 
-                // Normalize start and end dates to UTC for API request
-                const startDateObj = new Date(Date.UTC(year, month - 1, 1)); // First day of selected month, UTC
-                const endDateObj = new Date(Date.UTC(year, month, 1));       // First day of next month, UTC
+                // Calculate local start and end dates for the selected month
+                // These will be in the browser's local timezone
+                const localStartDate = new Date(year, month - 1, 1, 0, 0, 0); // 1st day of month, 00:00:00 local time
+                const localEndDate = new Date(year, month, 1, 0, 0, 0);       // 1st day of next month, 00:00:00 local time
+
+                // To send as ISO-like strings that backend can interpret as local times easily
+                // or compare with DATETIME fields that are often local.
+                // Format to YYYY-MM-DD HH:MM:SS
+                const formatToDBDateTimeString = (date) => {
+                    const y = date.getFullYear();
+                    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+                    const d = date.getDate().toString().padStart(2, '0');
+                    const hh = date.getHours().toString().padStart(2, '0');
+                    const mm = date.getMinutes().toString().padStart(2, '0');
+                    const ss = date.getSeconds().toString().padStart(2, '0');
+                    return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+                };
                 
-                // Format to ISO string for backend
-                const apiStartDate = startDateObj.toISOString();
-                const apiEndDate = endDateObj.toISOString();
+                // The API call expects startDate and endDate to be "inclusive" and "exclusive"
+                // So, startDate should be 'YYYY-MM-01 00:00:00'
+                // And endDate should be 'YYYY-MM-DD 23:59:59' for the last day of the month.
+                // We send localEndDate (1st of next month) and let backend subtract 1ms.
+                const apiStartDate = formatToDBDateTimeString(localStartDate);
+                // apiEndDate will be the first day of the next month, local time
+                const apiEndDate = formatToDBDateTimeString(localEndDate);
 
                 const response = await posts.getAll({
                     bizNum: bizNum,
