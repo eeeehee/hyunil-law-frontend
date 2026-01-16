@@ -445,24 +445,27 @@
                 const followUpFormEl = document.getElementById('followUpForm');
 
                 // 추가 문의 횟수 확인
-                if (followupQuestions.length >= 2) {
+                const totalFollowupLimit = 2; // 추가 문의 총 한도
+                const currentFollowupUsed = followupQuestions.length;
+                const followupRemaining = totalFollowupLimit - currentFollowupUsed;
+
+                if (currentFollowupUsed >= totalFollowupLimit) {
                     // 2회 모두 사용한 경우
                     followUpFormEl.innerHTML = `
                         <div class="form-guide" style="color:#666;">💬 추가 문의
-                            <span style="font-size:13px; color:#ff4d4f; font-weight:700;">(2/2 모두 사용)</span>
+                            <span style="font-size:13px; color:#ff4d4f; font-weight:700;">(${followupRemaining}/${totalFollowupLimit} 한도 초과)</span>
                         </div>
                         <div style="padding:20px; background:#f5f5f5; border-radius:8px; text-align:center; color:#888;">
                             추가 문의 가능 횟수를 모두 사용하였습니다.
                         </div>
                     `;
                     followUpFormEl.style.display = 'block';
-                } else if (followupQuestions.length > followupAnswers.length) {
-                    // 추가 질문은 했지만 아직 답변이 없는 경우 - 폼 표시 안 함
+                } else if (currentFollowupUsed > followupAnswers.length) {
+                    // 추가 질문은 했지만 아직 답변이 없는 경우 - 폼 표시 안 함 (사용자가 추가 질문 등록 못하도록)
                     followUpFormEl.style.display = 'none';
                 } else {
                     // 추가 문의 가능한 경우
-                    const remainingCount = 2 - followupQuestions.length;
-                    followUpFormEl.querySelector('.form-guide span').textContent = `(${followupQuestions.length}/2 사용, ${remainingCount}회 남음)`;
+                    followUpFormEl.querySelector('.form-guide span').textContent = `(${followupRemaining}/${totalFollowupLimit} 남음)`;
                     followUpFormEl.style.display = 'block';
                 }
             }
