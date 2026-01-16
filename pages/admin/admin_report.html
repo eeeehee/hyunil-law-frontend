@@ -376,15 +376,21 @@
                 // apiEndDate will be the first day of the next month, local time
                 const apiEndDate = formatToDBDateTimeString(localEndDate);
 
+                // 자문관리에서 제외되는 카테고리 (결제/요금제/회원정보 관련)
+                const excludeCategories = ['payment_method', 'plan_change', 'extra_usage_quote', 'member_req_internal', 'member_req_admin', 'guest'];
+
                 const response = await posts.getAll({
                     bizNum: bizNum,
-                    startDate: apiStartDate, // Pass to backend
-                    endDate: apiEndDate    // Pass to backend
+                    startDate: apiStartDate,
+                    endDate: apiEndDate
                 });
-                const allPosts = response.posts || []; // Now allPosts are already filtered by date
-                
-                // Client-side date filtering is no longer needed
+                const allPosts = response.posts || [];
+
+                // 자문 관련 카테고리만 필터링 + 부서 필터링
                 const filteredPosts = allPosts.filter(p => {
+                    // 제외 카테고리는 제외
+                    if (excludeCategories.includes(p.category)) return false;
+                    // 부서 필터
                     if (dept === 'all') return true;
                     return p.userDepartment === dept || p.department === dept;
                 });

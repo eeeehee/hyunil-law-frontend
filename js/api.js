@@ -344,8 +344,10 @@ export const posts = {
         if (filters.department) params.append('department', filters.department);
         if (filters.limit) params.append('limit', filters.limit);
         if (filters.offset) params.append('offset', filters.offset);
-        if (filters.bizNum) params.append('bizNum', filters.bizNum); // bizNum 필터 추가
-        
+        if (filters.bizNum) params.append('bizNum', filters.bizNum);
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
+
         return await apiRequest(`/posts?${params.toString()}`);
     },
 
