@@ -1490,6 +1490,36 @@
                     } catch (e) {
                         detailHtml = `<pre style="white-space:pre-wrap; word-break:break-all;">${post.content}</pre>`;
                     }
+                } else if (post.category === 'phone_request') {
+                    // 전화상담 요청 - 줄바꿈 포맷팅
+                    const originalContent = post.content || '';
+                    const consultCategoryMatch = originalContent.match(/\[상담 분야\]\s*(.*)/);
+                    const timeSlotsMatch = originalContent.match(/\[희망 시간대\]\s*([\s\S]*?)(?=\[연락처\]|\[상담 내용\]|$)/);
+                    const phoneMatch = originalContent.match(/\[연락처\]\s*(.*)/);
+                    const contentMatch = originalContent.match(/\[상담 내용\]\s*([\s\S]*?)$/);
+
+                    const consultCategory = consultCategoryMatch ? consultCategoryMatch[1].trim() : '-';
+                    let timeSlots = '-';
+                    if (timeSlotsMatch) {
+                        const rawSlots = timeSlotsMatch[1].trim();
+                        const slots = rawSlots.split(/[,\n]/).map(s => s.trim()).filter(s => s);
+                        timeSlots = slots.join('<br>');
+                    }
+                    const phone = phoneMatch ? phoneMatch[1].trim() : '-';
+                    const consultContent = contentMatch ? contentMatch[1].trim() : '-';
+
+                    detailHtml = `
+                        <div style="line-height:2;">
+                            <strong>[상담 분야]</strong><br>
+                            <div style="margin-left:10px; margin-bottom:15px;">${consultCategory}</div>
+                            <strong>[희망 시간대]</strong><br>
+                            <div style="margin-left:10px; margin-bottom:15px;">${timeSlots}</div>
+                            <strong>[연락처]</strong><br>
+                            <div style="margin-left:10px; margin-bottom:15px;">${phone}</div>
+                            <strong>[상담 내용]</strong><br>
+                            <div style="margin-left:10px;">${consultContent}</div>
+                        </div>
+                    `;
                 } else {
                     // 기타 요청 (추가이용견적 포함)
                     detailHtml = `
