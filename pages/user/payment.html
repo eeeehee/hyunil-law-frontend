@@ -477,10 +477,10 @@
             const phoneRemaining = Math.max(0, phoneLimit - phoneUsed);
 
             if (qaEl) {
-                qaEl.textContent = `📝 서면: ${qaUsed} / ${qaLimit} (남은 ${qaRemaining}건)`;
+                qaEl.textContent = `📝 서면: ${qaRemaining} / ${qaLimit} (남은 ${qaRemaining}건)`;
             }
             if (phoneEl) {
-                phoneEl.textContent = `📞 전화: ${phoneUsed} / ${phoneLimit} (남은 ${phoneRemaining}건)`;
+                phoneEl.textContent = `📞 전화: ${phoneRemaining} / ${phoneLimit} (남은 ${phoneRemaining}건)`;
             }
         }
 

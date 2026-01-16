@@ -615,14 +615,17 @@
                     entEditBtn = `<button class="btn-deduct" onclick="editEnterpriseLimit('${comp.bizNum}', ${qaLimit}, ${phoneLimit})" style="margin-left:5px; background:#1a1a2e; color:white; border:none;">⚙️ 한도설정</button>`;
                 }
 
+                const qaRemaining = Math.max(0, qaLimit - (meta.qaUsedCount || 0));
+                const phoneRemaining = Math.max(0, phoneLimit - (meta.phoneUsedCount || 0));
+
                 quotaHtml = `
                     <div class="quota-row">
                         <div class="quota-box">
-                            <span class="q-label">📝 서면</span> <span class="quota-val">${meta.qaUsedCount}</span> / ${qaLimit}
+                            <span class="q-label">📝 서면</span> <span class="quota-val">${qaRemaining}</span> / ${qaLimit}
                             <button class="btn-deduct" onclick="adjustQuota('${comp.bizNum}', 'qa')">➖</button>
                         </div>
                         <div class="quota-box">
-                            <span class="q-label">📞 전화</span> <span class="quota-val">${meta.phoneUsedCount}</span> / ${phoneLimit}
+                            <span class="q-label">📞 전화</span> <span class="quota-val">${phoneRemaining}</span> / ${phoneLimit}
                             <button class="btn-phone-log" onclick="openLogModal('${comp.bizNum}', '${comp.name}')">📞 기록+차감</button>
                         </div>
                         ${entEditBtn}
